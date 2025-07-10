@@ -99,15 +99,20 @@ h1, h2, h3, h4, h5, h6, .font-primary {
 }
 
 /*--------------------------------------------------------------
-# Header
+# Headerffffffffffffffffffffffffffffffffff
 --------------------------------------------------------------*/
 #header {
-  height: 70px;
+  height: 100px;
   transition: all 0.5s;
   transition: all 0.5s;
   padding: 10px 0;
   background: #fff;
   z-index: 997;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 #header.header-scrolled {
@@ -553,20 +558,20 @@ section {
 }
 
 /*--------------------------------------------------------------
-# Our event
+# Our equipment
 --------------------------------------------------------------*/
-.event .event-item {
+.equipment .equipment-item {
   margin-bottom: 30px;
 }
 
-.event #event-flters {
+.equipment #equipment-flters {
   padding: 0;
   margin: 0 0 35px 0;
   list-style: none;
   text-align: center;
 }
 
-.event #event-flters li {
+.equipment #equipment-flters li {
   cursor: pointer;
   margin: 0 15px 15px 0;
   display: inline-block;
@@ -581,59 +586,59 @@ section {
   transition: all 0.3s ease-in-out;
 }
 
-.event #event-flters li:hover, .event #event-flters li.filter-active {
+.equipment #equipment-flters li:hover, .equipment #equipment-flters li.filter-active {
   background:#965320;
   color: #fff;
 }
 
-.event #event-flters li:last-child {
+.equipment #equipment-flters li:last-child {
   margin-right: 0;
 }
-.event .section-title h2{
+.equipment .section-title h2{
   padding-top: 5px;
   text-align: center;
   color: #965320;
   font-weight: 600;
   position: relative;
 }
-.event .card {
+.equipment .card {
   border:none;
   padding: 0px 0px 0px 0px;
   color:rgb(0, 12, 148);
 
 }
-.event .card:hover {
+.equipment .card:hover {
   box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
 }
-.event .img {
+.equipment .img {
 	max-width: 100%;
 	height: auto;
   vertical-align: bottom;
 }
 
-.event .card-text {
+.equipment .card-text {
   border:none;
   padding: 10px 10px 10px 10px;
   color:rgb(148, 0, 0);
 
 }
 
-.event h2, h3 {
+.equipment h2, h3 {
   margin: 0;
   font-weight: 200;
 }
 
-.event h2 {
+.equipment h2 {
   font-size: 35px;
   color: #222222;
 }
 
-.event  h3 {
+.equipment  h3 {
   font-size: 15px;
   color: #838689;
 }
 
-.event p {
+.equipment p {
   margin: 1.25em 0;
   font-size: em(13);
   font-weight: 400;
