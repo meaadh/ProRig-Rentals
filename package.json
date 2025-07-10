@@ -1,0 +1,23 @@
+{
+  "name": "prorig-rentals",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meaadh/ProRig-Rentals.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/meaadh/ProRig-Rentals/issues"
+  },
+  "homepage": "https://github.com/meaadh/ProRig-Rentals#readme",
+  "description": "",
+  "dependencies": {
+    "mongodb": "^6.17.0"
+  }
+}
