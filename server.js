@@ -9,17 +9,22 @@ const client = new MongoClient(uri, {
   }
 });
 const dbname="ProRigsRentals"
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db(dbname).command({ ping: 1 });
-    console.log(`Pinged your deployment. You successfully connected to the ${dbname} database`);
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
-}
-run().catch(console.dir);
+let db;
 
+async function connectToDB() {
+  if(!db)
+    { 
+    try {
+      // Connect the client to the server	(optional starting in v4.7)
+      await client.connect();
+      // Confirmation of a successful connection
+      db= client.db(dbname);
+      console.log(` Successfully connected to the ${dbname} database`);
+    } catch(err) {
+      // Error message when client fails to connection
+      console.log(` MongoDB connection failed to the ${dbname} database`,err);
+    }
+  }
+  return db;
+}
+module.exports=connectToDB;
