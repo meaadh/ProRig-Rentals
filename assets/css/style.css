@@ -117,20 +117,19 @@ h1, h2, h3, h4, h5, h6, .font-primary {
   display:flex;
   align-items: left;
 }
-
-#header .logo-icon {
-  width: 80px; /* Adjust size as needed */
-  padding: 0;
-  margin-top: 70px;
-  max-height: 40px;
+#header .logo h1 {
+  font-size: 28px;
+  margin: 0;
+  padding: 10px 0;
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: 3px;
+  text-transform: uppercase;
 }
 
-#header .logo-text {
-  font-weight: 400;
-  font-size: 36px;
-  position: absolute;
-  right:67%;
-  color: linear-gradient(90deg, #0055A5, #00BFFF);
+#header .logo h1 a, #header .logo h1 a:hover {
+  color: #336600;
+  text-decoration: none;
 }
 
 #header .logo img {
@@ -553,20 +552,20 @@ section {
 }
 
 /*--------------------------------------------------------------
-# Our event
+# Our Avaliablity
 --------------------------------------------------------------*/
-.event .event-item {
+.avaliablity .event-item {
   margin-bottom: 30px;
 }
 
-.event #event-flters {
+.avaliablity #event-flters {
   padding: 0;
   margin: 0 0 35px 0;
   list-style: none;
   text-align: center;
 }
 
-.event #event-flters li {
+.avaliablity #event-flters li {
   cursor: pointer;
   margin: 0 15px 15px 0;
   display: inline-block;
@@ -581,65 +580,187 @@ section {
   transition: all 0.3s ease-in-out;
 }
 
-.event #event-flters li:hover, .event #event-flters li.filter-active {
+.avaliablity #event-flters li:hover, .avaliablity #event-flters li.filter-active {
   background:#965320;
   color: #fff;
 }
 
-.event #event-flters li:last-child {
+.avaliablity #event-flters li:last-child {
   margin-right: 0;
 }
-.event .section-title h2{
+.avaliablity #type-flters {
+  padding: 0;
+  margin: 0 0 35px 0;
+  list-style: none;
+  text-align: center;
+}
+
+.avaliablity #type-flters li {
+  cursor: pointer;
+  margin: 0 15px 15px 0;
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 12px;
+  line-height: 20px;
+  color: #444;
+  border-radius: 4px;
+  text-transform: uppercase;
+  background: #fff;
+  margin-bottom: 5px;
+  transition: all 0.3s ease-in-out;
+}
+
+.avaliablity #type-flters li:hover, .avaliablity #type-flters li.filter-active {
+  background:#965320;
+  color: #fff;
+}
+
+.avaliablity #type-flters li:last-child {
+  margin-right: 0;
+}
+.avaliablity .section-title h2{
   padding-top: 5px;
   text-align: center;
   color: #965320;
   font-weight: 600;
   position: relative;
 }
-.event .card {
+.avaliablity .card {
   border:none;
   padding: 0px 0px 0px 0px;
   color:rgb(0, 12, 148);
 
 }
-.event .card:hover {
+.avaliablity .card:hover {
   box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
 }
-.event .img {
+.avaliablity .img {
 	max-width: 100%;
 	height: auto;
   vertical-align: bottom;
 }
 
-.event .card-text {
+.avaliablity .card-text {
   border:none;
   padding: 10px 10px 10px 10px;
   color:rgb(148, 0, 0);
 
 }
 
-.event h2, h3 {
+.avaliablity h2, h3 {
   margin: 0;
   font-weight: 200;
 }
 
-.event h2 {
+.avaliablity h2 {
   font-size: 35px;
   color: #222222;
 }
 
-.event  h3 {
+.avaliablity  h3 {
   font-size: 15px;
   color: #838689;
 }
 
-.event p {
+.avaliablity p {
   margin: 1.25em 0;
   font-size: em(13);
   font-weight: 400;
   color: #222222;
 }
+/*--------------------------------------------------------------
+# Our Location
+--------------------------------------------------------------*/
+.location {
+  background: #fff;
+  padding: 60px 0 30px 0;
+}
+.location .section-title{
+  color:#965320;
+}
+.location  .our-location {
+  padding: 30px 0 100px;
+  margin-bottom: 30px;
+  background-color: #f7f7f7;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 5px 25px 0 rgba(214, 215, 216, 0.6);
+}
 
+.location  .our-location .picture {
+  display: inline-block;
+  height: 200px;
+  width: 300px;
+  margin-bottom: 20px;
+  z-index: 1;
+  position: relative;
+}
+
+.location  .our-location .picture::before {
+  content: "";
+  width: 100%;
+  height: 0;
+  background-color: #965320;
+  position: absolute;
+  bottom: 135%;
+  right: 0;
+  left: 0;
+  opacity: 0.9;
+  transform: scale(3);
+  transition: all 0.3s linear 0s;
+}
+
+.location  .our-location:hover .picture::before {
+  height: 100%;
+}
+
+.location  .our-location .picture img {
+  width: 100%;
+  height: auto;
+  transform: scale(1);
+  transition: all 0.9s ease 0s;
+}
+
+.location .our-location .title {
+  display: block;
+  font-size: 15px;
+  color: #4e5052;
+  text-transform: capitalize;
+}
+
+.location .our-location .maps {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  background-color: #965320;
+  position: absolute;
+  bottom: -100px;
+  left: 0;
+  transition: all 0.5s ease 0s;
+}
+
+.location .our-location:hover .maps {
+  bottom: 0;
+}
+
+.location .our-location .maps li {
+  display: inline-block;
+}
+
+.location .our-location .maps li a {
+  display: block;
+  padding: 10px;
+  font-size: 17px;
+  color: white;
+  transition: all 0.3s ease 0s;
+  text-decoration: none;
+}
+
+.location .our-location .maps li a:hover {
+  color: #965320;
+  background-color: #f7f5ec;
+}
 /*--------------------------------------------------------------
 # Our Team
 --------------------------------------------------------------*/

@@ -43,8 +43,8 @@ if (isset($_POST['submit'])) {
    <meta content="" name="keywords">
 
    <!-- Favicons -->
-   <link href="assets/img/favicon_io/favicon.ico" rel="icon">
-   <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="assets/img/favicon_io/favicon.ico" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
 
    <!-- Google Fonts -->
    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900" rel="stylesheet">
@@ -75,7 +75,7 @@ if (isset($_POST['submit'])) {
       <div class="container">
 
          <div class="logo float-left">
-            <a href="index.php"><img src="assets/img/pcm logo.png" alt="" class="img-fluid"></a>
+            <a href="Home.html"><img src="assets/img/ProRigRental Full Logo.png" alt="" class="img-fluid"></a>
          </div>
          <div class="mobile">
 
@@ -86,26 +86,18 @@ if (isset($_POST['submit'])) {
       <div class="form-container">
          <form action="" method="post">
             <h3>register now</h3>
-            <?php
-            if (isset($error)) {
-               foreach ($error as $error) {
-                  echo '<span class="error-msg">' . $error . '</span>';
-               };
-            };
-            ?>
             <input type="text" name="name" required placeholder="enter your name">
             <input type="text" name="username" required placeholder="enter your username">
             <input type="email" name="email" required placeholder="enter your email">
             <input type="password" name="password" required placeholder="enter your password">
             <input type="password" name="cpassword" required placeholder="confirm your password">
-            <select name="user_type">
-               <option value="admin">admin</option>
-               <option value="user">chair</option>
-               <option value="author">author</option>
-               <option value="reviewer">reviewer</option>
+            <select name="user_type">              
+               <option value="author">Customer</option>
+               <option value="admin">Admin</option>
+               <option value="user">Maintenance</option>
             </select>
             <input type="submit" name="submit" value="register now" class="form-btn">
-            <p>Already have an account? <a href="loginform.php">Login Now</a></p>
+            <p>Already have an account? <a href="loginform.html">Login Now</a></p>
          </form>
       </div>
    </main><!-- End #main -->
@@ -128,7 +120,7 @@ if (isset($_POST['submit'])) {
                   <div class="info-box">
                      <a href="mailto:info@conference.com"><i class="bx bx-envelope"></i></a>
                      <h3>Email Us</h3>
-                     <p>info@conference.com</p>
+                     <p>info@ProRigRentals.com</p>
                   </div>
                </div>
 
@@ -144,7 +136,7 @@ if (isset($_POST['submit'])) {
       </div>
       <div class="container">
          <div class="copyright">
-            &copy; Copyright <strong><span>PERSPECTIVES PROCEEDINGS MANAGEMENT</span></strong>. All Rights Reserved
+            &copy; Copyright <strong><span>ProRigs Rentals Corporation</span></strong>. All Rights Reserved
          </div>
          <div class="credits">
             <!-- All the links in the footer should remain intact. -->
