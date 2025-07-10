@@ -534,63 +534,6 @@
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
-<script>
-// Initialize Isotope
-var $grid = $('.event-container').isotope({
-  itemSelector: '.event-item'
-});
-
-// Store filters
-var filters = {
-  event: '*', // default is All
-  type: ''    // default is none
-};
-
-// Event filters
-$('#event-flters').on('click', 'li', function() {
-  var $this = $(this);
-  var filterValue = $this.attr('data-filter');
-  
-  filters['event'] = filterValue;
-
-  var combinedFilter = concatValues(filters);
-  $grid.isotope({ filter: combinedFilter });
-
-  // Update active class
-  $this.addClass('filter-active').siblings().removeClass('filter-active');
-});
-
-// Type filters (toggleable)
-$('#type-flters').on('click', 'li', function() {
-  var $this = $(this);
-  var filterValue = $this.attr('data-filter');
-
-  // Toggle logic:
-  if ($this.hasClass('filter-active')) {
-    // If already active, unselect
-    filters['type'] = '';
-    $this.removeClass('filter-active');
-  } else {
-    // Select new filter
-    filters['type'] = filterValue;
-    $this.addClass('filter-active').siblings().removeClass('filter-active');
-  }
-
-  var combinedFilter = concatValues(filters);
-  $grid.isotope({ filter: combinedFilter });
-});
-
-// Combine filter values
-function concatValues(obj) {
-  var allFilters = [];
-  for (var key in obj) {
-    if (obj[key] && obj[key] !== '*') {
-      allFilters.push(obj[key]);
-    }
-  }
-  return allFilters.length ? allFilters.join('') : '*';
-}
-</script>
 </body>
 
 </html>
