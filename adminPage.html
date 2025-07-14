@@ -29,7 +29,7 @@ if (isset($_POST["submit"])) {
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Conference Paper Review System</title>
+  <title>ProRigs Rentals</title>
   <meta content="" name="descriptison">
   <meta content="" name="keywords">
 
@@ -81,7 +81,6 @@ if (isset($_POST["submit"])) {
           <li><a href="home.html#avaliablity">Equipments</a></li>
           <li><a href="home.html#location">Locations</a></li>
           <li><a href="home.html#team">Board Members</a></li>
-          <li><a href="home.html#contact">Contact Us</a></li>
           <a href="logout.php" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
             | Logout</a>
         </ul>
@@ -90,8 +89,8 @@ if (isset($_POST["submit"])) {
     </div>
   </header><!-- End Header -->
   <div class="hero-text">
-    <h2 class="animate__animated animate__fadeInDown"><span>ProRigs Rental</span></h2>
-    <h6 class="animate__animated animate__fadeInUp">A Heavy Equipment Solutions- 24/7 Avaliablity</h6>
+    <h2 class="animate__animated animate__fadeInDown"><span>ProRigs Rental Corporation</span></h2>
+    <h6 class="animate__animated animate__fadeInUp">A Heavy Equipment Solutions Company</h6>
   </div>
   <main id="main">
     <div class="user-container">
@@ -102,10 +101,23 @@ if (isset($_POST["submit"])) {
     </div>
     <div class="form-container">
       <form action="" method="post">
-        <h3>Create Conference</h3>
-        <input type="text" name="conf_name" required placeholder="Enter conference name">
-        <input type="text" name="conf_location" required placeholder="Enter Location">
-        <input type="date" name="start_date" required placeholder="Enter Location">
+        <h3>USER MANAGMENT</h3>
+          <select name="Role">
+                      <option value="managment">Managment</option>
+                      <option value="maintainance">Maintainance</option>
+                      <option value="user">Customer</option>
+          </select>
+          <input type="checkbox" id="customerpage" name="customerpage" value="customerpage"><label for="customepage"> Access Customer Page</label>
+          
+          <input type="checkbox" id="adminpage" name="adminpage" value="adminpage">
+          <label for="adminpage"> Access Admin Page</label>
+          <input type="checkbox" id="managerpage" name="managerpage" value="managerpage">
+          <label for="managerpage"> Access Manager Page</label>
+          <label class="container">One
+          <input type="checkbox" checked="checked">
+          <span class="checkmark"></span>
+          </label>
+          <input type="date" name="start_date" required placeholder="Enter Location">
         <input type="submit" name="submit" value="Create Conference" class="form-btn">
       </form>
     </div>
@@ -121,7 +133,7 @@ if (isset($_POST["submit"])) {
 
     <div class="container">
       <div class="copyright">
-        &copy; Copyright <strong><span>ProRigs Rental</span></strong>. All Rights Reserved
+        &copy; Copyright <strong><span>ProRigs Rental Corporation</span></strong>. All Rights Reserved
       </div>
       <div class="credits">
         <!-- All the links in the footer should remain intact. -->
