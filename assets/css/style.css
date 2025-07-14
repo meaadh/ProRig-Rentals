@@ -1261,48 +1261,6 @@ table.center {
   padding-top: 50px;
 }
 
-.footer .footer-about .logo {
-  line-height: 1;
-  margin-bottom: 25px;
-}
-
-.footer .footer-about .logo img {
-  max-height: 40px;
-  margin-right: 6px;
-}
-
-.footer .footer-about .logo span {
-  color: var(--heading-color);
-  font-family: var(--heading-font);
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-.footer .footer-about p {
-  font-size: 14px;
-  font-family: var(--heading-font);
-}
-
-.footer .social-links a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid color-mix(in srgb, var(--default-color), transparent 50%);
-  font-size: 16px;
-  color: color-mix(in srgb, var(--default-color), transparent 20%);
-  margin-right: 10px;
-  transition: 0.3s;
-}
-
-.footer .social-links a:hover {
-  color: var(--accent-color);
-  border-color: var(--accent-color);
-}
-
 .footer h4 {
   font-size: 16px;
   font-weight: bold;
@@ -1311,7 +1269,7 @@ table.center {
 }
 
 .footer .footer-links {
-  margin-bottom: 30px;
+  margin-bottom: 0px;
 }
 
 .footer .footer-links ul {
@@ -1327,7 +1285,7 @@ table.center {
 }
 
 #footer .footer-links ul li {
-  padding: 10px 0;
+  padding: 0px 0;
   display: flex;
   align-items: center;
 }
@@ -1348,6 +1306,37 @@ table.center {
 
 .footer .footer-contact p {
   margin-bottom: 5px;
+}
+.nav-menu-footer, .nav-menu-footer * {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-menu-footer > ul > li {
+  position: relative;
+  white-space: nowrap;
+  float: left;
+}
+
+.nav-menu-footer a {
+  display: block;
+  position: relative;
+  color: #220065;
+  padding: 12px 15px;
+  transition: 0.3s;
+  font-size: 14px;
+  font-family: "Open Sans", sans-serif;
+}
+
+.nav-menu-footer a:hover, .nav-menu .active > a{
+  color: #6bf600;
+  text-decoration: none;
+}
+.nav-menu-footer li:hover > a
+{
+  color: #8fb00e;
+  text-decoration: none;
 }
 #footer .copyright {
   text-align: center;
