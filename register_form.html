@@ -1,36 +1,3 @@
-<?php
-
-@include 'config.php';
-
-if (isset($_POST['submit'])) {
-
-   $name = mysqli_real_escape_string($conn, $_POST['name']);
-   $username = mysqli_real_escape_string($conn, $_POST['username']);
-   $email = mysqli_real_escape_string($conn, $_POST['email']);
-   $pass = md5($_POST['password']);
-   $cpass = md5($_POST['cpassword']);
-   $user_type = $_POST['user_type'];
-
-   $select = " SELECT * FROM users WHERE username = '$username' && password = '$pass' ";
-
-   $result = mysqli_query($conn, $select);
-
-   if (mysqli_num_rows($result) > 0) {
-
-      $error[] = 'user already exist!';
-   } else {
-
-      if ($pass != $cpass) {
-         $error[] = 'password not matched!';
-      } else {
-         $insert = "INSERT INTO users(name,username, email, password, user_type) VALUES('$name','$username ','$email','$pass','$user_type')";
-         mysqli_query($conn, $insert);
-         header('location:loginform.php');
-      }
-   }
-};
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -84,13 +51,13 @@ if (isset($_POST['submit'])) {
    </header><!-- End Header -->
    <main id="main">
       <div class="form-container">
-         <form action="" method="post">
+         <form action="http://localhost:3000/sign_up" method="post">
             <h3>Register Now</h3>
-            <input type="text" name="name" required placeholder="enter your name">
+            <input type="text" name="fname" required placeholder="enter your first name">
+            <input type="text" name="lname" required placeholder="enter your last name">
             <input type="text" name="username" required placeholder="enter your username">
             <input type="email" name="email" required placeholder="enter your email">
             <input type="password" name="password" required placeholder="enter your password">
-            <input type="password" name="cpassword" required placeholder="confirm your password">
             <select name="user_type">              
                <option value="author">Customer</option>
                <option value="admin">Admin</option>
