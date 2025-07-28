@@ -74,22 +74,40 @@ async function getNextUserID()
   console.log("Full updateResult:", counter.value);
   return counter.value.sequence_value;
 }
+
 app.post("/contact_us", async(req,res)=>{
-  const{fname,lname,email,username,password,user_type}=req.body;
+  const{name,email,subject,message,}=req.body;
   try {
     const data = {
-      fname,
-      lname,
+      name,
       email,
-      username,
+      subject,
+      message,
     };
   
-    await db.collection("RentalUsers").insertOne(data);
-    console.log(`Successfully into to the ${dbname} database with userId:`,userId);
-    return res.redirect("loginform.html");
+    await db.collection("ContactForm").insertOne(data);
+    console.log(`Successfully into to the ${dbname} database with name:`,name);
+    return res.redirect(`Home.html?success=${encodeURIComponent("Message Sent")}`);
   } catch(err) {
     console.log(`Insert error to the ${dbname} database`,err);
-    return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Failed: " + err.message)}`);
+    return res.redirect(`Home.html?error=${encodeURIComponent("Contact Form Failed: " + err.message)}`);
+  }
+})
+app.post("/customer_order", async(req,res)=>{
+  const{name,email,subject,message,}=req.body;
+  try {
+    const data = {
+      name,
+      email,
+      subject,
+      message,
+    };
+  
+    await db.collection("Reservations").insertOne(data);
+    console.log(`Successfully into to the ${dbname} database with name:`);
+  } catch(err) {
+    console.log(`Insert error to the ${dbname} database`,err);
+    return res.redirect(`customer.html?error=${encodeURIComponent("Reservations Failed: " + err.message)}`);
   }
 })
 app.post("/sign_up", async(req,res)=>{

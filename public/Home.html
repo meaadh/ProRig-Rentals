@@ -39,7 +39,27 @@
 </head>
 
 <body>
+   <div id="error-message" style="color: red; font-weight: bold;"></div>
+   <div id="success-message" style="color: rgb(34, 255, 0); font-weight: bold;"></div>
 
+   <script>
+      const params = new URLSearchParams(window.location.search);
+      const error = params.get("error");
+      const success = params.get("success");
+
+      if (error) {
+         document.getElementById("error-message").textContent = decodeURIComponent(error);
+
+         const cleanUrl = window.location.origin + window.location.pathname;
+         window.history.replaceState({}, document.title, cleanUrl);
+      }
+      else if (success) {
+         document.getElementById("success-message").textContent = decodeURIComponent(success);
+
+         const cleanUrl = window.location.origin + window.location.pathname;
+         window.history.replaceState({}, document.title, cleanUrl);
+      }
+   </script>
   <!-- ======= Top Bar ======= -->
   <section id="topbar" class="d-none d-lg-block">
     <div class="container clearfix">
@@ -475,7 +495,7 @@
           </div>
 
           <div class="col-lg-12" data-aos="fade-up" data-aos-delay="300">
-            <form action="" method="post" class="php-email-form">
+            <form action="http://localhost:3000/contact_us" method="post" class="js-email-form">
               <div class="row">
                 <div class="col-lg-6 d-flex align-items-stretch">
                   <input type="text" class="form-control" name="name" required placeholder="Your Name">
