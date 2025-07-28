@@ -1279,7 +1279,7 @@ table.center {
   background:#00569d;
   border-top: 1px solid #007cb5;
   border-bottom: .5px solid #0000000a ;
-  padding: 20px 0 10px 0;
+  padding: 10px 0 10px 0;
 }
 
 #footer .info-box {
@@ -1323,7 +1323,7 @@ table.center {
 }
 
 #footer .footer-top {
-  padding-top: 10px;
+  padding-top: 50px;
 }
 
 #footer h4 {

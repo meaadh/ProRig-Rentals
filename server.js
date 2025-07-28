@@ -74,7 +74,24 @@ async function getNextUserID()
   console.log("Full updateResult:", counter.value);
   return counter.value.sequence_value;
 }
-
+app.post("/contact_us", async(req,res)=>{
+  const{fname,lname,email,username,password,user_type}=req.body;
+  try {
+    const data = {
+      fname,
+      lname,
+      email,
+      username,
+    };
+  
+    await db.collection("RentalUsers").insertOne(data);
+    console.log(`Successfully into to the ${dbname} database with userId:`,userId);
+    return res.redirect("loginform.html");
+  } catch(err) {
+    console.log(`Insert error to the ${dbname} database`,err);
+    return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Failed: " + err.message)}`);
+  }
+})
 app.post("/sign_up", async(req,res)=>{
   const{fname,lname,email,username,password,user_type}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
