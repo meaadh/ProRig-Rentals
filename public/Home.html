@@ -145,14 +145,14 @@
         </div>
       </div>
       <nav class="nav-menu float-right d-none d-lg-block">
-        <ul>
+        <ul id="main-navbar-list">
           <li class="active"><a href="#header">Home</a></li>
           <li><a href="#about">About Us</a></li>
           <li><a href="#avaliablity">Equipments</a></li>
           <li><a href="#location">Locations</a></li>
           <li><a href="#team">Board Members</a></li>
           <li><a href="#contact">Contact Us</a></li>
-          <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-login"></i>
+          <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-login"></i>
             | Login</a>
         </ul>
       </nav><!-- .nav-menu -->
@@ -560,6 +560,43 @@
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
+  <script>
+    // Add Customer Page link if user is logged in
+    fetch('/api/userinfo')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.name && data.name !== "Customer") {
+          // Change login link to logout if logged in
+          const loginLink = document.getElementById('login-link');
+          if (loginLink) {
+            loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
+            loginLink.href = '/logout';
+          }
+
+          const navbar = document.getElementById('main-navbar-list');
+          if (navbar && !document.getElementById('customer-page-link')) {
+            const li = document.createElement('li');
+            li.id = 'customer-page-link';
+            li.innerHTML = '<a href="customer.html" id="customer-page-link-anchor">Rent Equipment</a>';
+            // Insert after the first li (Home)
+            const homeLi = navbar.querySelector('li');
+            if (homeLi && homeLi.nextSibling) {
+              navbar.insertBefore(li, homeLi.nextSibling);
+            } else {
+              navbar.appendChild(li);
+            }
+          }
+          // If already on customer.html, highlight the nav link
+          if (window.location.pathname.endsWith('customer.html')) {
+            const anchor = document.getElementById('customer-page-link-anchor');
+            if (anchor && anchor.parentElement) {
+              anchor.parentElement.classList.add('active');
+            }
+          }
+        }
+      })
+      .catch(() => { /* not logged in, do nothing */ });
+  </script>
 </body>
 
 </html>
