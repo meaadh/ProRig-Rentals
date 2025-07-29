@@ -109,6 +109,13 @@
         <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
       </form>
     </div>
+    <!-- Reservation Success Modal -->
+    <div id="reservation-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:30px 40px; border-radius:10px; box-shadow:0 2px 20px #0003; text-align:center; max-width:90vw;">
+        <h2 style="margin-bottom:20px;">Reservation successful!</h2>
+        <button id="close-modal-btn" style="padding:8px 24px; font-size:1.1em; border:none; background:#007bff; color:#fff; border-radius:5px; cursor:pointer;">Okay</button>
+      </div>
+    </div>
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
@@ -242,13 +249,22 @@
         if (data.error) {
           document.getElementById('reservation-error').textContent = data.error;
           document.getElementById('reservation-success').textContent = '';
+        } else if (data.unavailable_equipment_ids && data.unavailable_equipment_ids.length > 0) {
+          document.getElementById('reservation-success').textContent = "Reservation successful for available equipment only.";
+          document.getElementById('reservation-error').textContent = "Some equipment was already booked and not reserved.";
+          // Set modal flag and refresh
+          localStorage.setItem('showReservationModal', '1');
+          setTimeout(() => window.location.reload(), 50);
         } else {
           document.getElementById('reservation-success').textContent = "Reservation successful!";
           document.getElementById('reservation-error').textContent = '';
-          // Optionally clear selections
-          selectedEquipmentSet.clear();
-          renderEquipment(document.getElementById('equipment-category').value);
+          // Set modal flag and refresh
+          localStorage.setItem('showReservationModal', '1');
+          setTimeout(() => window.location.reload(), 50);
         }
+        // Optionally clear selections
+        selectedEquipmentSet.clear();
+        renderEquipment(document.getElementById('equipment-category').value);
       })
       .catch(() => {
         document.getElementById('reservation-error').textContent = "Reservation failed. Please try again.";
@@ -256,7 +272,7 @@
       });
     });
 
-    // Try to pre-fill the name field with the logged-in user's name if available in sessionStorage
+    // Show modal if reservation was successful before reload
     document.addEventListener('DOMContentLoaded', function() {
       // If you set the user's name in sessionStorage or localStorage after login, use it here
       // Example: sessionStorage.setItem('customer_name', 'John Doe');
@@ -264,6 +280,13 @@
       if (name) {
         document.getElementById('customer_name').value = name;
       }
+      if (localStorage.getItem('showReservationModal') === '1') {
+        document.getElementById('reservation-modal').style.display = 'flex';
+        localStorage.removeItem('showReservationModal');
+      }
+      document.getElementById('close-modal-btn').onclick = function() {
+        document.getElementById('reservation-modal').style.display = 'none';
+      };
     });
   </script>
 
