@@ -2,7 +2,7 @@ const express=require("express");
 const session = require('express-session');
 const bodyParser=require("body-parser");
 const crypto=require("crypto");
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 const uri = require ("./atlas_uri")
@@ -199,15 +199,61 @@ app.post('/api/reservations', async (req, res) => {
         equipmentIds = [];
       }
     }
+    // Fix: Always call ObjectId as a function, not as a constructor
+    const objectIds = equipmentIds.map(id => {
+      try {
+        // If id is already an ObjectId, return id
+        if (typeof id === 'object' && id && (id._bsontype === 'ObjectID' || id._bsontype === 'ObjectId')) return id;
+        // If id is a string of 24 hex chars, convert to ObjectId
+        if (typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id)) return new ObjectId(id);
+        return id;
+      } catch {
+        return id;
+      }
+    });
+
     const data = {
       customer_name,
       end_date,
       equipment_ids: equipmentIds
     };
     await db.collection("Reservations").insertOne(data);
+
+    // Debug: Log what IDs are being used for update
+    console.log("Updating Equipments with IDs:", objectIds);
+
+    // Remove any non-ObjectId values from objectIds
+    const validObjectIds = objectIds.filter(id => ObjectId.isValid(id) && typeof id === 'object');
+
+    // Log validObjectIds for debugging
+    console.log("Valid ObjectIds for update:", validObjectIds);
+
+    if (validObjectIds.length > 0) {
+      const updateResult = await db.collection("Equipments").updateMany(
+        { _id: { $in: validObjectIds } },
+        { $set: { availability: false, unavailable_until: new Date(end_date) } }
+      );
+      console.log("Equipment update result:", updateResult.modifiedCount, "updated.");
+    } else {
+      console.log("No valid equipment IDs to update availability.");
+    }
+
     res.json({ message: 'Reservation created successfully', ...data });
   } catch (err) {
     console.log(`Insert error to the ${dbname} database`, err);
     res.status(500).json({ error: "Failed to create reservation: " + err.message });
   }
 });
+
+// Automatically make equipment available again after the return date
+setInterval(async () => {
+  try {
+    const now = new Date();
+    await db.collection("Equipments").updateMany(
+      { unavailable_until: { $lte: now }, availability: false },
+      { $set: { availability: true }, $unset: { unavailable_until: "" } }
+    );
+  } catch (err) {
+    console.error("Error updating equipment availability:", err);
+  }
+}, 60 * 1000); // Runs every 1 minute
