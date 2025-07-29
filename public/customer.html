@@ -71,8 +71,7 @@
   <main id="main">
     <div class="user-container">
       <div class="content">
-        <h3>HI, <span>Customer</span></h3>
-        <h1>Welcome <span>Customer</span></h1>
+        <h1>Welcome <span id="user-welcome-name">Customer</span></h1>
       </div>
     </div>
     <!-- Equipment List Section -->
@@ -272,14 +271,21 @@
       });
     });
 
-    // Show modal if reservation was successful before reload
+    // Replace sessionStorage logic with API call to get user's name from server
     document.addEventListener('DOMContentLoaded', function() {
-      // If you set the user's name in sessionStorage or localStorage after login, use it here
-      // Example: sessionStorage.setItem('customer_name', 'John Doe');
-      const name = sessionStorage.getItem('customer_name');
-      if (name) {
-        document.getElementById('customer_name').value = name;
-      }
+      fetch('/api/userinfo')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.name) {
+            document.getElementById('customer_name').value = data.name;
+          
+            document.getElementById('user-welcome-name').textContent = data.name;
+          }
+        })
+        .catch(() => {
+          // fallback: do nothing, default is "Customer"
+        });
+
       if (localStorage.getItem('showReservationModal') === '1') {
         document.getElementById('reservation-modal').style.display = 'flex';
         localStorage.removeItem('showReservationModal');

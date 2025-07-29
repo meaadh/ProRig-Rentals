@@ -129,6 +129,8 @@ app.post('/login', async (req, res) => {
     });
 
     if (user) {
+      // Print user's full name to the console at login
+      console.log("User logged in:", user.fname + " " + user.lname);
       if (user.user_type === 'admin') {
         req.session.admin_name = user.lname;
         return res.redirect('/adminPage.html');
@@ -242,6 +244,28 @@ app.post('/api/reservations', async (req, res) => {
   } catch (err) {
     console.log(`Insert error to the ${dbname} database`, err);
     res.status(500).json({ error: "Failed to create reservation: " + err.message });
+  }
+});
+
+app.get('/api/userinfo', async (req, res) => {
+  try {
+    // Only proceed if user is logged in
+    if (!req.session || !req.session.user_name) {
+      console.log("User not found or not logged in.");
+      return res.json({ name: "Customer" });
+    }
+    // Find the user in the DB by last name (as stored in session)
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (user) {
+      // Return full name: first name + last name
+      return res.json({ name: user.fname + " " + user.lname });
+    } else {
+      console.log("User not found in database for lname:", req.session.user_name);
+      return res.json({ name: req.session.user_name });
+    }
+  } catch (err) {
+    console.log("User not found or error occurred.");
+    return res.json({ name: "Customer" });
   }
 });
 
