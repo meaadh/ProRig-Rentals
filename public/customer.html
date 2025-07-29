@@ -75,11 +75,38 @@
         <h1>Welcome <span>Customer</span></h1>
       </div>
     </div>
+    <!-- Equipment List Section -->
+    <section class="equipment-section py-4">
+      <div class="container">
+        <h3 class="mb-4">Available Equipment</h3>
+        <div class="mb-3">
+          <label for="equipment-category" class="form-label">Select Category:</label>
+          <select id="equipment-category" class="form-control" style="max-width:350px;">
+            <option value="">-- Choose Category --</option>
+            <option value="Heavy Equipment">Heavy Equipment</option>
+            <option value="Landscaping Tools">Landscaping Tools</option>
+            <option value="Light Equipment">Light Equipment</option>
+            <option value="Ladder & Lifts">Ladder & Lifts</option>
+            <option value="Carpet Cleaners & Pressure Washers">Carpet Cleaners & Pressure Washers</option>
+          </select>
+        </div>
+        <div id="equipment-list" class="row">
+          <!-- Equipment cards will be loaded here -->
+        </div>
+      </div>
+    </section>
     <div class="form-container">
-      <form action="" method="post">
+      <form id="reservation-form" action="/api/reservations" method="post">
         <h3>Reservation</h3>
-          <input type="date" name="start_date" required placeholder="Enter Location">
-        <input type="submit" name="submit" value="Create Conference" class="form-btn">
+        <label for="customer_name">Name:</label>
+        <input type="text" name="customer_name" id="customer_name" required>
+        <label for="end_date" style="margin-left:10px;">Return Date:</label>
+        <input type="date" name="end_date" id="end_date" required>
+        <!-- Hidden input for selected equipment -->
+        <input type="hidden" name="equipment_ids" id="selected-equipment">
+        <input type="submit" name="submit" value="Reserve Selected Equipment" class="form-btn">
+        <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
+        <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
       </form>
     </div>
   </main><!-- End #main -->
@@ -131,6 +158,107 @@
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
+  <script>
+    let allEquipment = [];
+    let selectedEquipmentSet = new Set();
+
+    function renderEquipment(category) {
+      const list = document.getElementById('equipment-list');
+      // Only show available equipment
+      let filtered = allEquipment.filter(eq => eq.availability === true);
+      if (category) {
+        filtered = filtered.filter(eq =>
+          (eq.category || eq.type || '').toLowerCase() === category.toLowerCase()
+        );
+      }
+      if (!filtered.length) {
+        list.innerHTML = '<div class="col-12"><p>No equipment available for this category.</p></div>';
+        return;
+      }
+      list.innerHTML = filtered.map(eq => `
+        <div class="col-md-4 mb-4">
+          <div class="card h-100 shadow-sm">
+            ${eq.image ? `<img src="${eq.image}" class="card-img-top" alt="${eq.name || eq.equipmentName || 'Equipment'}">` : ''}
+            <div class="card-body">
+              <h5 class="card-title">${eq.name || eq.equipmentName || 'Equipment'}</h5>
+              <p class="card-text">${eq.description || ''}</p>
+              <div>
+                <input type="checkbox" class="equipment-checkbox" value="${eq._id}" id="equip_${eq._id}" ${selectedEquipmentSet.has(eq._id) ? 'checked' : ''}>
+                <label for="equip_${eq._id}">Select this equipment</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Add event listeners to checkboxes to update selectedEquipmentSet
+      document.querySelectorAll('.equipment-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+          if (this.checked) {
+            selectedEquipmentSet.add(this.value);
+          } else {
+            selectedEquipmentSet.delete(this.value);
+          }
+        });
+      });
+    }
+
+    fetch('/api/equipments')
+      .then(res => res.json())
+      .then(data => {
+        allEquipment = data;
+        renderEquipment(""); // Show nothing until category is picked
+      })
+      .catch(() => {
+        document.getElementById('equipment-list').innerHTML = '<div class="col-12"><p>Error loading equipment.</p></div>';
+      });
+
+    document.getElementById('equipment-category').addEventListener('change', function() {
+      renderEquipment(this.value);
+    });
+
+    // Collect selected equipment IDs on form submit
+    document.getElementById('reservation-form').addEventListener('submit', function(e) {
+      document.getElementById('selected-equipment').value = JSON.stringify(Array.from(selectedEquipmentSet));
+      // AJAX submit to show error/success without page reload
+      e.preventDefault();
+      const form = this;
+      const formData = new FormData(form);
+      // Remove start_date from formData if present
+      formData.delete('start_date');
+      fetch(form.action, {
+        method: 'POST',
+        body: new URLSearchParams([...formData])
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById('reservation-error').textContent = data.error;
+          document.getElementById('reservation-success').textContent = '';
+        } else {
+          document.getElementById('reservation-success').textContent = "Reservation successful!";
+          document.getElementById('reservation-error').textContent = '';
+          // Optionally clear selections
+          selectedEquipmentSet.clear();
+          renderEquipment(document.getElementById('equipment-category').value);
+        }
+      })
+      .catch(() => {
+        document.getElementById('reservation-error').textContent = "Reservation failed. Please try again.";
+        document.getElementById('reservation-success').textContent = '';
+      });
+    });
+
+    // Try to pre-fill the name field with the logged-in user's name if available in sessionStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      // If you set the user's name in sessionStorage or localStorage after login, use it here
+      // Example: sessionStorage.setItem('customer_name', 'John Doe');
+      const name = sessionStorage.getItem('customer_name');
+      if (name) {
+        document.getElementById('customer_name').value = name;
+      }
+    });
+  </script>
 
 </body>
 

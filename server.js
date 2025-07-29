@@ -93,23 +93,6 @@ app.post("/contact_us", async(req,res)=>{
     return res.redirect(`Home.html?error=${encodeURIComponent("Contact Form Failed: " + err.message)}`);
   }
 })
-app.post("/customer_order", async(req,res)=>{
-  const{name,email,subject,message,}=req.body;
-  try {
-    const data = {
-      name,
-      email,
-      subject,
-      message,
-    };
-  
-    await db.collection("Reservations").insertOne(data);
-    console.log(`Successfully into to the ${dbname} database with name:`);
-  } catch(err) {
-    console.log(`Insert error to the ${dbname} database`,err);
-    return res.redirect(`customer.html?error=${encodeURIComponent("Reservations Failed: " + err.message)}`);
-  }
-})
 app.post("/sign_up", async(req,res)=>{
   const{fname,lname,email,username,password,user_type}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
@@ -192,6 +175,39 @@ app.get('/logout', (req, res) => {
     res.redirect('/loginform.html');
   });
 });
-
-
-
+app.get('/api/equipments', async (req, res) => {
+  try {
+    // This line fetches all equipment from the 'Equipments' collection in your database
+    const equipments = await db.collection("Equipments").find({}).toArray();
+    res.json(equipments);
+  } catch (err) {
+    res.status(500).json({ error: "Failedd to fetch equipments" });
+  }
+});
+app.post('/api/reservations', async (req, res) => {
+  try {
+    const { customer_name, end_date, equipment_ids } = req.body;
+    if (!customer_name || !end_date || !equipment_ids) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+    // Parse equipment_ids if it's a JSON string
+    let equipmentIds = equipment_ids;
+    if (typeof equipmentIds === 'string') {
+      try {
+        equipmentIds = JSON.parse(equipmentIds);
+      } catch {
+        equipmentIds = [];
+      }
+    }
+    const data = {
+      customer_name,
+      end_date,
+      equipment_ids: equipmentIds
+    };
+    await db.collection("Reservations").insertOne(data);
+    res.json({ message: 'Reservation created successfully', ...data });
+  } catch (err) {
+    console.log(`Insert error to the ${dbname} database`, err);
+    res.status(500).json({ error: "Failed to create reservation: " + err.message });
+  }
+});

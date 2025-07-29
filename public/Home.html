@@ -29,6 +29,64 @@
 
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
+  <style>
+    /* Ensure equipment cards are the same height and organized */
+    .event-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px 0;
+    }
+
+    .event-item {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 24px;
+    }
+
+    .event-item .card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: stretch;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      border: 1px solid #eee;
+      min-height: 370px;
+    }
+
+    .event-item .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    .event-item .card-text {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+    }
+
+    .event-item h2,
+    .event-item h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .event-item p {
+      margin-bottom: 0.5rem;
+      font-size: 0.97rem;
+    }
+
+    @media (max-width: 991.98px) {
+      .event-item {
+        margin-bottom: 20px;
+      }
+    }
+  </style>
 
   <!-- =======================================================
   * Template Name: Mamba - v2.3.0
@@ -175,104 +233,13 @@
               <li data-filter=".filter-Landscaping">Landscaping Tools</li>
               <li data-filter=".filter-Light">Light Equipment</li>
               <li data-filter=".filter-Ladder">Ladder & Lifts</li>
-               <li data-filter=".filter-Cleaner">Carpet Cleaners & Presssure Washers</li>
+              <li data-filter=".filter-Cleaner">Carpet Cleaners & Pressure Washers</li>
             </ul>
           </div>
         </div>
         <div class="row event-container">
-
-          <div class="col-lg-4 col-md-6 event-item filter-Available filter-Heavy">
-            <div class="card">
-              <img src="assets/img/Event-background.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Tech Conference</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-Available filter-Heavy">
-            <div class="card">
-              <img src="assets/img/Event-background.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Candy Conference</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-Available filter-Heavy">
-            <div class="card">
-              <img src="assets/img/Event-background.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Google Conference</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-Available">
-            <div class="card">
-              <img src="assets/img/Event-background2.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Conference Dinner</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-Booked">
-            <div class="card">
-              <img src="assets/img/Event-background.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Tech Conference</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-Booked">
-            <div class="card">
-              <img src="assets/img/Event-background2.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Conference Dinner</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-Booked">
-            <div class="card">
-              <img src="assets/img/Event-background2.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Conference Dinner</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-upcomming">
-            <div class="card">
-              <img src="assets/img/Event-background.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Food Conference</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-upcomming">
-            <div class="card">
-              <img src="assets/img/Event-background2.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Conference Dinner</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
+          <!-- Dynamic equipment cards will be injected here by JS -->
         </div>
-      </div>
     </section><!-- End Avaliablity Section -->
 
     <!-- ======= Location Section ======= -->
