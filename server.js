@@ -86,11 +86,11 @@ app.post("/contact_us", async(req,res)=>{
     };
   
     await db.collection("ContactForm").insertOne(data);
-    console.log(`Successfully into to the ${dbname} database with name:`,name);
-    return res.redirect(`Home.html?success=${encodeURIComponent("Message Sent")}`);
+    console.log(`Successfully into to the ${dbname} database with name:`,email);
+    return res.json({sucess:"Message Sent"});
   } catch(err) {
     console.log(`Insert error to the ${dbname} database`,err);
-    return res.redirect(`Home.html?error=${encodeURIComponent("Contact Form Failed: " + err.message)}`);
+    return res.json({error:"Contact Form Failed:"+err.message});
   }
 })
 app.post("/customer_order", async(req,res)=>{
