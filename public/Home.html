@@ -152,8 +152,11 @@
           <li><a href="#location">Locations</a></li>
           <li><a href="#team">Board Members</a></li>
           <li><a href="#contact">Contact Us</a></li>
-          <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-login"></i>
-            | Login</a>
+          <!-- The customer/return links will be injected here by JS, so move the login/logout anchor to the end -->
+          <li id="login-link-li">
+            <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-login"></i>
+              | Login</a>
+          </li>
         </ul>
       </nav><!-- .nav-menu -->
 
@@ -574,21 +577,40 @@
           }
 
           const navbar = document.getElementById('main-navbar-list');
-          if (navbar && !document.getElementById('customer-page-link')) {
-            const li = document.createElement('li');
-            li.id = 'customer-page-link';
-            li.innerHTML = '<a href="customer.html" id="customer-page-link-anchor">Rent Equipment</a>';
-            // Insert after the first li (Home)
-            const homeLi = navbar.querySelector('li');
-            if (homeLi && homeLi.nextSibling) {
-              navbar.insertBefore(li, homeLi.nextSibling);
-            } else {
-              navbar.appendChild(li);
-            }
+          // Remove customer/return links if already present (avoid duplicates)
+          if (document.getElementById('customer-page-link')) document.getElementById('customer-page-link').remove();
+          if (document.getElementById('return-page-link')) document.getElementById('return-page-link').remove();
+
+          // Find the logout/login anchor (should be the last child)
+          const logoutAnchorLi = document.getElementById('login-link-li');
+          // Create Rent Equipment link
+          const rentLi = document.createElement('li');
+          rentLi.id = 'customer-page-link';
+          rentLi.innerHTML = '<a href="customer.html" id="customer-page-link-anchor">Rent Equipment</a>';
+
+          // Create Return Equipment link
+          const returnLi = document.createElement('li');
+          returnLi.id = 'return-page-link';
+          returnLi.innerHTML = '<a href="return.html" id="return-page-link-anchor">Return Equipment</a>';
+
+          // Insert before the logout/login anchor
+          if (logoutAnchorLi && logoutAnchorLi.parentNode === navbar) {
+            navbar.insertBefore(rentLi, logoutAnchorLi);
+            navbar.insertBefore(returnLi, logoutAnchorLi);
+          } else {
+            navbar.appendChild(rentLi);
+            navbar.appendChild(returnLi);
           }
-          // If already on customer.html, highlight the nav link
+
+          // Highlight nav links if on those pages
           if (window.location.pathname.endsWith('customer.html')) {
             const anchor = document.getElementById('customer-page-link-anchor');
+            if (anchor && anchor.parentElement) {
+              anchor.parentElement.classList.add('active');
+            }
+          }
+          if (window.location.pathname.endsWith('return.html')) {
+            const anchor = document.getElementById('return-page-link-anchor');
             if (anchor && anchor.parentElement) {
               anchor.parentElement.classList.add('active');
             }

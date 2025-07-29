@@ -51,14 +51,17 @@
         </div>
       </div>
       <nav class="nav-menu float-right d-none d-lg-block">
-        <ul>
+        <ul id="main-navbar-list">
           <li class="active"><a href="home.html">Home</a></li>
           <li><a href="home.html#about">About Us</a></li>
           <li><a href="home.html#avaliablity">Equipments</a></li>
           <li><a href="home.html#location">Locations</a></li>
           <li><a href="home.html#team">Board Members</a></li>
-          <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
-            | Logout</a>
+          <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
+          <li id="login-link-li">
+            <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-logout"></i>
+              | Logout</a>
+          </li>
         </ul>
       </nav><!-- .nav-menu -->
 
@@ -293,6 +296,65 @@
       document.getElementById('close-modal-btn').onclick = function() {
         document.getElementById('reservation-modal').style.display = 'none';
       };
+    });
+
+    // Add Customer/Return Page links at the end of navbar before logout
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/api/userinfo')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.name && data.name !== "Customer") {
+            // Change login link to logout if logged in
+            const loginLink = document.getElementById('login-link');
+            if (loginLink) {
+              loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
+              loginLink.href = '/logout';
+            }
+            const navbar = document.getElementById('main-navbar-list');
+            // Remove customer/return links if already present
+            if (document.getElementById('customer-page-link')) document.getElementById('customer-page-link').remove();
+            if (document.getElementById('return-page-link')) document.getElementById('return-page-link').remove();
+
+            // Find the logout/login anchor (should be the last child)
+            const logoutAnchorLi = document.getElementById('login-link-li');
+            // Create Rent Equipment link
+            const rentLi = document.createElement('li');
+            rentLi.id = 'customer-page-link';
+            rentLi.innerHTML = '<a href="customer.html" id="customer-page-link-anchor">Rent Equipment</a>';
+
+            // Create Return Equipment link
+            const returnLi = document.createElement('li');
+            returnLi.id = 'return-page-link';
+            returnLi.innerHTML = '<a href="return.html" id="return-page-link-anchor">Return Equipment</a>';
+
+            // Insert before the logout/login anchor
+            if (logoutAnchorLi && logoutAnchorLi.parentNode === navbar) {
+              navbar.insertBefore(rentLi, logoutAnchorLi);
+              navbar.insertBefore(returnLi, logoutAnchorLi);
+            } else {
+              navbar.appendChild(rentLi);
+              navbar.appendChild(returnLi);
+            }
+
+            // Highlight nav links if on those pages
+            if (window.location.pathname.endsWith('customer.html')) {
+              const anchor = document.getElementById('customer-page-link-anchor');
+              if (anchor && anchor.parentElement) {
+                anchor.parentElement.classList.add('active');
+              }
+            }
+            if (window.location.pathname.endsWith('return.html')) {
+              const anchor = document.getElementById('return-page-link-anchor');
+              if (anchor && anchor.parentElement) {
+                anchor.parentElement.classList.add('active');
+              }
+            }
+          }
+        })
+        .catch(() => { /* not logged in, do nothing */ });
+
+      // ...existing code...
+      // (rest of your DOMContentLoaded logic)
     });
   </script>
 
