@@ -220,6 +220,13 @@
     // Collect selected equipment IDs on form submit
     document.getElementById('reservation-form').addEventListener('submit', function(e) {
       document.getElementById('selected-equipment').value = JSON.stringify(Array.from(selectedEquipmentSet));
+      // Prevent submit if no equipment is selected
+      if (selectedEquipmentSet.size === 0) {
+        document.getElementById('reservation-error').textContent = "Please select at least one equipment to reserve.";
+        document.getElementById('reservation-success').textContent = '';
+        e.preventDefault();
+        return;
+      }
       // AJAX submit to show error/success without page reload
       e.preventDefault();
       const form = this;
