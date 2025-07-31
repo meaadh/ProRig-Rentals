@@ -584,14 +584,19 @@
             }
           }
         }
+        else if(data && data.name && data.name !== "admin")
+        {
+          
+        }
       })
+   
       .catch(() => { /* not logged in, do nothing */ });
 
     // Hide hero login button if logged in
     fetch('/api/userinfo')
       .then(res => res.json())
       .then(data => {
-        if (data && data.name && data.name !== "Customer") {
+        if (data && data.name && data.name !== "Customer"||data && data.name && data.name !== "admin") {
           // Hide hero login button if logged in
           const heroLoginBtn = document.getElementById('hero-login-btn');
           if (heroLoginBtn) heroLoginBtn.style.display = 'none';
