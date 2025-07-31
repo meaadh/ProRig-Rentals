@@ -94,7 +94,7 @@ app.post("/contact_us", async(req,res)=>{
   }
 })
 app.post("/sign_up", async(req,res)=>{
-  const{fname,lname,email,username,password,user_type}=req.body;
+  const{fname,lname,email,username,password}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
   try {
     const userId= await getNextUserID();
@@ -105,7 +105,7 @@ app.post("/sign_up", async(req,res)=>{
       email,
       username,
       password: hash,
-      user_type
+      user_type:"customer"
     };
   
     await db.collection("RentalUsers").insertOne(data);
@@ -154,14 +154,14 @@ app.post('/login', async (req, res) => {
       // Print user's full name to the console at login
       console.log("User logged in:", user.fname + " " + user.lname);
       if (user.user_type === 'admin') {
-        req.session.admin_name = user.lname;
+        req.session.userData ={fname:user.fname,lname:user.lname,useName:user.username};
         return res.redirect('/adminPage.html');
       } else {
         req.session.user_name = user.lname;
+        req.session.userData ={fname:user.fname,lname:user.lname,useName:user.username};
 
         if (user.user_type === 'customer') return res.redirect('/customer.html');
-        if (user.user_type === 'maintainance') return res.redirect('/maintainance.html');
-        if (user.user_type === 'user') return res.redirect('/userpage.html');
+        if (user.user_type === 'maintainance') return res.redirect('/maintainancePage.html');
 
         return res.send('Unknown user type');
       }
@@ -173,24 +173,21 @@ app.post('/login', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
-app.get('/adminPage.html', (req, res) => {
-  res.send(`Welcome User: ${req.session.user_name}`);
-});
-app.get('/userPage.html', (req, res) => {
-  res.send(`Welcome User: ${req.session.user_name}`);
-});
-app.get('/maintainance.html', (req, res) => {
-  res.send(`Welcome Family: ${req.session.user_name}`);
-});
-app.get('/customer.html', (req, res) => {
-  res.send(`Welcome Customer: ${req.session.user_name}`);
-});
 app.get("/",(req,res)=>{
   res.set({"Access-control-Allow-Origin": "*" });
   return res.redirect("register_form.html");
 });
 app.get('/logout', (req, res) => {
+  const user=req.session.userData;
+  if(user)
+  {
+    console.log("User Logged Out",user.fname + " " + user.lname);
+  }
+  else
+  {
+    console.log("user not found in database");
+
+  }
   req.session.destroy(err => {
     if (err) {
       console.error("Logout failed:", err);
@@ -198,6 +195,18 @@ app.get('/logout', (req, res) => {
     }
     res.redirect('/loginform.html');
   });
+});
+app.get('/userdetail', (req, res) => {
+  const user=req.session.userData;
+
+  if(user)
+    {
+    res.json({ name: user.fname + " " + user.lname });
+    }
+    else
+    {
+      console.log("User not found in database");
+    }
 });
 app.get('/api/equipments', async (req, res) => {
   try {
