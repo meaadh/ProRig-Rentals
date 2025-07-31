@@ -188,7 +188,9 @@
             <div class="carousel-content container">
               <h2 class="animate__animated animate__fadeInDown">ProRigs Rentals Corporation</h2>
               <h6 class="animate__animated animate__fadeInUp">A Heavy Equipment Solutions Company</h6>
-              <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started animate__animated animate__fadeInUp scrollto"><i class="icofont-login"></i> | Login</a>
+              <span id="hero-login-btn">
+                <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started animate__animated animate__fadeInUp scrollto"><i class="icofont-login"></i> | Login</a>
+              </span>
             </div>
           </div>
         </div>
@@ -631,6 +633,18 @@
               anchor.parentElement.classList.add('active');
             }
           }
+        }
+      })
+      .catch(() => { /* not logged in, do nothing */ });
+
+    // Hide hero login button if logged in
+    fetch('/api/userinfo')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.name && data.name !== "Customer") {
+          // Hide hero login button if logged in
+          const heroLoginBtn = document.getElementById('hero-login-btn');
+          if (heroLoginBtn) heroLoginBtn.style.display = 'none';
         }
       })
       .catch(() => { /* not logged in, do nothing */ });
