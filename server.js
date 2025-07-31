@@ -159,7 +159,7 @@ app.post('/login', async (req, res) => {
       if (user.user_type === 'admin') {
         return res.redirect('/adminPage.html');
       } else {
-        req.session.user_name =  user.fname + " " + user.lname;
+        req.session.user_name =username;
 
         if (user.user_type === 'customer') return res.redirect('/customer.html');
         if (user.user_type === 'maintainance') return res.redirect('/maintainancePage.html');
@@ -239,7 +239,7 @@ app.post('/api/reservations', async (req, res) => {
     // --- New: Get user _id if logged in ---
     let user_id = null;
     if (req.session && req.session.user_name) {
-      const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+      const user = await db.collection('RentalUsers').findOne({ name: req.session.user_name });
       if (user && user._id) {
         user_id = user._id;
       }
@@ -303,12 +303,12 @@ app.get('/api/userinfo', async (req, res) => {
       return res.json({ name: "Customer" });
     }
     // Find the user in the DB by last name (as stored in session)
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    const user = await db.collection('RentalUsers').findOne({ name: req.session.user_name });
     if (user) {
       // Return full name: first name + last name
       return res.json({ name: user.fname + " " + user.lname });
     } else {
-      console.log("User not found in database for lname:", req.session.user_name);
+      console.log("User not found in database for name:", req.session.user_name);
       return res.json({ name: req.session.user_name });
     }
   } catch (err) {
@@ -324,7 +324,7 @@ app.get('/api/myrentals', async (req, res) => {
       return res.status(401).json({ error: "Not logged in" });
     }
     // Find user by last name (as stored in session)
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    const user = await db.collection('RentalUsers').findOne({ name: req.session.user_name });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -378,7 +378,7 @@ app.post('/api/return', async (req, res) => {
     if (!equipmentId) {
       return res.status(400).json({ success: false, error: "No equipment ID provided" });
     }
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    const user = await db.collection('RentalUsers').findOne({ name: req.session.user_name });
     if (!user) {
       return res.status(404).json({ success: false, error: "User not found" });
     }
