@@ -152,7 +152,7 @@ app.post('/login', async (req, res) => {
 
     if (user) {
       // Print user's full name to the console at login
-      console.log("User logged in:", user.fname + " " + user.lname);
+      console.log("User Logged In:", user.fname + " " + user.lname);
       if (user.user_type === 'admin') {
         req.session.userData ={fname:user.fname,lname:user.lname,useName:user.username};
         return res.redirect('/adminPage.html');
