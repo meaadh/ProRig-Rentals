@@ -266,7 +266,8 @@
           }
           data.forEach(item => {
             let filters = [];
-            if (item.availability === true) filters.push("filter-Available");
+            // Use quantity_available for availability
+            if (item.quantity_available > 0) filters.push("filter-Available");
             else filters.push("filter-Booked");
             if (item.category === "Heavy Equipment") filters.push("filter-Heavy");
             if (item.category === "Landscaping Tools") filters.push("filter-Landscaping");
@@ -285,7 +286,7 @@
                   <img src="${imgUrl}" class="img-fluid" alt="${item.name || item.category}" />
                   <div class="card-text">
                     <h2>${item.name || item.category}</h2>
-                    <h3>Available: ${item.availability === true ? "Yes" : "No"}</h3>
+                    <h3>Available: ${item.quantity_available > 0 ? "Yes" : "No"} (${item.quantity_available || 0} in stock)</h3>
                     <p>${item.description || ""}</p>
                     <p>Rate: $${item.rental_rate_per_day} / day</p>
                   </div>

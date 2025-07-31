@@ -148,8 +148,9 @@
           if (Array.isArray(data) && data.length > 0) {
             data.forEach(item => {
               const option = document.createElement('option');
-              option.value = item.id; // Use the MongoDB ObjectId string
-              option.textContent = (item.name ? item.name + ' - ' : '') + item.id;
+              // Show quantity if available
+              option.value = item.id;
+              option.textContent = (item.name ? item.name + ' - ' : '') + item.id + (item.quantity_available !== undefined ? ` (Available: ${item.quantity_available})` : '');
               select.appendChild(option);
             });
             select.required = true;

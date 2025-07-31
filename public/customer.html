@@ -208,8 +208,8 @@
 
     function renderEquipment(category) {
       const list = document.getElementById('equipment-list');
-      // Only show available equipment
-      let filtered = allEquipment.filter(eq => eq.availability === true);
+      // Only show equipment with quantity_available > 0
+      let filtered = allEquipment.filter(eq => (eq.quantity_available || 0) > 0);
       if (category) {
         filtered = filtered.filter(eq =>
           (eq.category || eq.type || '').toLowerCase() === category.toLowerCase()
@@ -233,13 +233,12 @@
             <div class="card-body">
               <h5 class="card-title">${eq.name || eq.equipmentName || 'Equipment'}</h5>
               <p class="card-text">${eq.description || ''}</p>
-              ${
-                (eq.name || eq.equipmentName || '').toLowerCase().includes('dump truck')
-                  ? `<div style="font-weight:bold;margin-bottom:5px;">Price: $${eq.rental_rate_per_day ? Number(eq.rental_rate_per_day).toFixed(2) : 'N/A'} per day</div>`
-                  : eq.rental_rate_per_day
-                    ? `<div style="font-weight:bold;margin-bottom:5px;">Price: $${Number(eq.rental_rate_per_day).toFixed(2)} per day</div>`
-                    : ''
-              }
+              <div style="font-weight:bold;margin-bottom:5px;">
+                Price: $${eq.rental_rate_per_day ? Number(eq.rental_rate_per_day).toFixed(2) : 'N/A'} per day
+              </div>
+              <div style="font-size:0.98em;margin-bottom:5px;">
+                <b>Quantity Available:</b> ${eq.quantity_available || 0}
+              </div>
               <div>
                 <input type="checkbox" class="equipment-checkbox" value="${eq._id}" id="equip_${eq._id}" ${selectedEquipmentSet.has(eq._id) ? 'checked' : ''}>
                 <label for="equip_${eq._id}">Select this equipment</label>
@@ -360,7 +359,7 @@
               msg = `<div style="color:green;font-weight:bold;">Reservation successful!</div>`;
             }
             document.getElementById('reservation-modal-title').textContent = "Reservation successful!";
-            document.getElementById('reservation-modal-body').innerHTML = `
+            document.getElementById('reservation-modal_body').innerHTML = `
               ${msg}
               <button id="close-modal-btn" style="padding:8px 24px; font-size:1.1em; border:none; background:#007bff; color:#fff; border-radius:5px; cursor:pointer; margin-top:10px;">Okay</button>
             `;
@@ -372,7 +371,7 @@
             document.getElementById('reservation-success').textContent = '';
             document.getElementById('reservation-error').textContent = '';
             selectedEquipmentSet.clear();
-            renderEquipment(document.getElementById('equipment-category').value);
+            renderEquipment(document.getElementById('equipment-category').value); // <-- Add this line to refresh stock
           }
         })
         .catch(() => {
