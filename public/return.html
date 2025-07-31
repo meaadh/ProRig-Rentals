@@ -9,28 +9,32 @@
   <link href="assets/css/style.css" rel="stylesheet">
 </head>
 <body>
-  <!-- Header (reuse from Home.html) -->
   <header id="header">
     <div class="container">
       <div class="logo float-left">
-        <a href="Home.html"><img src="assets/img/ProRigRental Full Logo.png" alt="" class="img-fluid"></a>
+        <a href="home.html"><img src="assets/img/ProRigRental Full Logo.png" alt="" class="img-fluid"></a>
+      </div>
+      <div class="mobile">
+        <div class="donate float-right">
+          <h1><a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
+              | Logout</a></h1>
+        </div>
       </div>
       <nav class="nav-menu float-right d-none d-lg-block">
         <ul id="main-navbar-list">
-          <li><a href="Home.html">Home</a></li>
-          <li><a href="Home.html#about">About Us</a></li>
-          <li><a href="Home.html#avaliablity">Equipments</a></li>
-          <li><a href="Home.html#location">Locations</a></li>
-          <li><a href="Home.html#team">Board Members</a></li>
-          <li><a href="Home.html#contact">Contact Us</a></li>
-          <!-- The customer/return links will be injected here by JS -->
+          <li class="active"><a href="home.html">Home</a></li>
+          <li><a href="home.html#about">About Us</a></li>
+          <li><a href="home.html#avaliablity">Equipments</a></li>
+          <li><a href="home.html#location">Locations</a></li>
+          <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
           <li id="login-link-li">
-            <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-login"></i> | Login</a>
+            <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-logout"></i>
+              | Logout</a>
           </li>
         </ul>
-      </nav>
+      </nav><!-- .nav-menu -->
     </div>
-  </header>
+  </header><!-- End Header -->
   <main id="main" style="margin-top: 80px;">
     <section class="container" style="max-width: 600px;">
       <div class="section-title">
@@ -51,161 +55,39 @@
       <div id="no-equipment-message" class="alert alert-info" style="display:none;">You have no equipment to return.</div>
     </section>
   </main>
-  <footer id="footer" style="margin-top:40px;">
-    <div class="container">
-      <div class="copyright">
-        &copy; Copyright <strong><span>ProRigs Rentals Corporation</span></strong>. All Rights Reserved
+  <!-- ======= Footer ======= -->
+  <footer id="footer">
+    <div class="footer-top">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12 footer-links">            
+            <ul>
+              <li><a href="tos.html">Terms of Services </a></li>
+              <li><a href="privacy.html">Privacy Policy</a></li>
+              <li><a href="cookies_settings.html">Cookies Settings</a></li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
-  </footer>
+
+    <div class="container">
+      <div class="copyright">
+        &copy; Copyright <strong><span>ProRigs Rental Corporation</span></strong>. All Rights Reserved
+      </div>
+      <div class="credits">
+        <!-- All the links in the footer should remain intact. -->
+        <!-- You can delete the links only if you purchased the pro version. -->
+        <!-- Licensing information: https://bootstrapmade.com/license/ -->
+        <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/mamba-one-page-bootstrap-template-free/ -->
+        Designed by Meaad Hassan | Template by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+      </div>
+    </div>
+  </footer><!-- End Footer -->
   <script src="assets/vendor/jquery/jquery.min.js"></script>
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Prevent navbar from lifting up when clicking "Return Equipment" on this page
-    document.addEventListener('DOMContentLoaded', function() {
-      const returnLink = document.getElementById('return-page-link-anchor');
-      if (returnLink && window.location.pathname.endsWith('return.html')) {
-        returnLink.addEventListener('click', function(e) {
-          e.preventDefault();
-        });
-      }
-    });
+  <script src="assets/js/main.js"></script>
 
-    // Highlight nav link if loaded directly
-    document.addEventListener('DOMContentLoaded', function() {
-      // Move customer/return links to end of navbar before logout/login
-      fetch('/api/userinfo')
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.name && data.name !== "Customer") {
-            // Change login link to logout if logged in
-            const loginLink = document.getElementById('login-link');
-            if (loginLink) {
-              loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
-              loginLink.href = '/logout';
-            }
-            const navbar = document.getElementById('main-navbar-list');
-            // Remove customer/return links if already present
-            if (document.getElementById('customer-page-link')) document.getElementById('customer-page-link').remove();
-            if (document.getElementById('return-page-link')) document.getElementById('return-page-link').remove();
-
-            // Find the logout/login anchor (should be the last child)
-            const logoutAnchorLi = document.getElementById('login-link-li');
-            // Create Rent Equipment link
-            const rentLi = document.createElement('li');
-            rentLi.id = 'customer-page-link';
-            rentLi.innerHTML = '<a href="customer.html" id="customer-page-link-anchor">Rent Equipment</a>';
-
-            // Create Return Equipment link
-            const returnLi = document.createElement('li');
-            returnLi.id = 'return-page-link';
-            returnLi.innerHTML = '<a href="return.html" id="return-page-link-anchor">Return Equipment</a>';
-
-            // Insert before the logout/login anchor
-            if (logoutAnchorLi && logoutAnchorLi.parentNode === navbar) {
-              navbar.insertBefore(rentLi, logoutAnchorLi);
-              navbar.insertBefore(returnLi, logoutAnchorLi);
-            } else {
-              navbar.appendChild(rentLi);
-              navbar.appendChild(returnLi);
-            }
-
-            // Highlight nav links if on those pages
-            if (window.location.pathname.endsWith('customer.html')) {
-              const anchor = document.getElementById('customer-page-link-anchor');
-              if (anchor && anchor.parentElement) {
-                anchor.parentElement.classList.add('active');
-              }
-            }
-            if (window.location.pathname.endsWith('return.html')) {
-              const anchor = document.getElementById('return-page-link-anchor');
-              if (anchor && anchor.parentElement) {
-                anchor.parentElement.classList.add('active');
-              }
-            }
-          }
-        })
-        .catch(() => { /* not logged in, do nothing */ });
-
-      // Highlight nav link if loaded directly (legacy)
-      const anchor = document.getElementById('return-page-link-anchor');
-      if (anchor && anchor.parentElement) {
-        anchor.parentElement.classList.add('active');
-      }
-    });
-
-    // Fetch user's rented equipment and populate the select
-    function loadUserEquipment() {
-      fetch('/api/myrentals')
-        .then(res => {
-          if (!res.ok) throw new Error('Network response was not ok');
-          return res.json();
-        })
-        .then(data => {
-          const select = document.getElementById('equipmentSelect');
-          const noMsg = document.getElementById('no-equipment-message');
-          select.innerHTML = '';
-          if (Array.isArray(data) && data.length > 0) {
-            data.forEach(item => {
-              const option = document.createElement('option');
-              option.value = item.id; // Use the MongoDB ObjectId string
-              option.textContent = (item.name ? item.name + ' - ' : '') + item.id;
-              select.appendChild(option);
-            });
-            select.required = true;
-            select.style.display = '';
-            noMsg.style.display = 'none';
-          } else {
-            select.style.display = 'none';
-            noMsg.textContent = 'You have no equipment to return.';
-            noMsg.style.display = '';
-          }
-        })
-        .catch(() => {
-          const select = document.getElementById('equipmentSelect');
-          const noMsg = document.getElementById('no-equipment-message');
-          select.style.display = 'none';
-          noMsg.textContent = 'Unable to load your rentals. Please make sure you are logged in and have active rentals.';
-          noMsg.style.display = '';
-        });
-    }
-    loadUserEquipment();
-
-    // Handle return form submission
-    document.getElementById('return-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const select = document.getElementById('equipmentSelect');
-      const equipmentId = select.value;
-      document.getElementById('return-success').style.display = 'none';
-      document.getElementById('return-error').style.display = 'none';
-      if (!equipmentId) {
-        document.getElementById('return-error').textContent = 'Please select equipment to return.';
-        document.getElementById('return-error').style.display = 'block';
-        return;
-      }
-      fetch('/api/return', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ equipmentId })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          document.getElementById('return-success').textContent = 'Equipment returned successfully!';
-          document.getElementById('return-success').style.display = 'block';
-          document.getElementById('return-form').reset();
-          loadUserEquipment();
-        } else {
-          document.getElementById('return-error').textContent = data.error || 'Failed to return equipment.';
-          document.getElementById('return-error').style.display = 'block';
-        }
-      })
-      .catch(() => {
-        document.getElementById('return-error').textContent = 'Server error. Please try again.';
-        document.getElementById('return-error').style.display = 'block';
-      });
-    });
-  </script>
 </body>
 </html>
 
