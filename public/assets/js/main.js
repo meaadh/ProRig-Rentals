@@ -175,29 +175,6 @@
     time: 1000
   });
 
-  // Porfolio isotope and filter
-  $(window).on('load', function() {
-    var eventIsotope = $('.event-container').isotope({
-      itemSelector: '.event-item',
-      layoutMode: 'fitRows'
-    });
-
-    $('#event-flters li').on('click', function() {
-      $("#event-flters li").removeClass('filter-active');
-      $(this).addClass('filter-active');
-
-      eventIsotope.isotope({
-        filter: $(this).data('filter')
-      });
-      aos_init();
-    });
-
-    // Initiate venobox (lightbox feature used in portofilo)
-    $(document).ready(function() {
-      $('.venobox').venobox();
-    });
-  });
-
   // event details carousel
   $(".event-details-carousel").owlCarousel({
     autoplay: true,
@@ -272,4 +249,60 @@
     }
     return allFilters.length ? allFilters.join('') : '*';
   }
+
+  // Dynamically load equipment data
+  $(document).ready(function() {
+    // Only run if .event-container exists
+    if ($('.event-container').length) {
+      fetch('/api/equipments')
+        .then(res => res.json())
+        .then(data => {
+          console.log("Fetched equipment data:", data); // DEBUG: See what comes from the API
+          const $container = $('.event-container');
+          $container.empty();
+          if (!Array.isArray(data) || data.length === 0) {
+            $container.append('<div class="col-12"><p style="color:red;font-weight:bold;">No equipment found. Check your API or database.</p></div>');
+            return;
+          }
+          data.forEach(item => {
+            let filters = [];
+            if (item.availability === true) filters.push("filter-Available");
+            else filters.push("filter-Booked");
+            if (item.category === "Heavy Equipment") filters.push("filter-Heavy");
+            if (item.category === "Landscaping Tools") filters.push("filter-Landscaping");
+            if (item.category === "Light Equipment") filters.push("filter-Light");
+            if (item.category === "Ladder & Lifts") filters.push("filter-Ladder");
+            if (item.category === "Carpet Cleaners & Pressure Washers") filters.push("filter-Cleaner");
+            // Use item.image if present, fallback to item.image_url, then fallback to no-image.png
+            const imgUrl = (item.image && item.image.trim() !== "") 
+              ? item.image 
+              : (item.image_url && item.image_url.trim() !== "" 
+                ? item.image_url 
+                : "assets/img/no-image.png");
+            $container.append(`
+              <div class="col-lg-4 col-md-6 event-item ${filters.join(' ')}">
+                <div class="card">
+                  <img src="${imgUrl}" class="img-fluid" alt="${item.name || item.category}" />
+                  <div class="card-text">
+                    <h2>${item.name || item.category}</h2>
+                    <h3>Available: ${item.availability === true ? "Yes" : "No"}</h3>
+                    <p>${item.description || ""}</p>
+                    <p>Rate: $${item.rental_rate_per_day} / day</p>
+                  </div>
+                </div>
+              </div>
+            `);
+          });
+          if ($container.data('isotope')) {
+            $container.isotope('reloadItems').isotope();
+          } else if (typeof Isotope !== "undefined") {
+            $container.isotope({ itemSelector: '.event-item' });
+          }
+        })
+        .catch(err => {
+          console.error("Error fetching equipment:", err);
+          $('.event-container').empty().append('<div class="col-12"><p style="color:red;font-weight:bold;">Failed to load equipment data.</p></div>');
+        });
+    }
+  });
 })(jQuery);

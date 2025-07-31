@@ -2,7 +2,7 @@ const express=require("express");
 const session = require('express-session');
 const bodyParser=require("body-parser");
 const crypto=require("crypto");
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 const uri = require ("./atlas_uri")
@@ -93,23 +93,6 @@ app.post("/contact_us", async(req,res)=>{
     return res.json({error:"Contact Form Failed:"+err.message});
   }
 })
-app.post("/customer_order", async(req,res)=>{
-  const{name,email,subject,message,}=req.body;
-  try {
-    const data = {
-      name,
-      email,
-      subject,
-      message,
-    };
-  
-    await db.collection("Reservations").insertOne(data);
-    console.log(`Successfully into to the ${dbname} database with name:`);
-  } catch(err) {
-    console.log(`Insert error to the ${dbname} database`,err);
-    return res.redirect(`customer.html?error=${encodeURIComponent("Reservations Failed: " + err.message)}`);
-  }
-})
 app.post("/sign_up", async(req,res)=>{
   const{fname,lname,email,username,password,user_type}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
@@ -146,6 +129,8 @@ app.post('/login', async (req, res) => {
     });
 
     if (user) {
+      // Print user's full name to the console at login
+      console.log("User logged in:", user.fname + " " + user.lname);
       if (user.user_type === 'admin') {
         req.session.admin_name = user.lname;
         return res.redirect('/adminPage.html');
@@ -192,6 +177,236 @@ app.get('/logout', (req, res) => {
     res.redirect('/loginform.html');
   });
 });
+app.get('/api/equipments', async (req, res) => {
+  try {
+    // This line fetches all equipment from the 'Equipments' collection in your database
+    const equipments = await db.collection("Equipments").find({}).toArray();
+    res.json(equipments);
+  } catch (err) {
+    res.status(500).json({ error: "Failedd to fetch equipments" });
+  }
+});
+app.post('/api/reservations', async (req, res) => {
+  try {
+    const { customer_name, end_date, equipment_ids } = req.body;
+    if (!customer_name || !end_date || !equipment_ids) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+    // Parse equipment_ids if it's a JSON string
+    let equipmentIds = equipment_ids;
+    if (typeof equipmentIds === 'string') {
+      try {
+        equipmentIds = JSON.parse(equipmentIds);
+      } catch {
+        equipmentIds = [];
+      }
+    }
+    // Fix: Always call ObjectId as a function, not as a constructor
+    const objectIds = equipmentIds.map(id => {
+      try {
+        // If id is already an ObjectId, return id
+        if (typeof id === 'object' && id && (id._bsontype === 'ObjectID' || id._bsontype === 'ObjectId')) return id;
+        // If id is a string of 24 hex chars, convert to ObjectId
+        if (typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id)) return new ObjectId(id);
+        return id;
+      } catch {
+        return id;
+      }
+    });
 
+    // --- New: Get user _id if logged in ---
+    let user_id = null;
+    if (req.session && req.session.user_name) {
+      const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+      if (user && user._id) {
+        user_id = user._id;
+      }
+    }
+    // --- End new code ---
 
+    const data = {
+      customer_name,
+      end_date,
+      equipment_ids: equipmentIds,
+      ...(user_id && { user_id }) // Only add user_id if found
+    };
+    await db.collection("Reservations").insertOne(data);
 
+    // Debug: Log what IDs are being used for update
+    console.log("Updating Equipments with IDs:", objectIds);
+
+    // Remove any non-ObjectId values from objectIds
+    const validObjectIds = objectIds.filter(id => ObjectId.isValid(id) && typeof id === 'object');
+
+    // Log validObjectIds for debugging
+    console.log("Valid ObjectIds for update:", validObjectIds);
+
+    if (validObjectIds.length > 0) {
+      const updateResult = await db.collection("Equipments").updateMany(
+        { _id: { $in: validObjectIds } },
+        { $set: { availability: false, unavailable_until: new Date(end_date) } }
+      );
+      console.log("Equipment update result:", updateResult.modifiedCount, "updated.");
+    } else {
+      console.log("No valid equipment IDs to update availability.");
+    }
+
+    res.json({ message: 'Reservation created successfully', ...data });
+  } catch (err) {
+    console.log(`Insert error to the ${dbname} database`, err);
+    res.status(500).json({ error: "Failed to create reservation: " + err.message });
+  }
+});
+
+app.get('/api/userinfo', async (req, res) => {
+  try {
+    // Only proceed if user is logged in
+    if (!req.session || !req.session.user_name) {
+      console.log("User not found or not logged in.");
+      return res.json({ name: "Customer" });
+    }
+    // Find the user in the DB by last name (as stored in session)
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (user) {
+      // Return full name: first name + last name
+      return res.json({ name: user.fname + " " + user.lname });
+    } else {
+      console.log("User not found in database for lname:", req.session.user_name);
+      return res.json({ name: req.session.user_name });
+    }
+  } catch (err) {
+    console.log("User not found or error occurred.");
+    return res.json({ name: "Customer" });
+  }
+});
+
+app.get('/api/myrentals', async (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session || !req.session.user_name) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+    // Find user by last name (as stored in session)
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    // Find all reservations for this user
+    const reservations = await db.collection('Reservations').find({ user_id: user._id }).toArray();
+    // Gather all equipment IDs from reservations
+    const equipmentIdSet = new Set();
+    reservations.forEach(resv => {
+      if (Array.isArray(resv.equipment_ids)) {
+        resv.equipment_ids.forEach(id => {
+          // Accept both ObjectId and string
+          if (typeof id === 'object' && id && id._bsontype) {
+            equipmentIdSet.add(id.toString());
+          } else if (typeof id === 'string') {
+            equipmentIdSet.add(id);
+          }
+        });
+      }
+    });
+    if (equipmentIdSet.size === 0) {
+      return res.json([]);
+    }
+    // Fetch equipment details
+    const equipmentIds = Array.from(equipmentIdSet).map(id => {
+      try {
+        return ObjectId.isValid(id) ? new ObjectId(id) : null;
+      } catch {
+        return null;
+      }
+    }).filter(Boolean);
+    const equipments = await db.collection('Equipments').find({ _id: { $in: equipmentIds } }).toArray();
+    // Return a simplified list
+    const result = equipments.map(eq => ({
+      id: eq._id,
+      name: eq.name || eq.equipmentName || "Equipment",
+      description: eq.description || "",
+      image: eq.image || ""
+    }));
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch user rentals" });
+  }
+});
+
+app.post('/api/return', async (req, res) => {
+  try {
+    if (!req.session || !req.session.user_name) {
+      return res.status(401).json({ success: false, error: "Not logged in" });
+    }
+    const { equipmentId } = req.body;
+    if (!equipmentId) {
+      return res.status(400).json({ success: false, error: "No equipment ID provided" });
+    }
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    // Find reservation(s) containing this equipment for this user (compare as string)
+    const reservations = await db.collection('Reservations').find({ user_id: user._id }).toArray();
+    let reservation = null;
+    let matchedIdType = null;
+    for (const resv of reservations) {
+      if (Array.isArray(resv.equipment_ids)) {
+        for (const id of resv.equipment_ids) {
+          if (
+            (typeof id === 'object' && id && id._bsontype && id.toString() === equipmentId) ||
+            (typeof id === 'string' && id === equipmentId)
+          ) {
+            reservation = resv;
+            matchedIdType = typeof id;
+            break;
+          }
+        }
+      }
+      if (reservation) break;
+    }
+    if (!reservation) {
+      return res.status(404).json({ success: false, error: "Reservation not found for this equipment" });
+    }
+
+    // Remove equipment from reservation
+    let updatedEquipmentIds = reservation.equipment_ids.filter(id => {
+      if (typeof id === 'object' && id && id._bsontype) {
+        return id.toString() !== equipmentId;
+      }
+      return id !== equipmentId;
+    });
+    if (updatedEquipmentIds.length === 0) {
+      await db.collection('Reservations').deleteOne({ _id: reservation._id });
+    } else {
+      await db.collection('Reservations').updateOne(
+        { _id: reservation._id },
+        { $set: { equipment_ids: updatedEquipmentIds } }
+      );
+    }
+
+    // Set equipment as available
+    let eqId = ObjectId.isValid(equipmentId) ? new ObjectId(equipmentId) : equipmentId;
+    await db.collection('Equipments').updateOne(
+      { _id: eqId },
+      { $set: { availability: true }, $unset: { unavailable_until: "" } }
+    );
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("Return error:", err);
+    return res.status(500).json({ success: false, error: "Server error: " + err.message });
+  }
+});
+
+// Automatically make equipment available again after the return date
+setInterval(async () => {
+  try {
+    const now = new Date();
+    await db.collection("Equipments").updateMany(
+      { unavailable_until: { $lte: now }, availability: false },
+      { $set: { availability: true }, $unset: { unavailable_until: "" } }
+    );
+  } catch (err) {
+    console.error("Error updating equipment availability:", err);
+  }
+}, 60 * 1000); // Runs every 1 minute

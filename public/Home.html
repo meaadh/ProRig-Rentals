@@ -29,6 +29,80 @@
 
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
+  <style>
+    /* Ensure equipment cards are the same height and organized */
+    .event-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px 0;
+    }
+
+    .event-item {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 24px;
+    }
+
+    .event-item .card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: stretch;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      border: 1px solid #eee;
+      min-height: 370px;
+    }
+
+    .event-item .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: contain;
+      background: #f8f8f8;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    /* Ensure location/team images fit nicely */
+    .picture img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #f8f8f8;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .event-item .card-text {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+    }
+
+    .event-item h2,
+    .event-item h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .event-item p {
+      margin-bottom: 0.5rem;
+      font-size: 0.97rem;
+    }
+
+    @media (max-width: 991.98px) {
+      .event-item {
+        margin-bottom: 20px;
+      }
+
+      .picture img {
+        max-height: 160px;
+      }
+    }
+  </style>
 
   <!-- =======================================================
   * Template Name: Mamba - v2.3.0
@@ -66,15 +140,18 @@
         </div>
       </div>
       <nav class="nav-menu float-right d-none d-lg-block">
-        <ul>
+        <ul id="main-navbar-list">
           <li class="active"><a href="#header">Home</a></li>
           <li><a href="#about">About Us</a></li>
           <li><a href="#avaliablity">Equipments</a></li>
           <li><a href="#location">Locations</a></li>
           <li><a href="#team">Board Members</a></li>
           <li><a href="#contact">Contact Us</a></li>
-          <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-login"></i>
-            | Login</a>
+          <!-- The customer/return links will be injected here by JS, so move the login/logout anchor to the end -->
+          <li id="login-link-li">
+            <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-login"></i>
+              | Login</a>
+          </li>
         </ul>
       </nav><!-- .nav-menu -->
 
@@ -154,104 +231,13 @@
               <li data-filter=".filter-Landscaping">Landscaping Tools</li>
               <li data-filter=".filter-Light">Light Equipment</li>
               <li data-filter=".filter-Ladder">Ladder & Lifts</li>
-               <li data-filter=".filter-Cleaner">Carpet Cleaners & Presssure Washers</li>
+              <li data-filter=".filter-Cleaner">Carpet Cleaners & Pressure Washers</li>
             </ul>
           </div>
         </div>
         <div class="row event-container">
-
-          <div class="col-lg-4 col-md-6 event-item filter-Available filter-Heavy">
-            <div class="card">
-              <img src="assets/img/Event-background.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Tech Conference</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-Available filter-Heavy">
-            <div class="card">
-              <img src="assets/img/Event-background.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Candy Conference</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-Available filter-Heavy">
-            <div class="card">
-              <img src="assets/img/Event-background.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Google Conference</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-Available">
-            <div class="card">
-              <img src="assets/img/Event-background2.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Conference Dinner</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-Booked">
-            <div class="card">
-              <img src="assets/img/Event-background.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Tech Conference</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-Booked">
-            <div class="card">
-              <img src="assets/img/Event-background2.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Conference Dinner</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-Booked">
-            <div class="card">
-              <img src="assets/img/Event-background2.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Conference Dinner</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-upcomming">
-            <div class="card">
-              <img src="assets/img/Event-background.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Food Conference</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 col-md-6 event-item filter-upcomming">
-            <div class="card">
-              <img src="assets/img/Event-background2.png" class="img-fluid" />
-              <div class="card-text">
-                <h2>Conference Dinner</h2>
-                <h3>Avaliable: 11</h3>
-                <p>Voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident</p>
-              </div>
-            </div>
-          </div>
+          <!-- Dynamic equipment cards will be injected here by JS -->
         </div>
-      </div>
     </section><!-- End Avaliablity Section -->
 
     <!-- ======= Location Section ======= -->
@@ -608,6 +594,62 @@
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
+  <script>
+    // Add Customer Page link if user is logged in
+    fetch('/api/userinfo')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.name && data.name !== "Customer") {
+          // Change login link to logout if logged in
+          const loginLink = document.getElementById('login-link');
+          if (loginLink) {
+            loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
+            loginLink.href = '/logout';
+          }
+
+          const navbar = document.getElementById('main-navbar-list');
+          // Remove customer/return links if already present (avoid duplicates)
+          if (document.getElementById('customer-page-link')) document.getElementById('customer-page-link').remove();
+          if (document.getElementById('return-page-link')) document.getElementById('return-page-link').remove();
+
+          // Find the logout/login anchor (should be the last child)
+          const logoutAnchorLi = document.getElementById('login-link-li');
+          // Create Rent Equipment link
+          const rentLi = document.createElement('li');
+          rentLi.id = 'customer-page-link';
+          rentLi.innerHTML = '<a href="customer.html" id="customer-page-link-anchor">Rent Equipment</a>';
+
+          // Create Return Equipment link
+          const returnLi = document.createElement('li');
+          returnLi.id = 'return-page-link';
+          returnLi.innerHTML = '<a href="return.html" id="return-page-link-anchor">Return Equipment</a>';
+
+          // Insert before the logout/login anchor
+          if (logoutAnchorLi && logoutAnchorLi.parentNode === navbar) {
+            navbar.insertBefore(rentLi, logoutAnchorLi);
+            navbar.insertBefore(returnLi, logoutAnchorLi);
+          } else {
+            navbar.appendChild(rentLi);
+            navbar.appendChild(returnLi);
+          }
+
+          // Highlight nav links if on those pages
+          if (window.location.pathname.endsWith('customer.html')) {
+            const anchor = document.getElementById('customer-page-link-anchor');
+            if (anchor && anchor.parentElement) {
+              anchor.parentElement.classList.add('active');
+            }
+          }
+          if (window.location.pathname.endsWith('return.html')) {
+            const anchor = document.getElementById('return-page-link-anchor');
+            if (anchor && anchor.parentElement) {
+              anchor.parentElement.classList.add('active');
+            }
+          }
+        }
+      })
+      .catch(() => { /* not logged in, do nothing */ });
+  </script>
 </body>
 
 </html>
