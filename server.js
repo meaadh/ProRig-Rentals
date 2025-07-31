@@ -192,7 +192,7 @@ app.get('/api/equipments', async (req, res) => {
 });
 app.post('/api/reservations', async (req, res) => {
   try {
-    const { customer_name, end_date, equipment_ids } = req.body;
+    const { customer_name, end_date, equipment_ids, total_cost } = req.body;
     if (!customer_name || !end_date || !equipment_ids) {
       return res.status(400).json({ error: 'All fields are required' });
     }
@@ -232,7 +232,8 @@ app.post('/api/reservations', async (req, res) => {
       customer_name,
       end_date,
       equipment_ids: equipmentIds,
-      ...(user_id && { user_id }) // Only add user_id if found
+      ...(user_id && { user_id }), // Only add user_id if found
+      ...(total_cost && { total_cost: Number(total_cost) }) // Added  total_cost if present
     };
     await db.collection("Reservations").insertOne(data);
 
@@ -245,15 +246,29 @@ app.post('/api/reservations', async (req, res) => {
     // Log validObjectIds for debugging
     console.log("Valid ObjectIds for update:", validObjectIds);
 
+    // --- NEW LOGIC: Decrement quantity_available and update availability ---
     if (validObjectIds.length > 0) {
-      const updateResult = await db.collection("Equipments").updateMany(
-        { _id: { $in: validObjectIds } },
-        { $set: { availability: false, unavailable_until: new Date(end_date) } }
-      );
-      console.log("Equipment update result:", updateResult.modifiedCount, "updated.");
+      // Fetch all selected equipment
+      const equipments = await db.collection("Equipments").find({ _id: { $in: validObjectIds } }).toArray();
+      for (const eq of equipments) {
+        if (typeof eq.quantity_available === 'number' && eq.quantity_available > 0) {
+          const newQty = eq.quantity_available - 1;
+          await db.collection("Equipments").updateOne(
+            { _id: eq._id },
+            {
+              $set: {
+                quantity_available: newQty,
+                availability: newQty > 0,
+                unavailable_until: new Date(end_date)
+              }
+            }
+          );
+        }
+      }
     } else {
       console.log("No valid equipment IDs to update availability.");
     }
+    // --- END NEW LOGIC ---
 
     res.json({ message: 'Reservation created successfully', ...data });
   } catch (err) {
@@ -389,12 +404,24 @@ app.post('/api/return', async (req, res) => {
       );
     }
 
-    // Set equipment as available
+    // --- NEW LOGIC: Increment quantity_available and update availability ---
     let eqId = ObjectId.isValid(equipmentId) ? new ObjectId(equipmentId) : equipmentId;
-    await db.collection('Equipments').updateOne(
-      { _id: eqId },
-      { $set: { availability: true }, $unset: { unavailable_until: "" } }
-    );
+    const equipment = await db.collection('Equipments').findOne({ _id: eqId });
+    if (equipment) {
+      const newQty = (equipment.quantity_available || 0) + 1;
+      await db.collection('Equipments').updateOne(
+        { _id: eqId },
+        {
+          $set: {
+            quantity_available: newQty,
+            availability: newQty > 0
+          },
+          $unset: { unavailable_until: "" }
+        }
+      );
+    }
+    // --- END NEW LOGIC ---
+
     return res.json({ success: true });
   } catch (err) {
     console.error("Return error:", err);
@@ -406,10 +433,12 @@ app.post('/api/return', async (req, res) => {
 setInterval(async () => {
   try {
     const now = new Date();
+    // --- NEW LOGIC: Only set availability true if quantity_available > 0 ---
     await db.collection("Equipments").updateMany(
-      { unavailable_until: { $lte: now }, availability: false },
+      { unavailable_until: { $lte: now }, availability: false, quantity_available: { $gt: 0 } },
       { $set: { availability: true }, $unset: { unavailable_until: "" } }
     );
+    // --- END NEW LOGIC ---
   } catch (err) {
     console.error("Error updating equipment availability:", err);
   }
