@@ -121,16 +121,15 @@ app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
   const hashedPass = crypto.createHash("sha256").update(password).digest("hex");
-
   try {
     const user = await db.collection('RentalUsers').findOne({
       username: username,
       password: hashedPass
     });
-
     if (user) {
       // Print user's full name to the console at login
       console.log("User logged in:", user.fname + " " + user.lname);
+        req.session.user = {id: user._id,fname: user.fname,lname: user.lname};
       if (user.user_type === 'admin') {
         req.session.admin_name = user.lname;
         return res.redirect('/adminPage.html');
@@ -152,31 +151,36 @@ app.post('/login', async (req, res) => {
   }
 });
 
+
 app.get('/adminPage.html', (req, res) => {
   res.send(`Welcome User: ${req.session.user_name}`);
-});
-app.get('/userPage.html', (req, res) => {
-  res.send(`Welcome User: ${req.session.user_name}`);
-});
-app.get('/maintainance.html', (req, res) => {
-  res.send(`Welcome Family: ${req.session.user_name}`);
-});
-app.get('/customer.html', (req, res) => {
-  res.send(`Welcome Customer: ${req.session.user_name}`);
 });
 app.get("/",(req,res)=>{
   res.set({"Access-control-Allow-Origin": "*" });
   return res.redirect("register_form.html");
 });
+
 app.get('/logout', (req, res) => {
-  req.session.destroy(err => {
+    const user=req.session.user;
+
+    if(user)
+    {
+    console.log("User Logged out:",user.fname+" "+user.lname)
+    }
+    else
+    {
+      console.log("Unknown user logged out");
+    }
+
+    req.session.destroy(err => {   
     if (err) {
       console.error("Logout failed:", err);
       return res.status(500).send("Logout failed");
     }
     res.redirect('/loginform.html');
-  });
+    });
 });
+
 app.get('/api/equipments', async (req, res) => {
   try {
     // This line fetches all equipment from the 'Equipments' collection in your database

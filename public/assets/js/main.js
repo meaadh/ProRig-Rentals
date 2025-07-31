@@ -583,6 +583,7 @@
               loginLink.href = '/logout';
             }
             const navbar = document.getElementById('main-navbar-list');
+            const mobile = document.getElementById('mobile');
             // Remove customer/return links if already present
             if (document.getElementById('customer-page-link')) document.getElementById('customer-page-link').remove();
             if (document.getElementById('return-page-link')) document.getElementById('return-page-link').remove();
