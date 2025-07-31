@@ -178,6 +178,19 @@ app.get("/",(req,res)=>{
   return res.redirect("register_form.html");
 });
 
+app.get('/userdetail', (req, res) => {
+  const user=req.session.user;
+
+  if(user)
+    {
+    res.json({ name: user.fname + " " + user.lname });
+    }
+    else
+    {
+      console.log("User not found in database for:", user.userName);
+    }
+});
+
 app.get('/logout', (req, res) => {
     const user=req.session.user;
 
