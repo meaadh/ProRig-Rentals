@@ -140,6 +140,7 @@
         <input type="date" name="end_date" id="end_date" required>
         <!-- Hidden input for selected equipment -->
         <input type="hidden" name="equipment_ids" id="selected-equipment">
+        <input type="hidden" name="total_cost" id="total-cost">
         <input type="submit" name="submit" value="Reserve Selected Equipment" class="form-btn">
         <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
         <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
@@ -249,7 +250,7 @@
         `;
       }).join('');
 
-      // Add event listeners to checkboxes to update selectedEquipmentSet
+      // Added  event listeners to checkboxes to update selectedEquipmentSet
       document.querySelectorAll('.equipment-checkbox').forEach(cb => {
         cb.addEventListener('change', function() {
           if (this.checked) {
@@ -279,7 +280,7 @@
     function calculateDays(startDate, endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      // Add 1 to include the end date as a full day
+      // Added  1 to include the end date as a full day
       return Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
     }
 
@@ -334,6 +335,11 @@
           totalPrice += Number(eq.rental_rate_per_day) * days;
         }
       });
+      // Set total cost in hidden input before showing modal and submitting
+      const taxRate = 0.06;
+      const taxAmount = totalPrice * taxRate;
+      const totalWithTax = totalPrice + taxAmount;
+      document.getElementById('total-cost').value = totalWithTax.toFixed(2);
       // Show modal and only submit if user confirms
       showPaymentModal(totalPrice, () => {
         // AJAX submit to show error/success without page reload
@@ -371,7 +377,7 @@
             document.getElementById('reservation-success').textContent = '';
             document.getElementById('reservation-error').textContent = '';
             selectedEquipmentSet.clear();
-            renderEquipment(document.getElementById('equipment-category').value); // <-- Add this line to refresh stock
+            renderEquipment(document.getElementById('equipment-category').value);
           }
         })
         .catch(() => {
@@ -412,7 +418,7 @@
       // ...existing code...
     });
 
-    // Add Customer/Return Page links at the end of navbar before logout
+    // Added  Customer/Return Page links at the end of navbar before logout
     document.addEventListener('DOMContentLoaded', function() {
       fetch('/api/userinfo')
         .then(res => res.json())

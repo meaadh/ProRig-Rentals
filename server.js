@@ -188,7 +188,7 @@ app.get('/api/equipments', async (req, res) => {
 });
 app.post('/api/reservations', async (req, res) => {
   try {
-    const { customer_name, end_date, equipment_ids } = req.body;
+    const { customer_name, end_date, equipment_ids, total_cost } = req.body;
     if (!customer_name || !end_date || !equipment_ids) {
       return res.status(400).json({ error: 'All fields are required' });
     }
@@ -228,7 +228,8 @@ app.post('/api/reservations', async (req, res) => {
       customer_name,
       end_date,
       equipment_ids: equipmentIds,
-      ...(user_id && { user_id }) // Only add user_id if found
+      ...(user_id && { user_id }), // Only add user_id if found
+      ...(total_cost && { total_cost: Number(total_cost) }) // Added  total_cost if present
     };
     await db.collection("Reservations").insertOne(data);
 
