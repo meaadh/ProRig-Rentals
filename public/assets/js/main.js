@@ -273,7 +273,12 @@
             if (item.category === "Light Equipment") filters.push("filter-Light");
             if (item.category === "Ladder & Lifts") filters.push("filter-Ladder");
             if (item.category === "Carpet Cleaners & Pressure Washers") filters.push("filter-Cleaner");
-            const imgUrl = item.image_url && item.image_url.trim() !== "" ? item.image_url : "assets/img/no-image.png";
+            // Use item.image if present, fallback to item.image_url, then fallback to no-image.png
+            const imgUrl = (item.image && item.image.trim() !== "") 
+              ? item.image 
+              : (item.image_url && item.image_url.trim() !== "" 
+                ? item.image_url 
+                : "assets/img/no-image.png");
             $container.append(`
               <div class="col-lg-4 col-md-6 event-item ${filters.join(' ')}">
                 <div class="card">
