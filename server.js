@@ -94,7 +94,7 @@ app.post("/contact_us", async(req,res)=>{
   }
 })
 app.post("/sign_up", async(req,res)=>{
-  const{fname,lname,email,username,password}=req.body;
+  const{fname,lname,email,username,password,user_type}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
   try {
     const userId= await getNextUserID();
@@ -105,7 +105,7 @@ app.post("/sign_up", async(req,res)=>{
       email,
       username,
       password: hash,
-      user_type:"customer"
+      user_type
     };
   
     await db.collection("RentalUsers").insertOne(data);
@@ -116,7 +116,6 @@ app.post("/sign_up", async(req,res)=>{
     return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Failed: " + err.message)}`);
   }
 })
-
 app.post("/managment", async(req,res)=>{
   const{fname,lname,email,username,password,user_type}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
@@ -140,7 +139,6 @@ app.post("/managment", async(req,res)=>{
     return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Failed: " + err.message)}`);
   }
 })
-
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -155,14 +153,16 @@ app.post('/login', async (req, res) => {
     if (user) {
       // Print user's full name to the console at login
       console.log("User logged in:", user.fname + " " + user.lname);
-      req.session.user = {id: user._id, fname: user.fname, lname: user.lname,userName:user.username};
       if (user.user_type === 'admin') {
+        req.session.admin_name = user.lname;
         return res.redirect('/adminPage.html');
       } else {
-        req.session.user_name =username;
+        req.session.user_name = user.lname;
 
         if (user.user_type === 'customer') return res.redirect('/customer.html');
-        if (user.user_type === 'maintainance') return res.redirect('/maintainancePage.html');
+        if (user.user_type === 'maintainance') return res.redirect('/maintainance.html');
+        if (user.user_type === 'user') return res.redirect('/userpage.html');
+
         return res.send('Unknown user type');
       }
     } else {
@@ -174,6 +174,18 @@ app.post('/login', async (req, res) => {
   }
 });
 
+app.get('/adminPage.html', (req, res) => {
+  res.send(`Welcome User: ${req.session.user_name}`);
+});
+app.get('/userPage.html', (req, res) => {
+  res.send(`Welcome User: ${req.session.user_name}`);
+});
+app.get('/maintainance.html', (req, res) => {
+  res.send(`Welcome Family: ${req.session.user_name}`);
+});
+app.get('/customer.html', (req, res) => {
+  res.send(`Welcome Customer: ${req.session.user_name}`);
+});
 app.get("/",(req,res)=>{
   res.set({"Access-control-Allow-Origin": "*" });
   return res.redirect("register_form.html");
@@ -186,18 +198,6 @@ app.get('/logout', (req, res) => {
     }
     res.redirect('/loginform.html');
   });
-});
-app.get('/userdetail', (req, res) => {
-  const user=req.session.user;
-
-  if(user)
-    {
-    res.json({ name: user.fname + " " + user.lname });
-    }
-    else
-    {
-      console.log("User not found in database for:", user.userName);
-    }
 });
 app.get('/api/equipments', async (req, res) => {
   try {
@@ -239,7 +239,7 @@ app.post('/api/reservations', async (req, res) => {
     // --- New: Get user _id if logged in ---
     let user_id = null;
     if (req.session && req.session.user_name) {
-      const user = await db.collection('RentalUsers').findOne({ name: req.session.user_name });
+      const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
       if (user && user._id) {
         user_id = user._id;
       }
@@ -303,12 +303,12 @@ app.get('/api/userinfo', async (req, res) => {
       return res.json({ name: "Customer" });
     }
     // Find the user in the DB by last name (as stored in session)
-    const user = await db.collection('RentalUsers').findOne({ name: req.session.user_name });
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
     if (user) {
       // Return full name: first name + last name
       return res.json({ name: user.fname + " " + user.lname });
     } else {
-      console.log("User not found in database for name:", req.session.user_name);
+      console.log("User not found in database for lname:", req.session.user_name);
       return res.json({ name: req.session.user_name });
     }
   } catch (err) {
@@ -324,7 +324,7 @@ app.get('/api/myrentals', async (req, res) => {
       return res.status(401).json({ error: "Not logged in" });
     }
     // Find user by last name (as stored in session)
-    const user = await db.collection('RentalUsers').findOne({ name: req.session.user_name });
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -378,7 +378,7 @@ app.post('/api/return', async (req, res) => {
     if (!equipmentId) {
       return res.status(400).json({ success: false, error: "No equipment ID provided" });
     }
-    const user = await db.collection('RentalUsers').findOne({ name: req.session.user_name });
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
     if (!user) {
       return res.status(404).json({ success: false, error: "User not found" });
     }
