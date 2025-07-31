@@ -46,16 +46,17 @@
       </div>
       <div class="mobile">
         <div class="login float-right">
-          <h1><a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
+          <h1><a href="logout.php" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
               | Logout</a></h1>
         </div>
       </div>
       <nav class="nav-menu float-right d-none d-lg-block">
         <ul id="main-navbar-list">
-          <li><a href="home.html">Home</a></li>
+          <li class="active"><a href="home.html">Home</a></li>
           <li><a href="home.html#about">About Us</a></li>
           <li><a href="home.html#avaliablity">Equipments</a></li>
           <li><a href="home.html#location">Locations</a></li>
+          <li><a href="home.html#team">Board Members</a></li>
           <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
           <li id="login-link-li">
             <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-logout"></i>
@@ -106,17 +107,18 @@
         <input type="date" name="end_date" id="end_date" required>
         <!-- Hidden input for selected equipment -->
         <input type="hidden" name="equipment_ids" id="selected-equipment">
+        <input type="hidden" name="total_cost" id="total-cost">
         <input type="submit" name="submit" value="Reserve Selected Equipment" class="form-btn">
         <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
         <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
       </form>
     </div>
-    <!-- Reservation Success Model -->
+    <!-- Reservation Success Modal -->
     <div id="reservation-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
       <div style="background:#fff; padding:30px 40px; border-radius:10px; box-shadow:0 2px 20px #0003; text-align:center; max-width:90vw;">
         <h2 style="margin-bottom:20px;" id="reservation-modal-title">Reservation successful!</h2>
         <div id="reservation-modal-body"></div>
-        <!-- <button id="close-model-btn" ...>Okay</button> -->
+        <!-- <button id="close-modal-btn" ...>Okay</button> -->
       </div>
     </div>
   </main><!-- End #main -->
@@ -161,6 +163,7 @@
   <script src="assets/vendor/venobox/venobox.min.js"></script>
   <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
   <script src="assets/vendor/counterup/counterup.min.js"></script>
+  <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
   <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
 
@@ -440,6 +443,7 @@
       // (rest of your DOMContentLoaded logic)
     });
   </script>
+
 </body>
 
 </html>
