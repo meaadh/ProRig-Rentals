@@ -116,7 +116,6 @@ app.post("/sign_up", async(req,res)=>{
     return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Failed: " + err.message)}`);
   }
 })
-
 app.post("/managment", async(req,res)=>{
   const{fname,lname,email,username,password,user_type}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
@@ -153,7 +152,7 @@ app.post('/login', async (req, res) => {
     if (user) {
       // Print user's full name to the console at login
       console.log("User logged in:", user.fname + " " + user.lname);
-        req.session.user = {id: user._id,fname: user.fname,lname: user.lname};
+        req.session.user = {id: user._id,fname: user.fname,lname: user.lname,userName: user.username};
       if (user.user_type === 'admin') {
         return res.redirect('/adminPage.html');
       } else {
