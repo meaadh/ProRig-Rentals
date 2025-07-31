@@ -118,7 +118,7 @@ app.post("/sign_up", async(req,res)=>{
 })
 
 app.post("/managment", async(req,res)=>{
-  const{fname,lname,email,username,password.user_type}=req.body;
+  const{fname,lname,email,username,password,user_type}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
   try {
     const userId= await getNextUserID();
