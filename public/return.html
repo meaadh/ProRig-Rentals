@@ -208,6 +208,10 @@
               }
             }
           }
+          if (data && data.name) {
+            document.getElementById('customer_name').value = data.name;
+            document.getElementById('user-welcome-name').textContent = data.name;
+          }
         })
         .catch(() => { /* not logged in, do nothing */ });
 

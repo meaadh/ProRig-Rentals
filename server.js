@@ -94,6 +94,30 @@ app.post("/contact_us", async(req,res)=>{
   }
 })
 app.post("/sign_up", async(req,res)=>{
+  const{fname,lname,email,username,password}=req.body;
+  const hash=crypto.createHash("sha256").update(password).digest("hex");
+  try {
+    const userId= await getNextUserID();
+    const data = {
+      userId,
+      fname,
+      lname,
+      email,
+      username,
+      password: hash,
+      user_type: "customer"
+    };
+  
+    await db.collection("RentalUsers").insertOne(data);
+    console.log(`Successfully into to the ${dbname} database with userId:`,userId);
+    return res.redirect("loginform.html");
+  } catch(err) {
+    console.log(`Insert error to the ${dbname} database`,err);
+    return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Failed: " + err.message)}`);
+  }
+})
+
+app.post("/managment", async(req,res)=>{
   const{fname,lname,email,username,password,user_type}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
   try {
@@ -131,15 +155,10 @@ app.post('/login', async (req, res) => {
       console.log("User logged in:", user.fname + " " + user.lname);
         req.session.user = {id: user._id,fname: user.fname,lname: user.lname};
       if (user.user_type === 'admin') {
-        req.session.admin_name = user.lname;
         return res.redirect('/adminPage.html');
       } else {
-        req.session.user_name = user.lname;
-
         if (user.user_type === 'customer') return res.redirect('/customer.html');
         if (user.user_type === 'maintainance') return res.redirect('/maintainance.html');
-        if (user.user_type === 'user') return res.redirect('/userpage.html');
-
         return res.send('Unknown user type');
       }
     } else {

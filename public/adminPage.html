@@ -1,27 +1,3 @@
-<?php
-
-@include 'config.php';
-$statusMsg = '';
-
-session_start();
-
-if (!isset($_SESSION['admin_name'])) {
-  header('location:loginform.php');
-}
-$sql = "SELECT * FROM `images`";
-$all_filename = mysqli_query($conn, $sql);
-if (isset($_POST["submit"])) {
-  $username = mysqli_real_escape_string($conn, $_POST['username']);
-  $recommendation = mysqli_real_escape_string($conn, $_POST['recommendation']);
-  $file_name = mysqli_real_escape_string($conn, $_POST['file_name']);
-  $insert = "INSERT INTO finalsubmission (username, recommendation,file_name) VALUES ('$username', '$recommendation','$file_name')";
-  if (mysqli_query($conn, $insert)) {
-    $statusMsg = "Final Recommedation added successfully";
-  } else {
-    $statusMsg = "Final Recommendation upload failed, please try again.";
-  }
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -69,7 +45,7 @@ if (isset($_POST["submit"])) {
         <a href="home.html"><img src="assets/img/ProRigRental Full Logo.png" alt="" class="img-fluid"></a>
       </div>
       <div class="mobile">
-        <div class="donate float-right">
+        <div class="login float-right">
           <h1><a href="logout.php" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
               | Logout</a></h1>
         </div>
@@ -95,30 +71,22 @@ if (isset($_POST["submit"])) {
   <main id="main">
     <div class="user-container">
       <div class="content">
-        <h3>HI, <span>Admin</span></h3>
-        <h1>Welcome <span>ADMIN</span></h1>
+        <h3>HI, <span id="user-welcome-name">Customer</span></h3>
+        <h1>Welcome <span>Customer</span></h1>
       </div>
     </div>
     <div class="form-container">
-      <form action="" method="post">
+      <form action="http://localhost:3000/management" method="post">
         <h3>USER MANAGMENT</h3>
-          <select name="Role">
+          <select name="user_type">
                       <option value="managment">Managment</option>
                       <option value="maintainance">Maintainance</option>
-                      <option value="user">Customer</option>
           </select>
-          <input type="checkbox" id="customerpage" name="customerpage" value="customerpage"><label for="customepage"> Access Customer Page</label>
-          
-          <input type="checkbox" id="adminpage" name="adminpage" value="adminpage">
-          <label for="adminpage"> Access Admin Page</label>
-          <input type="checkbox" id="managerpage" name="managerpage" value="managerpage">
-          <label for="managerpage"> Access Manager Page</label>
-          <label class="container">One
-          <input type="checkbox" checked="checked">
-          <span class="checkmark"></span>
-          </label>
-          <input type="date" name="start_date" required placeholder="Enter Location">
-        <input type="submit" name="submit" value="Create Conference" class="form-btn">
+          <input type="text" name="fname" required placeholder="enter their first name">
+          <input type="text" name="lname" required placeholder="enter their last name">
+          <input type="text" name="username" required placeholder="enter a username">
+          <input type="email" name="email" required placeholder="enter their email">
+          <input type="password" name="password" required placeholder="enter a password">
       </form>
     </div>
   </main><!-- End #main -->
@@ -148,7 +116,7 @@ if (isset($_POST["submit"])) {
         <!-- You can delete the links only if you purchased the pro version. -->
         <!-- Licensing information: https://bootstrapmade.com/license/ -->
         <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/mamba-one-page-bootstrap-template-free/ -->
-        Designed by Meaad Hassan | Template by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+        Template by <a href="https://bootstrapmade.com/">BootstrapMade</a>
       </div>
     </div>
   </footer><!-- End Footer -->
@@ -170,7 +138,21 @@ if (isset($_POST["submit"])) {
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
-
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/userinfo')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.name) {
+          document.getElementById('customer_name').value = data.name;
+          document.getElementById('user-welcome-name').textContent = data.name;
+        }
+      })
+      .catch(() => {
+        // fallback: do nothing, default is "Customer"
+      });
+  });
+  </script>
 </body>
 
 </html>
