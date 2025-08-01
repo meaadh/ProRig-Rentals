@@ -510,13 +510,14 @@ section {
 # About Us
 --------------------------------------------------------------*/
 .about {
-  padding-bottom: 15px;
+  padding-bottom: 10px;
 
 }
 
 .about .image{
   overflow: hidden;
   position: relative;
+
 }
 
 .about .container {
