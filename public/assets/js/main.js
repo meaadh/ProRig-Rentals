@@ -291,5 +291,170 @@
         });
     }
   });
+  document.addEventListener('DOMContentLoaded', function () {
+    fetch('/api/userinfo')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.name && data.name !== "Customer") {
+
+          // Change login text
+          const loginLink = document.getElementById('login-link');
+          if (loginLink) {
+            loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
+            loginLink.href = '/logout';
+          }
+
+          // Define desktop and mobile nav targets
+          const navTargets = [
+            document.getElementById('main-navbar-list'),
+            document.querySelector('.mobile-nav ul')
+          ];
+
+          navTargets.forEach(nav => {
+            if (!nav) return;
+
+            // Remove old if exists
+            ['customer-page-link', 'return-page-link'].forEach(id => {
+              const old = nav.querySelector(`#${id}`);
+              if (old) old.remove();
+            });
+
+            // Create and insert new links
+            const rentLi = document.createElement('li');
+            rentLi.id = 'customer-page-link';
+            rentLi.innerHTML = '<a href="customer.html" id="customer-page-link-anchor">Rent Equipment</a>';
+
+            const returnLi = document.createElement('li');
+            returnLi.id = 'return-page-link';
+            returnLi.innerHTML = '<a href="return.html" id="return-page-link-anchor">Return Equipment</a>';
+
+            const logoutLi = nav.querySelector('#login-link-li');
+            if (logoutLi) {
+              nav.insertBefore(rentLi, logoutLi);
+              nav.insertBefore(returnLi, logoutLi);
+            } else {
+              nav.appendChild(rentLi);
+              nav.appendChild(returnLi);
+            }
+          });
+
+          // Highlight links when on specific pages
+          const current = window.location.pathname;
+          if (current.endsWith('customer.html')) {
+            document.querySelectorAll('#customer-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+          }
+          if (current.endsWith('return.html')) {
+            document.querySelectorAll('#return-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+          }
+        }
+      })
+      .catch(() => { /* Not logged in, ignore */ });
+  });
+
+  fetch('/api/userinfo')
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.name && data.name !== "Customer"||data && data.name && data.name !== "admin") {
+        // Hide hero login button if logged in
+        const heroLoginBtn = document.getElementById('hero-login-btn');
+        if (heroLoginBtn) heroLoginBtn.style.display = 'none';
+      }
+    })
+    .catch(() => { /* not logged in, do nothing */ });
+  var coll = document.getElementsByClassName("collapsible");
+  var i;
+
+  for (i = 0; i < coll.length; i++) {
+    coll[i].addEventListener("click", function() {
+      this.classList.toggle("active");
+      var content = this.nextElementSibling;
+      if (content.style.maxHeight){
+        content.style.maxHeight = null;
+      } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+      } 
+    });
+  }
+  // Prevent navbar from lifting up when clicking "Return Equipment" on this page
+  document.addEventListener('DOMContentLoaded', function() {
+    const returnLink = document.getElementById('return-page-link-anchor');
+    if (returnLink && window.location.pathname.endsWith('return.html')) {
+      returnLink.addEventListener('click', function(e) {
+        e.preventDefault();
+      });
+    }
+  });
+  // Fetch user's rented equipment and populate the select
+  function loadUserEquipment() {
+    fetch('/api/myrentals')
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
+      .then(data => {
+        const select = document.getElementById('equipmentSelect');
+        const noMsg = document.getElementById('no-equipment-message');
+        select.innerHTML = '';
+        if (Array.isArray(data) && data.length > 0) {
+          data.forEach(item => {
+            const option = document.createElement('option');
+            // Show quantity if available
+            option.value = item.id;
+            option.textContent = (item.name ? item.name + ' - ' : '') + item.id + (item.quantity_available !== undefined ? ` (Available: ${item.quantity_available})` : '');
+            select.appendChild(option);
+          });
+          select.required = true;
+          select.style.display = '';
+          noMsg.style.display = 'none';
+        } else {
+          select.style.display = 'none';
+          noMsg.textContent = 'You have no equipment to return.';
+          noMsg.style.display = '';
+        }
+      })
+      .catch(() => {
+        const select = document.getElementById('equipmentSelect');
+        const noMsg = document.getElementById('no-equipment-message');
+        select.style.display = 'none';
+        noMsg.textContent = 'Unable to load your rentals. Please make sure you are logged in and have active rentals.';
+        noMsg.style.display = '';
+      });
+  }
+  loadUserEquipment();
+
+  // Handle return form submission
+  document.getElementById('return-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const select = document.getElementById('equipmentSelect');
+    const equipmentId = select.value;
+    document.getElementById('return-success').style.display = 'none';
+    document.getElementById('return-error').style.display = 'none';
+    if (!equipmentId) {
+      document.getElementById('return-error').textContent = 'Please select equipment to return.';
+      document.getElementById('return-error').style.display = 'block';
+      return;
+    }
+    fetch('/api/return', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ equipmentId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById('return-success').textContent = 'Equipment returned successfully!';
+        document.getElementById('return-success').style.display = 'block';
+        document.getElementById('return-form').reset();
+        loadUserEquipment();
+      } else {
+        document.getElementById('return-error').textContent = data.error || 'Failed to return equipment.';
+        document.getElementById('return-error').style.display = 'block';
+      }
+    })
+    .catch(() => {
+      document.getElementById('return-error').textContent = 'Server error. Please try again.';
+      document.getElementById('return-error').style.display = 'block';
+    });
+  });
   
 })(jQuery);

@@ -306,7 +306,9 @@ h1, h2, h3, h4, h5, h6, .font-primary {
 .mobile-nav-active .mobile-nav {
   left: 0;
 }
-
+body.mobile-nav-active .mobile {
+  display: none;
+}
 .mobile-nav-active .mobile-nav-toggle i {
   color: #fff;
 }
