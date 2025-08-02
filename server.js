@@ -130,8 +130,8 @@ app.post("/managment", async(req,res)=>{
       username,
       password: hash,
       user_type,
-      order_date:new Date().toISOString().split('T')[0],
-
+      created_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
+      updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
   
     await db.collection("RentalUsers").insertOne(data);
