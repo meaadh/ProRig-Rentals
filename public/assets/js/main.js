@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <a href="account.html" id="dashboard-page-link-anchor">Dashboard</a>
               </li>
               <li id="customer-page-link">
-                <a href="customer.html" id="customer-page-link-anchor">Rent Equipment</a>
+                <a href="reservation.html" id="customer-page-link-anchor">Rent Equipment</a>
               </li>
               <li id="return-page-link">
                 <a href="account.html#return" id="return-page-link-anchor">Return Equipment</a>
@@ -368,7 +368,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Highlight correct link
         const current = window.location.pathname;
-        if (current.endsWith('customer.html')) {
+        if (current.endsWith('res.html')) {
           document.querySelectorAll('#customer-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
         }
         if (current.endsWith('account.html#return')) {
