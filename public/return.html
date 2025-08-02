@@ -84,8 +84,8 @@
       <div class="content">
         <section class="account-section">
           <h3>Your Latest Orders</h3>
-          <div class="table">
-            <table class="center">
+          <div class="table-wrapper">
+            <table class="responsive-table">
                 <thead>
                     <th>OrderID</th>
                     <th>Start Date</th>
@@ -97,22 +97,22 @@
                 </thead>
                 <tbody>
                   <tr>
-                    <td>1234</td>
-                    <td>7/1/25</td>
-                    <td>7/31/25</td>
-                    <td>Renting</td>
-                    <td>Blower, Ladder, Digger</td>
-                    <td>Warren</td>
-                    <td>$328</td>
+                    <td data-label="OrderID">1234</td>
+                    <td data-label="Start Date">7/1/25</td>
+                    <td data-label="Return Date">7/31/25</td>
+                    <td data-label="Status">Renting</td>
+                    <td data-label="Items">Blower, Ladder, Digger</td>
+                    <td data-label="Location">Warren</td>
+                    <td data-label="Total">$328</td>
                   </tr>
                   <tr>
-                    <td>1234</td>
-                    <td>7/31/25</td>
-                    <td>8/31/25</td>
-                    <td>Renting</td>
-                    <td>Blower, Ladder, Digger</td>
-                    <td>Deaborn</td>
-                    <td>$482</td>
+                    <td data-label="OrderID">1234</td>
+                    <td data-label="Start Date">7/31/25</td>
+                    <td data-label="Return Date">8/31/25</td>
+                    <td data-label="Status">Renting</td>
+                    <td data-label="Items">Blower, Ladder, Digger</td>
+                    <td data-label="Location">Deaborn</td>
+                    <td data-label="Total">$482</td>
                   </tr>
                 </tbody>
             </table>
@@ -173,36 +173,34 @@
       <div class="content">
         <section class="payment-section">
           <h3>Payments</h3>
-          <div class="table">
-            <table class="center">
+            <table class="responsive-table">
                 <thead>
                     <th>Card</th>
                     <th>Name</th>
                     <th>Expiration</th>
                     <th>Status</th>
-                    <th>Address Nickname</th>
+                    <th>Addr Nickname</th>
                     <th>Actions</th>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>1234</td>
-                    <td>7/1/25</td>
-                    <td>7/31/25</td>
-                    <td>Renting</td>
-                    <td>Warren</td>
-                    <td><button id="delete">Delete</button></td>
+                    <td data-label="Card">4596</td>
+                    <td data-label="Name">Jeff Besos</td>
+                    <td data-label="Expiration">7/27</td>
+                    <td data-label="Status">Active</td>
+                    <td data-label="Addr Nickname">Warren</td>
+                    <td data-label="Actions"><button id="delete">Delete</button></td>
                   </tr>
                   <tr>
-                    <td>1234</td>
-                    <td>7/31/25</td>
-                    <td>8/31/25</td>
-                    <td>Renting</td>
-                    <td>Warren</td>
-                    <td><button id="delete2">Delete</button></td>
+                    <td data-label="Card">4280</td>
+                    <td data-label="Name">Jeff Bezos5</td>
+                    <td data-label="Expiration">8/28</td>
+                    <td data-label="Status">Active</td>
+                    <td data-label="Addr Nickname">Dearborn</td>
+                    <td data-label="Actions"><button id="delete2">Delete</button></td>
                   </tr>
                 </tbody>
             </table>
-          </div>
         </section>
       </div>
 
