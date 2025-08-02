@@ -344,13 +344,13 @@ document.addEventListener('DOMContentLoaded', function () {
           dropdownLi.classList.add('drop-down');
           dropdownLi.id = 'account-dropdown';
           dropdownLi.innerHTML = `
-            <a href="account.html" class="account-toggle">My Account<i class="icofont-simple-down dropdown-arrow"></i></a>
+            <a href="#" class="account-toggle">My Account<i class="icofont-simple-down dropdown-arrow"></i></a>
             <ul>
-              <li id="dashboard-page-link" class="mobile-only">
+              <li id="dashboard-page-link">
                 <a href="account.html" id="dashboard-page-link-anchor">Dashboard</a>
               </li>
               <li id="customer-page-link">
-                <a href="reservation.html" id="customer-page-link-anchor">Rent Equipment</a>
+                <a href="equipment-reservation.html" id="customer-page-link-anchor">Rent Equipment</a>
               </li>
               <li id="return-page-link">
                 <a href="account.html#return" id="return-page-link-anchor">Return Equipment</a>
@@ -368,15 +368,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Highlight correct link
         const current = window.location.pathname;
-        if (current.endsWith('res.html')) {
+        if (current.endsWith('account.html')) {
+          document.querySelectorAll('#dashboard-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+        }
+        if (current.endsWith('equipment-reservation.html')) {
           document.querySelectorAll('#customer-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
         }
         if (current.endsWith('account.html#return')) {
           document.querySelectorAll('#return-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
         }
-        if (current.endsWith('account.html')) {
-          document.querySelectorAll('#dashboard-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
-        }
+
       }
     });
 });

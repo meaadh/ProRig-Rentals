@@ -79,7 +79,7 @@
       </div>
     </div>
     <!-- Equipment List Section -->
-    <section class="equipment-section py-4">
+    <section id="equipment"class="equipment-section py-4">
       <div class="container">
         <h3 class="mb-4">Available Equipment</h3>
         <div class="mb-3">
@@ -98,6 +98,7 @@
         </div>
       </div>
     </section>
+    <section id="reservation">
     <div class="form-container">
       <form id="reservation-form" action="/api/reservations" method="post">
         <h3>Reservation</h3>
@@ -105,6 +106,27 @@
         <input type="text" name="customer_name" id="customer_name" required>
         <label for="end_date" style="margin-left:10px;">Return Date:</label>
         <input type="date" name="end_date" id="end_date" required>
+        <select id="payment" required>
+          <option value="">-- Choose Payment --</option>
+          <option value="Default">Default Card ending in 6969</option>
+          <option value="Mastercard">ending in 4200</option>
+          <option value="Visa">ending in 8008</option>
+        </select>
+        <select id="location" required>
+          <option value="">-- Choose Pickup Location --</option>
+          <option value="Dearborn">Dearborn</option>
+          <option value="Warren">Warren</option>
+          <option value="DearbornHeights">Dearborn Heights</option>
+          <option value="annArbor">Ann Arbor</option>
+          <option value="GrandRapids">Grand Rapids</option>
+          <option value="Lansing">Lansing</option>
+        </select>
+        <select id="address" required>
+          <option value="">-- Choose Billing address--</option>
+          <option value="default">4901 Evergreen Rd Dearborn, MI 48128</option>
+          <option value="address1">500 S State St, Ann Arbor, MI 48109</option>
+          <option value="address2">428 S Shaw Ln, East Lansing, MI 48824</option>
+        </select>
         <!-- Hidden input for selected equipment -->
         <input type="hidden" name="equipment_ids" id="selected-equipment">
         <input type="hidden" name="total_cost" id="total-cost">
@@ -113,6 +135,7 @@
         <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
       </form>
     </div>
+    </section>
     <!-- Reservation Success Modal -->
     <div id="reservation-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
       <div style="background:#fff; padding:30px 40px; border-radius:10px; box-shadow:0 2px 20px #0003; text-align:center; max-width:90vw;">
@@ -121,6 +144,7 @@
         <!-- <button id="close-modal-btn" ...>Okay</button> -->
       </div>
     </div>
+
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->

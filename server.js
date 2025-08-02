@@ -160,7 +160,7 @@ app.post('/login', async (req, res) => {
         req.session.user_name = user.lname;
         req.session.userData ={fname:user.fname,lname:user.lname,useName:user.username};
 
-        if (user.user_type === 'customer') return res.redirect('/reservation.html');
+        if (user.user_type === 'customer') return res.redirect('/equipment-reservation.html');
         if (user.user_type === 'maintainance') return res.redirect('/maintainancePage.html');
 
         return res.send('Unknown user type');

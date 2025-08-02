@@ -348,9 +348,7 @@ body.mobile-nav-active .mobile {
 .mobile-nav-active .mobile-nav-toggle i {
   color: #fff;
 }
-@media only screen and (min-width: 992px) {
-  .mobile-only {display: none;}
-}
+
 /*--------------------------------------------------------------
 # Hero Section
 --------------------------------------------------------------*/
