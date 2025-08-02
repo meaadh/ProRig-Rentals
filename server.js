@@ -104,7 +104,9 @@ app.post("/sign_up", async(req,res)=>{
       email,
       username,
       password: hash,
-      user_type:"customer"
+      user_type:"customer",
+      created_at:new Date(),
+      updated_at:new Date(),
     };
   
     await db.collection("RentalUsers").insertOne(data);
@@ -127,7 +129,9 @@ app.post("/managment", async(req,res)=>{
       email,
       username,
       password: hash,
-      user_type
+      user_type,
+      order_date:new Date().toISOString().split('T')[0],
+
     };
   
     await db.collection("RentalUsers").insertOne(data);
@@ -264,7 +268,8 @@ app.post('/api/reservations', async (req, res) => {
       history_equipment_ids: equipmentIds,
       equipment_ids: equipmentIds,
       ...(user_id && { user_id }), // Only add user_id if found
-      ...(total_cost && { total_cost: Number(total_cost) }) // Added  total_cost if present
+      ...(total_cost && { total_cost: Number(total_cost) }), // Added  total_cost if present
+      created_at:new Date()
     };
     await db.collection("Reservations").insertOne(data);
 
@@ -468,7 +473,7 @@ app.post('/api/return', async (req, res) => {
     if (updatedEquipmentIds.length === 0) {
      await db.collection('Reservations').updateOne(
       {_id:reservation._id},
-      {$set: {equipment_ids:[],status:"Complete"} }
+      {$set: {equipment_ids:[],status:"Complete",updated_at:new Date(),} }
      );
     } else {
       await db.collection('Reservations').updateOne(
