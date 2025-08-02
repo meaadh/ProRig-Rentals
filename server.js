@@ -193,7 +193,7 @@ app.get('/logout', (req, res) => {
       console.error("Logout failed:", err);
       return res.status(500).send("Logout failed");
     }
-    res.redirect('/loginform.html');
+    res.redirect('/home.html');
   });
 });
 app.get('/userdetail', (req, res) => {

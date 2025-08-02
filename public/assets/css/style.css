@@ -1179,6 +1179,9 @@ section {
   padding:10px;
 }
 
+/*--------------------------------------------------------------
+# Gloabl User-Container
+--------------------------------------------------------------*/
 .user-container{
   min-height: 20vh;
   display: flex;
@@ -1207,6 +1210,7 @@ section {
 .user-container .content h1{
   font-size: 50px;
   color:#333;
+  padding-bottom: 40px;
 }
 
 .user-container .content h1 span{
@@ -1254,6 +1258,114 @@ section {
   background: rgb(0, 56, 125);
 }
 
+/*--------------------------------------------------------------
+# Account-section
+--------------------------------------------------------------*/
+#account .container{
+  
+}
+#account h3{
+    padding-bottom: 40px;
+
+}
+#account .collapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+#account .active, .collapsible:hover {
+  background-color: #555;
+}
+
+#account .collapsible:after {
+  content: '\002B';
+  color: white;
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
+
+#account .active:after {
+  content: "\2212";
+}
+
+#account .content {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: #f1f1f1;
+}
+#account .address-section {
+  background: #ffffff65;
+  border-top: 1px solid #ffffff;
+  border-bottom: 0.5px solid #c1c1c1;
+  padding: 10px 0;
+}
+
+#account .address-section .info-box {
+  color: #000000;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(214, 215, 216, 0.6);
+  padding: 10px 0;
+  margin-bottom: 10px;
+  width: 100%;
+}
+#account .address-section .info-box .info-line {
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ margin-bottom: 6px;
+}
+#account .address-section .info-box i {
+  font-size: 20px;
+  color: #000000;
+  padding: 8px;
+}
+
+#account .address-section .info-box a:hover i {
+  color: #51ff00;
+}
+
+#account .address-section .info-box h3 {
+  font-size: 15px;
+  color: #000000;
+  font-weight: 700;
+  margin: 5px 0;
+}
+
+#account .address-section .info-box p {
+  padding: 0;
+  line-height: 14px;
+  font-size: 14px;
+  margin-bottom: 0;
+  color: #000000;
+}
+
+#account .address-section .info-box a:hover p {
+  color: #51ff00;
+}
+
+.table{
+  margin-left:auto; 
+  margin-right:auto;
+}
+
+table.center {
+  margin-left:auto; 
+  margin-right:auto;
+}
+
+/*--------------------------------------------------------------
+# Gloabl Form
+--------------------------------------------------------------*/
 .form-containers{
   min-height: 50vh;
   display: flex;
@@ -1327,15 +1439,6 @@ section {
   padding:10px;
 }
 
-.table{
-  margin-left:auto; 
-  margin-right:auto;
-}
-
-table.center {
-  margin-left:auto; 
-  margin-right:auto;
-}
 /*--------------------------------------------------------------
 # Equipment-section
 --------------------------------------------------------------*/
