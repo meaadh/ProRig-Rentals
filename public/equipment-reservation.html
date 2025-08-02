@@ -106,14 +106,8 @@
         <input type="text" name="customer_name" id="customer_name" required>
         <label for="end_date" style="margin-left:10px;">Return Date:</label>
         <input type="date" name="end_date" id="end_date" required>
-        <select id="payment" required>
-          <option value="">-- Choose Payment --</option>
-          <option value="Default">Default Card ending in 6969</option>
-          <option value="Mastercard">ending in 4200</option>
-          <option value="Visa">ending in 8008</option>
-        </select>
-        <select id="location" required>
-          <option value="">-- Choose Pickup Location --</option>
+        <select id="location" name="location" required>
+          <option value=""disabled selected>-- Choose Pickup Location --</option>
           <option value="Dearborn">Dearborn</option>
           <option value="Warren">Warren</option>
           <option value="DearbornHeights">Dearborn Heights</option>
@@ -121,11 +115,17 @@
           <option value="GrandRapids">Grand Rapids</option>
           <option value="Lansing">Lansing</option>
         </select>
-        <select id="address" required>
-          <option value="">-- Choose Billing address--</option>
+        <select id="address" name="address" required>
+          <option value="" disabled selected>-- Choose Billing address--</option>
           <option value="default">4901 Evergreen Rd Dearborn, MI 48128</option>
           <option value="address1">500 S State St, Ann Arbor, MI 48109</option>
           <option value="address2">428 S Shaw Ln, East Lansing, MI 48824</option>
+        </select>
+        <select id="payment" name="payment" required>
+          <option value=""disabled selected>-- Choose Payment --</option>
+          <option value="default">Default Card ending in 6969</option>
+          <option value="mastercard">ending in 4200</option>
+          <option value="visa">ending in 8008</option>
         </select>
         <!-- Hidden input for selected equipment -->
         <input type="hidden" name="equipment_ids" id="selected-equipment">

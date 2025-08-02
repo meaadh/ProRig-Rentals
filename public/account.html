@@ -87,33 +87,17 @@
           <div class="table-wrapper">
             <table class="responsive-table">
                 <thead>
+                  <tr>
                     <th>OrderID</th>
                     <th>Start Date</th>
                     <th>Return Date</th>
                     <th>Status</th>
                     <th>Items</th>
-                    <th>Location</th>
+                    <th>Pick-Up Location</th>
                     <th>Total</th>
+                  </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td data-label="OrderID">1234</td>
-                    <td data-label="Start Date">7/1/25</td>
-                    <td data-label="Return Date">7/31/25</td>
-                    <td data-label="Status">Renting</td>
-                    <td data-label="Items">Blower, Ladder, Digger</td>
-                    <td data-label="Location">Warren</td>
-                    <td data-label="Total">$328</td>
-                  </tr>
-                  <tr>
-                    <td data-label="OrderID">1234</td>
-                    <td data-label="Start Date">7/31/25</td>
-                    <td data-label="Return Date">8/31/25</td>
-                    <td data-label="Status">Renting</td>
-                    <td data-label="Items">Blower, Ladder, Digger</td>
-                    <td data-label="Location">Deaborn</td>
-                    <td data-label="Total">$482</td>
-                  </tr>
+                <tbody id="orders-body">
                 </tbody>
             </table>
           </div>
@@ -175,12 +159,14 @@
           <h3>Payments</h3>
             <table class="responsive-table">
                 <thead>
+                  <tr>
                     <th>Card</th>
                     <th>Name</th>
                     <th>Expiration</th>
                     <th>Status</th>
                     <th>Addr Nickname</th>
                     <th>Actions</th>
+                  </tr>
                 </thead>
                 <tbody>
                   <tr>
@@ -299,6 +285,7 @@
         });
       }
     });
+
     document.addEventListener('DOMContentLoaded', function() {
       fetch('/userdetail')
         .then(res => res.json())
@@ -309,6 +296,31 @@
         })
         .catch(() => {
           // fallback: do nothing, default is "Customer"
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/myreservations')
+      .then(res => res.json())
+      .then(reservations => {
+        const tbody = document.getElementById('orders-body');
+        tbody.innerHTML = '';
+        reservations.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td data-label="OrderID">${r.order_id}</td>
+            <td data-label="Start Date">${new Date(r.order_date).toLocaleDateString()}</td>
+            <td data-label="Return Date">${new Date(r.end_date).toLocaleDateString()}</td>
+            <td data-label="Status">${r.status}</td>
+            <td data-label="Items">${r.items.join(', ')}</td>
+            <td data-label="Pick-Up Location">${r.location}</td>
+            <td data-label="Total">$${r.total_cost}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+     })
+        .catch(err => {
+          console.error('Error loading reservations:', err);
         });
     });
 

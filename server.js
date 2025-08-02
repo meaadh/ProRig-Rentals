@@ -22,7 +22,6 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({
     extended: true
 }));
-
 app.use(session({
   secret: 'ProRigs123',
   resave: false,
@@ -219,8 +218,8 @@ app.get('/api/equipments', async (req, res) => {
 });
 app.post('/api/reservations', async (req, res) => {
   try {
-    const { customer_name, end_date, equipment_ids, total_cost } = req.body;
-    if (!customer_name || !end_date || !equipment_ids) {
+    const { customer_name, end_date, location, address, payment, equipment_ids, total_cost } = req.body;
+    if (!customer_name || !end_date|| !location|| !address|| !payment || !equipment_ids) {
       return res.status(400).json({ error: 'All fields are required' });
     }
     // Parse equipment_ids if it's a JSON string
@@ -254,10 +253,15 @@ app.post('/api/reservations', async (req, res) => {
       }
     }
     // --- End new code ---
-
     const data = {
       customer_name,
       end_date,
+      order_date:new Date().toISOString().split('T')[0],
+      location,
+      address,
+      payment,
+      status: "Renting",
+      history_equipment_ids: equipmentIds,
       equipment_ids: equipmentIds,
       ...(user_id && { user_id }), // Only add user_id if found
       ...(total_cost && { total_cost: Number(total_cost) }) // Added  total_cost if present
@@ -377,6 +381,45 @@ app.get('/api/myrentals', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user rentals" });
   }
 });
+app.get('/api/myreservations', async (req, res) => {
+  try {
+    if (!req.session || !req.session.user_name) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const reservations = await db.collection('Reservations').find({ user_id: user._id }).toArray();
+    if (reservations.length === 0) return res.json([]);
+
+    const allEquipmentIds = reservations.flatMap(r => r.history_equipment_ids || []);
+    const uniqueIds = [...new Set(allEquipmentIds.map(id => id.toString()))];
+    const objectIds = uniqueIds.map(id => ObjectId.isValid(id) ? new ObjectId(id) : null).filter(Boolean);
+
+    const equipmentMap = {};
+    const equipmentDocs = await db.collection('Equipments').find({ _id: { $in: objectIds } }).toArray();
+    equipmentDocs.forEach(eq => {
+      equipmentMap[eq._id.toString()] = eq.name || eq.equipmentName || "Equipment";
+    });
+
+    // Build result
+    const result = reservations.map(r => ({
+      order_id: r._id || 'N/A',
+      order_date: r.order_date,
+      end_date: r.end_date,
+      status: r.status || "Renting",
+      location: r.location || "",
+      total_cost: r.total_cost || 0,
+      items: (r.history_equipment_ids || []).map(id => equipmentMap[id.toString()] || "Unknown")
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch reservations" });
+  }
+});
 
 app.post('/api/return', async (req, res) => {
   try {
@@ -423,7 +466,10 @@ app.post('/api/return', async (req, res) => {
       return id !== equipmentId;
     });
     if (updatedEquipmentIds.length === 0) {
-      await db.collection('Reservations').deleteOne({ _id: reservation._id });
+     await db.collection('Reservations').updateOne(
+      {_id:reservation._id},
+      {$set: {equipment_ids:[],status:"Complete"} }
+     );
     } else {
       await db.collection('Reservations').updateOne(
         { _id: reservation._id },
