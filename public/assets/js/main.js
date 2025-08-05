@@ -575,7 +575,17 @@ function showPaymentModal(totalPrice, onConfirm) {
       });
     });
   });
-
+  /*
+  document.getElementById('Payment-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    document.getElementById('payment-error').textContent = '';
+    document.getElementById('payment-success').textContent = '';
+  });
+    document.getElementById('Address-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    document.getElementById('address-error').textContent = '';
+    document.getElementById('address-success').textContent = '';
+  });*/
   // Replace sessionStorage logic with API call to get user's name from server
   document.addEventListener('DOMContentLoaded', function() {
     fetch('/api/userinfo')

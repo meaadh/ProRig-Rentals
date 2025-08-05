@@ -109,40 +109,7 @@
         <section class="address-section">
           <h3>Address</h3>
           <button id="add-address">Add Address</button>
-            <div class="row">
-              <div class="col-md-6 d-flex align-items-stretch">
-                <div class="info-box w-100">
-                  <h3>Default Address</h3>
-                  <div class="info-line">
-                    <i class="bx bx-map"></i>
-                  </div>
-                  <div class="info-line">
-                    <i class="bx bx-phone-call"></i>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6 d-flex align-items-stretch">
-                <div class="info-box w-100">
-                  <h3 id="user-welcome-name">Customer</h3>
-                  <div class="info-line">
-                    <i class="bx bx-map"></i>
-                  </div>
-                  <div class="info-line">
-                    <i class="bx bx-phone-call"></i>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6 d-flex align-items-stretch">
-                <div class="info-box w-100">
-                  <h3 id="user-welcome-name">Customer</h3>
-                  <div class="info-line">
-                    <i class="bx bx-map"></i>
-                  </div>
-                  <div class="info-line">
-                    <i class="bx bx-phone-call"></i>
-                  </div>
-                </div>
-              </div>
+            <div class="row" id="address-card-container">
             </div>
         </section>
       </div>
@@ -154,11 +121,12 @@
             <table class="responsive-table">
                 <thead>
                   <tr>
-                    <th>Card</th>
+                    <th>last4</th>
                     <th>Name</th>
                     <th>Expiration</th>
                     <th>Status</th>
-                    <th>Addr Nickname</th>
+                    <th>card_type</th>
+                    <th>Payment Nickname</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -284,13 +252,93 @@
             <td data-label="Status">${r.status}</td>
             <td data-label="Items">${r.items.join(', ')}</td>
             <td data-label="Pick-Up Location">${r.location}</td>
-            <td data-label="Total">$${r.total_cost}</td>
+            <td data-label="Total">${r.total_cost}</td>
           `;
           tbody.appendChild(tr);
         });
      })
         .catch(err => {
           console.error('Error loading reservations:', err);
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/mypayments')
+      .then(res => res.json())
+      .then(mypayment => {
+        const tbody = document.getElementById('payment-body');
+        tbody.innerHTML = '';
+        mypayment.forEach(p => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td data-label="last4">${p.last4}</td>
+            <td data-label="Name">${p.customer_name}</td>
+            <td data-label="Expiration">${p.expiration}</td>
+            <td data-label="Status">${p.status}</td>
+            <td data-label="card_type">${p.card_type}</td>
+            <td data-label="Payment Nickname">${p.payment_nickname}</td>
+            <td data-label="Actions"><button id="delete" class="delete-btn" data-last4="${p.last4}" data-expiration="${p.expiration}">Delete</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+     })
+        .catch(err => {
+          console.error('Error loading payments:', err);
+        });
+    });
+    document.addEventListener('click', () => {
+      if(e.target.classList.contains('delete-btn'))
+      {
+        const last4=e.target.dataset.last4;
+        const expiration=e.target.dataset.expiration;
+        fetch('/api/deletepayment',{method:'DELETE',headers:{'Content-Type':'application/json'}, body: JSON.stringify({last4,expiration})})
+        .then(res => res.json())
+        .then(data => {
+          if(data.success)
+          {
+            e.target.closest('tr').remove();
+          }
+          else
+          {
+            alert('Failed to delete payment');
+          }
+        })
+        .catch(err => {
+          console.error('Error deleting payment:', err);
+        });
+      }
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/myaddress')
+      .then(res => res.json())
+      .then(myaddress => {
+        const container=document.getElementById('address-card-container');
+        container.innerHTML='';
+          myaddress.forEach(addr=>{
+            const card=document.createElement('div');
+            card.className= 'col-md-6 d-flex align-items-stretch';
+            card.innerHTML=`
+              <div class="info-box w-100">
+                <h3>${addr.address_nickname||'Saved Address'}</h3>
+                <div class="info-line">
+                  <i class="bx bx-user"></i>
+                  ${addr.customer_name}
+                </div>
+                <div class="info-line">
+                  <i class="bx bx-map"></i>
+                  ${addr.address_line1} ${addr.city}, ${addr.state} ${addr.zip_code}
+                </div>
+                <div class="info-line">
+                  <i class="bx bx-phone-call"></i>
+                  ${addr.phone_number}
+                </div>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        })
+        .catch(err => {
+          console.error('Error loading address:', err);
         });
     });
 

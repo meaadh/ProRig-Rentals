@@ -118,9 +118,13 @@
           </select>
           <select id="address" name="address" required>
             <option value="" disabled selected>-- Choose Billing address--</option>
+             <option value="Lansing" >Lansing</option>
+
           </select>
           <select id="payment" name="payment" required>
             <option value=""disabled selected>-- Choose Payment --</option>
+            <option value="Visa" >Visa</option>
+
           </select>
           <!-- Hidden input for selected equipment -->
           <input type="hidden" name="equipment_ids" id="selected-equipment">
@@ -131,12 +135,12 @@
         </form>
         </div>
       </div>
-        <div class="forms-wrapper single-form">
+        <div class="forms-wrapper">
           <div class="reservation-form-container">
-            <form id="Payment-form" class="hidden-form" action="/api/payments" method="post">
+            <form id="Payment-form" class="hidden-form" action="http://localhost:3000/payments" method="post">
               <h3>Add Payment Info</h3>
               <input type="text" name="customer_name" id="customer_name" required placeholder="Cardholder Name">
-              <input type="text" name="card_number" id="card_number" required placeholder="Last Four Card Number:">
+              <input type="text" name="card_number" id="card_number" required placeholder="Card Number:">
               <input type="date" name="expiration" id="expiration" required placeholder="Expiration Date:">
               <input type="text" name="cvv" id="cvv" required placeholder="CVV">
               <select id="card_type" name="card_type" required>
@@ -148,24 +152,80 @@
               </select>
               <input type="text" name="payment_nickname" id="payment_nickname" required placeholder="Payment Nickname">
               <input type="submit" name="submit" value="Add Payment Card to Account" class="form-btn">
-              <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
-              <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
+              <div id="payments-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
+              <div id="payments-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
             </form>
           </div>
           <div class="reservation-form-container">
-            <form id="Address-form" class="hidden-form" action="/api/addresses" method="post">
+            <form id="Address-form" class="hidden-form" action="http://localhost:3000/addresses" method="post">
               <h3>Add Address Info</h3>
               <label for="city">Street</label>
               <input type="text" name="street" id="street" required placeholder="e.g., Evergreen">
               <label for="city">City</label>
               <input type="text" name="city" id="city" required placeholder="e.g., Dearborn">
-              <label for="zipcode">Zip Code</label>
-              <input type="text" name="zipcode" id="zipcode" required placeholder="e.g., 48128">
-              <label for="zipcode">Address Nickname</label>
+              <label for="state">State</label>
+              <select name="state" id="state" required>
+                <option value="" disabled selected>Select State</option>
+                <option value="AL">Alabama</option>
+                <option value="AK">Alaska</option>
+                <option value="AZ">Arizona</option>
+                <option value="AR">Arkansas</option>
+                <option value="CA">California</option>
+                <option value="CO">Colorado</option>
+                <option value="CT">Connecticut</option>
+                <option value="DE">Delaware</option>
+                <option value="FL">Florida</option>
+                <option value="GA">Georgia</option>
+                <option value="HI">Hawaii</option>
+                <option value="ID">Idaho</option>
+                <option value="IL">Illinois</option>
+                <option value="IN">Indiana</option>
+                <option value="IA">Iowa</option>
+                <option value="KS">Kansas</option>
+                <option value="KY">Kentucky</option>
+                <option value="LA">Louisiana</option>
+                <option value="ME">Maine</option>
+                <option value="MD">Maryland</option>
+                <option value="MA">Massachusetts</option>
+                <option value="MI">Michigan</option>
+                <option value="MN">Minnesota</option>
+                <option value="MS">Mississippi</option>
+                <option value="MO">Missouri</option>
+                <option value="MT">Montana</option>
+                <option value="NE">Nebraska</option>
+                <option value="NV">Nevada</option>
+                <option value="NH">New Hampshire</option>
+                <option value="NJ">New Jersey</option>
+                <option value="NM">New Mexico</option>
+                <option value="NY">New York</option>
+                <option value="NC">North Carolina</option>
+                <option value="ND">North Dakota</option>
+                <option value="OH">Ohio</option>
+                <option value="OK">Oklahoma</option>
+                <option value="OR">Oregon</option>
+                <option value="PA">Pennsylvania</option>
+                <option value="RI">Rhode Island</option>
+                <option value="SC">South Carolina</option>
+                <option value="SD">South Dakota</option>
+                <option value="TN">Tennessee</option>
+                <option value="TX">Texas</option>
+                <option value="UT">Utah</option>
+                <option value="VT">Vermont</option>
+                <option value="VA">Virginia</option>
+                <option value="WA">Washington</option>
+                <option value="WV">West Virginia</option>
+                <option value="WI">Wisconsin</option>
+                <option value="WY">Wyoming</option>
+              </select>
+              <label for="zip_code">Zip Code</label>
+              <input type="text" name="zip_code" id="zip_code" required placeholder="e.g., 48128">
+              <label for="phone_number">Phone Number</label>
+              <input type="text" name="phone_number" id="phone_number" required placeholder="e.g., 248-420-6969">
+              <label for="address_nickname">Address Nickname</label>
               <input type="text" name="address_nickname" id="address_nickname" required placeholder="Default">
               <input type="submit" name="submit" value="Add Address to Account" class="form-btn">
-              <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
-              <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
+              <div id="address-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
+              <div id="address-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
             </form>
           </div>
       </div>
@@ -175,6 +235,20 @@
       <div style="background:#fff; padding:30px 40px; border-radius:10px; box-shadow:0 2px 20px #0003; text-align:center; max-width:90vw;">
         <h2 style="margin-bottom:20px;" id="reservation-modal-title">Reservation successful!</h2>
         <div id="reservation-modal-body"></div>
+        <!-- <button id="close-modal-btn" ...>Okay</button> -->
+      </div>
+    </div>
+    <div id="payment-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:30px 40px; border-radius:10px; box-shadow:0 2px 20px #0003; text-align:center; max-width:90vw;">
+        <h2 style="margin-bottom:20px;" id="payment-modal-title">Reservation successful!</h2>
+        <div id="payment-modal-body"></div>
+        <!-- <button id="close-modal-btn" ...>Okay</button> -->
+      </div>
+    </div>
+     <div id="address-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:30px 40px; border-radius:10px; box-shadow:0 2px 20px #0003; text-align:center; max-width:90vw;">
+        <h2 style="margin-bottom:20px;" id="address-modal-title">Reservation successful!</h2>
+        <div id="address-modal-body"></div>
         <!-- <button id="close-modal-btn" ...>Okay</button> -->
       </div>
     </div>

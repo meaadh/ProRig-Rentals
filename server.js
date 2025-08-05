@@ -222,6 +222,7 @@ app.get('/api/equipments', async (req, res) => {
     res.status(500).json({ error: "Failedd to fetch equipments" });
   }
 });
+
 app.post('/api/reservations', async (req, res) => {
   try {
     const { customer_name, end_date, location, address, payment, equipment_ids, total_cost } = req.body;
@@ -314,120 +315,119 @@ app.post('/api/reservations', async (req, res) => {
     res.status(500).json({ error: "Failed to create reservation: " + err.message });
   }
 });
-
-app.get('/api/userinfo', async (req, res) => {
+app.post("/payments", async(req,res)=>{
+  const{customer_name,card_number,expiration,card_type,payment_nickname}=req.body;
+  if (!customer_name || !card_number|| !expiration|| !card_type|| !payment_nickname) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
   try {
-    // Only proceed if user is logged in
-    if (!req.session || !req.session.user_name) {
-      console.log("User not found or not logged in.");
-      return res.json({ name: "Customer" });
-    }
-    // Find the user in the DB by last name (as stored in session)
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
-    if (user) {
-      // Return full name: first name + last name
-      return res.json({ name: user.fname + " " + user.lname });
-    } else {
-      console.log("User not found in database for lname:", req.session.user_name);
-      return res.json({ name: req.session.user_name });
-    }
-  } catch (err) {
-    console.log("User not found or error occurred.");
-    return res.json({ name: "Customer" });
-  }
-});
-
-app.get('/api/myrentals', async (req, res) => {
-  try {
-    // Check if user is logged in
-    if (!req.session || !req.session.user_name) {
-      return res.status(401).json({ error: "Not logged in" });
-    }
-    // Find user by last name (as stored in session)
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    // Find all reservations for this user
-    const reservations = await db.collection('Reservations').find({ user_id: user._id }).toArray();
-    // Gather all equipment IDs from reservations
-    const equipmentIdSet = new Set();
-    reservations.forEach(resv => {
-      if (Array.isArray(resv.equipment_ids)) {
-        resv.equipment_ids.forEach(id => {
-          // Accept both ObjectId and string
-          if (typeof id === 'object' && id && id._bsontype) {
-            equipmentIdSet.add(id.toString());
-          } else if (typeof id === 'string') {
-            equipmentIdSet.add(id);
-          }
-        });
+    let user_id = null;
+    if (req.session && req.session.user_name) 
+    {
+      const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+      if (user && user._id) {
+        user_id = user._id;
       }
-    });
-    if (equipmentIdSet.size === 0) {
-      return res.json([]);
-    }
-    // Fetch equipment details
-    const equipmentIds = Array.from(equipmentIdSet).map(id => {
-      try {
-        return ObjectId.isValid(id) ? new ObjectId(id) : null;
-      } catch {
-        return null;
+      if(user&&user._id)
+      {
+        function formatExpiration(dateString)
+        {
+          const date=new Date(dateString);
+          const month= String(date.getMonth()+1).padStart(2,'0');
+          const year=String(date.getFullYear()).slice(-2);
+          return`${month}/${year}`;
+        }
+
+        const cleanedExpiration=formatExpiration(expiration);
+        const card_last4=card_number.slice(-4);
+
+        const paymentEntry = {
+          customer_name,
+          last4:card_last4,
+          card_type,
+          expiration:cleanedExpiration,
+          payment_nickname,
+          status:"active",
+          added_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
+        };
+        await db.collection("RentalUsers").updateOne(
+          {_id:user._id},
+          {$push:{payment:paymentEntry},
+          $set:{updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)}}
+        );
+        console.log(`Payment method added to ${dbname} database for userId:`,user.fname+" "+user.lname);
+        res.json({ message: 'Payment added successfully', ...paymentEntry });
+
       }
-    }).filter(Boolean);
-    const equipments = await db.collection('Equipments').find({ _id: { $in: equipmentIds } }).toArray();
-    // Return a simplified list
-    const result = equipments.map(eq => ({
-      id: eq._id,
-      name: eq.name || eq.equipmentName || "Equipment",
-      description: eq.description || "",
-      image: eq.image || ""
-    }));
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch user rentals" });
-  }
-});
-app.get('/api/myreservations', async (req, res) => {
-  try {
-    if (!req.session || !req.session.user_name) {
-      return res.status(401).json({ error: "Not logged in" });
+      else
+      {
+        throw new Error("User not found in session.");
+      }
+    }
+    else
+    {
+      throw new Error("User session is not available");
+
     }
 
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    const reservations = await db.collection('Reservations').find({ user_id: user._id }).toArray();
-    if (reservations.length === 0) return res.json([]);
-
-    const allEquipmentIds = reservations.flatMap(r => r.history_equipment_ids || []);
-    const uniqueIds = [...new Set(allEquipmentIds.map(id => id.toString()))];
-    const objectIds = uniqueIds.map(id => ObjectId.isValid(id) ? new ObjectId(id) : null).filter(Boolean);
-
-    const equipmentMap = {};
-    const equipmentDocs = await db.collection('Equipments').find({ _id: { $in: objectIds } }).toArray();
-    equipmentDocs.forEach(eq => {
-      equipmentMap[eq._id.toString()] = eq.name || eq.equipmentName || "Equipment";
-    });
-
-    // Build result
-    const result = reservations.map(r => ({
-      order_id: r._id || 'N/A',
-      order_date: r.order_date,
-      end_date: r.end_date,
-      status: r.status || "Renting",
-      location: r.location || "",
-      total_cost: r.total_cost || 0,
-      items: (r.history_equipment_ids || []).map(id => equipmentMap[id.toString()] || "Unknown")
-    }));
-
-    res.json(result);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch reservations" });
+   
+  } catch(err) {
+    console.log(`Payment Insert error to the ${dbname} database`,err);
+    return res.redirect(`equipment-reservation.html`);
   }
-});
+})
+app.post("/addresses", async(req,res)=>{
+  const{street,city,state,zip_code,phone_number,address_nickname}=req.body;
+  if (!street|| !city|| !state||!zip_code|| !phone_number|| !address_nickname) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+  try {
+    let user_id = null;
+    if (req.session && req.session.user_name) 
+    {
+      const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+      if (user && user._id) {
+        user_id = user._id;
+      }
+   
+      if(user&&user._id)
+      {
+        const addressEntry = {
+          customer_name:user.fname+" "+user.lname,
+          address_line1:street,
+          city,
+          state,
+          zip_code,
+          phone_number,
+          address_nickname,
+          added_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
+        };
+        await db.collection("RentalUsers").updateOne(
+          {_id:user._id},
+          {$push:{address:addressEntry},
+          $set:{updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)}}
+        );
+        console.log(`Address added to ${dbname} database for userId:`,user.fname+" "+user.lname);
+        res.json({ message: 'Address added successfully', ...paymentEntry });
 
+      }
+      else
+      {
+        throw new Error("User not found in session.");
+      }
+    }
+    else
+    {
+      throw new Error("User session is not available");
+
+    }
+
+   
+  } catch(err) {
+    console.log(`Address Insert error to the ${dbname} database`,err);
+    return res.redirect(`equipment-reservation.html`);
+  }
+})
 app.post('/api/return', async (req, res) => {
   try {
     if (!req.session || !req.session.user_name) {
@@ -523,3 +523,196 @@ setInterval(async () => {
     console.error("Error updating equipment availability:", err);
   }
 }, 60 * 1000); // Runs every 1 minute
+
+app.get('/api/userinfo', async (req, res) => {
+  try {
+    // Only proceed if user is logged in
+    if (!req.session || !req.session.user_name) {
+      console.log("User not found or not logged in.");
+      return res.json({ name: "Customer" });
+    }
+    // Find the user in the DB by last name (as stored in session)
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (user) {
+      // Return full name: first name + last name
+      return res.json({ name: user.fname + " " + user.lname });
+    } else {
+      console.log("User not found in database for lname:", req.session.user_name);
+      return res.json({ name: req.session.user_name });
+    }
+  } catch (err) {
+    console.log("User not found or error occurred.");
+    return res.json({ name: "Customer" });
+  }
+});
+app.get('/api/myrentals', async (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session || !req.session.user_name) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+    // Find user by last name (as stored in session)
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    // Find all reservations for this user
+    const reservations = await db.collection('Reservations').find({ user_id: user._id }).toArray();
+    // Gather all equipment IDs from reservations
+    const equipmentIdSet = new Set();
+    reservations.forEach(resv => {
+      if (Array.isArray(resv.equipment_ids)) {
+        resv.equipment_ids.forEach(id => {
+          // Accept both ObjectId and string
+          if (typeof id === 'object' && id && id._bsontype) {
+            equipmentIdSet.add(id.toString());
+          } else if (typeof id === 'string') {
+            equipmentIdSet.add(id);
+          }
+        });
+      }
+    });
+    if (equipmentIdSet.size === 0) {
+      return res.json([]);
+    }
+    // Fetch equipment details
+    const equipmentIds = Array.from(equipmentIdSet).map(id => {
+      try {
+        return ObjectId.isValid(id) ? new ObjectId(id) : null;
+      } catch {
+        return null;
+      }
+    }).filter(Boolean);
+    const equipments = await db.collection('Equipments').find({ _id: { $in: equipmentIds } }).toArray();
+    // Return a simplified list
+    const result = equipments.map(eq => ({
+      id: eq._id,
+      name: eq.name || eq.equipmentName || "Equipment",
+      description: eq.description || "",
+      image: eq.image || ""
+    }));
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch user rentals" });
+  }
+});
+app.get('/api/myreservations', async (req, res) => {
+  try {
+    if (!req.session || !req.session.user_name) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const reservations = await db.collection('Reservations').find({ user_id: user._id }).toArray();
+    if (reservations.length === 0) return res.json([]);
+
+    const allEquipmentIds = reservations.flatMap(r => r.history_equipment_ids || []);
+    const uniqueIds = [...new Set(allEquipmentIds.map(id => id.toString()))];
+    const objectIds = uniqueIds.map(id => ObjectId.isValid(id) ? new ObjectId(id) : null).filter(Boolean);
+
+    const equipmentMap = {};
+    const equipmentDocs = await db.collection('Equipments').find({ _id: { $in: objectIds } }).toArray();
+    equipmentDocs.forEach(eq => {
+      equipmentMap[eq._id.toString()] = eq.name || eq.equipmentName || "Equipment";
+    });
+
+    // Build result
+    const result = reservations.map(r => ({
+      order_id: r._id || 'N/A',
+      order_date: r.order_date,
+      end_date: r.end_date,
+      status: r.status || "Renting",
+      location: r.location || "",
+      total_cost: r.total_cost || 0,
+      items: (r.history_equipment_ids || []).map(id => equipmentMap[id.toString()] || "Unknown")
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch reservations" });
+  }
+});
+app.get('/api/mypayments', async (req, res) => {
+  try {
+    if (!req.session || !req.session.user_name) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const payments =user.payment||[];
+
+
+    // Build result
+    const result = payments.map((p,index) => ({
+      customer_name: p.customer_name || 'N/A',
+      last4: p.last4,
+      expiration: p.expiration,
+      status: p.status || "Active",
+      card_type:p.card_type|| "N/A",
+      payment_nickname: p.payment_nickname || "N/A"
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch Payment Methods" });
+  }
+});
+app.get('/api/myaddress', async (req, res) => {
+  try {
+    if (!req.session || !req.session.user_name) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const addresses = user.address||[];
+
+    // Build result
+    const result = addresses.map((p,index) => ({
+      customer_name:p.custumer_name||"N/A",
+      address_line1: p.address_line1,
+      city: p.city,
+      state: p.state,
+      zip_code:p.zip_code,
+      phone_number:p.phone_number ||"N/A",
+      address_nickname: p.address_nickname || "Saved Address"
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch Address Book" });
+  }
+});
+app.delete('/api/delete-payment', async (req, res) => {
+  const{last4,expiration}=req.body;
+  if (!req.session || !req.session.user_name) {
+    return res.status(401).json({ error: "Not logged in" });
+  }
+
+  try {
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const result =await db.collection('RentalUsers').updateOne({_id:user._id},{$pull:{payment:{last4,expiration}}});
+    if(result.modifiedCount>0)
+    {
+      res.json({success:true});
+    }
+    else
+    {
+      res.json({success:false,error: "Payment not found"});
+
+    }
+  } catch (err) {
+    console.error('Delete payment error',err);
+    res.status(500).json({ error: "Failed to remove Payment Method" });
+  }
+});
