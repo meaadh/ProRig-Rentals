@@ -105,6 +105,8 @@ app.post("/sign_up", async(req,res)=>{
       username,
       password: hash,
       user_type:"customer",
+      address:[],
+      payment:[],
       created_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
       updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
     };

@@ -98,43 +98,77 @@
         </div>
       </div>
     </section>
-    <section id="reservation">
-    <div class="form-container">
-      <form id="reservation-form" action="/api/reservations" method="post">
-        <h3>Reservation</h3>
-        <label for="customer_name">Name:</label>
-        <input type="text" name="customer_name" id="customer_name" required>
-        <label for="end_date" style="margin-left:10px;">Return Date:</label>
-        <input type="date" name="end_date" id="end_date" required>
-        <select id="location" name="location" required>
-          <option value=""disabled selected>-- Choose Pickup Location --</option>
-          <option value="Dearborn">Dearborn</option>
-          <option value="Warren">Warren</option>
-          <option value="DearbornHeights">Dearborn Heights</option>
-          <option value="annArbor">Ann Arbor</option>
-          <option value="GrandRapids">Grand Rapids</option>
-          <option value="Lansing">Lansing</option>
-        </select>
-        <select id="address" name="address" required>
-          <option value="" disabled selected>-- Choose Billing address--</option>
-          <option value="default">4901 Evergreen Rd Dearborn, MI 48128</option>
-          <option value="address1">500 S State St, Ann Arbor, MI 48109</option>
-          <option value="address2">428 S Shaw Ln, East Lansing, MI 48824</option>
-        </select>
-        <select id="payment" name="payment" required>
-          <option value=""disabled selected>-- Choose Payment --</option>
-          <option value="default">Default Card ending in 6969</option>
-          <option value="mastercard">ending in 4200</option>
-          <option value="visa">ending in 8008</option>
-        </select>
-        <!-- Hidden input for selected equipment -->
-        <input type="hidden" name="equipment_ids" id="selected-equipment">
-        <input type="hidden" name="total_cost" id="total-cost">
-        <input type="submit" name="submit" value="Reserve Selected Equipment" class="form-btn">
-        <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
-        <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
-      </form>
-    </div>
+    <section class="reservation-section">
+      <div class="forms-wrapper single-form">
+        <div class="reservation-form-container">
+        <form id="reservation-form" action="/api/reservations" method="post">
+          <h3>Reservation</h3>
+          <label for="customer_name">Name:</label>
+          <input type="text" name="customer_name" id="customer_name" required>
+          <label for="end_date" style="margin-left:10px;">Return Date:</label>
+          <input type="date" name="end_date" id="end_date" required>
+          <select id="location" name="location" required>
+            <option value=""disabled selected>-- Choose Pickup Location --</option>
+            <option value="Dearborn">Dearborn</option>
+            <option value="Warren">Warren</option>
+            <option value="DearbornHeights">Dearborn Heights</option>
+            <option value="annArbor">Ann Arbor</option>
+            <option value="GrandRapids">Grand Rapids</option>
+            <option value="Lansing">Lansing</option>
+          </select>
+          <select id="address" name="address" required>
+            <option value="" disabled selected>-- Choose Billing address--</option>
+          </select>
+          <select id="payment" name="payment" required>
+            <option value=""disabled selected>-- Choose Payment --</option>
+          </select>
+          <!-- Hidden input for selected equipment -->
+          <input type="hidden" name="equipment_ids" id="selected-equipment">
+          <input type="hidden" name="total_cost" id="total-cost">
+          <input type="submit" name="submit" value="Reserve Selected Equipment" class="form-btn">
+          <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
+          <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
+        </form>
+        </div>
+      </div>
+        <div class="forms-wrapper single-form">
+          <div class="reservation-form-container">
+            <form id="Payment-form" class="hidden-form" action="/api/payments" method="post">
+              <h3>Add Payment Info</h3>
+              <input type="text" name="customer_name" id="customer_name" required placeholder="Cardholder Name">
+              <input type="text" name="card_number" id="card_number" required placeholder="Last Four Card Number:">
+              <input type="date" name="expiration" id="expiration" required placeholder="Expiration Date:">
+              <input type="text" name="cvv" id="cvv" required placeholder="CVV">
+              <select id="card_type" name="card_type" required>
+                <option value=""disabled selected>-- Choose Card Type --</option>
+                <option value="Visa">Visa</option>
+                <option value="Mastercard">Mastercard</option>
+                <option value="Discover">Discover</option>
+                <option value="American Express">American Express</option>
+              </select>
+              <input type="text" name="payment_nickname" id="payment_nickname" required placeholder="Payment Nickname">
+              <input type="submit" name="submit" value="Add Payment Card to Account" class="form-btn">
+              <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
+              <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
+            </form>
+          </div>
+          <div class="reservation-form-container">
+            <form id="Address-form" class="hidden-form" action="/api/addresses" method="post">
+              <h3>Add Address Info</h3>
+              <label for="city">Street</label>
+              <input type="text" name="street" id="street" required placeholder="e.g., Evergreen">
+              <label for="city">City</label>
+              <input type="text" name="city" id="city" required placeholder="e.g., Dearborn">
+              <label for="zipcode">Zip Code</label>
+              <input type="text" name="zipcode" id="zipcode" required placeholder="e.g., 48128">
+              <label for="zipcode">Address Nickname</label>
+              <input type="text" name="address_nickname" id="address_nickname" required placeholder="Default">
+              <input type="submit" name="submit" value="Add Address to Account" class="form-btn">
+              <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
+              <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
+            </form>
+          </div>
+      </div>
     </section>
     <!-- Reservation Success Modal -->
     <div id="reservation-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
@@ -146,7 +180,9 @@
     </div>
 
   </main><!-- End #main -->
-
+   <!--<option value="default">4901 Evergreen Rd Dearborn, MI 48128</option>
+       <option value="address1">500 S State St, Ann Arbor, MI 48109</option>
+       <option value="address2">428 S Shaw Ln, East Lansing, MI 48824</option>-->
   <!-- ======= Footer ======= -->
   <footer id="footer">
     <div class="footer-top">

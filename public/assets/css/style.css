@@ -1216,6 +1216,103 @@ section {
   font-size: 20px;
   padding:10px;
 }
+/*--------------------------------------------------------------
+# Reservation Section
+--------------------------------------------------------------*/
+.reservation-section{
+  background: #f3f2f2;
+  width: 100%;
+}
+/*--------------------------------------------------------------
+# Reservation Forms
+--------------------------------------------------------------*/
+.forms-wrapper{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap:30px;
+  padding: 50px 10px;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+.single-form{
+  width: 100%;
+  padding-top: 20px;
+
+}
+.reservation-form-container{
+  flex: 1 1 500px;
+  max-width:480px;
+  display: flex;
+  justify-content: center;
+}
+
+.reservation-form-container form{
+  padding:20px;
+  border-radius: 5px;
+  box-shadow: 0 5px 10px rgba(0,0,0,.1);
+  background: #fff;
+  text-align: center;
+  width: 500px;
+}
+
+.reservation-form-container form h3{
+  font-size: 30px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  color:#333;
+}
+
+.reservation-form-container form input,
+.reservation-form-container form select{
+  width: 100%;
+  padding:10px 15px;
+  font-size: 17px;
+  margin:8px 0;
+  background: #eee;
+  border-radius: 5px;
+}
+
+.reservation-form-container form select option{
+  background: #fff;
+}
+
+.reservation-form-container form .form-btn{
+  background: rgb(0, 115, 255);
+  color:rgb(255, 255, 255);
+  text-transform: capitalize;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.reservation-form-container form .form-btn:hover{
+  background: rgb(0, 48, 107);
+  color:#fff;
+}
+
+.reservation-form-container form p{
+  margin-top: 10px;
+  font-size: 20px;
+  color:#333;
+}
+
+.reservation-form-container form p a{
+  color:rgb(0, 115, 255);
+}
+
+.reservation-form-container form .error-msg{
+  margin:10px 0;
+  display: block;
+  background: crimson;
+  color:#fff;
+  border-radius: 5px;
+  font-size: 20px;
+  padding:10px;
+}
+.hidden-form{
+  /*display: none;*/
+}
 
 /*--------------------------------------------------------------
 # Gloabl User-Container
