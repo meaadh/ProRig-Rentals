@@ -1311,7 +1311,7 @@ section {
   padding:10px;
 }
 .hidden-form{
-  /*display: none;*/
+  display: none;
 }
 
 /*--------------------------------------------------------------
