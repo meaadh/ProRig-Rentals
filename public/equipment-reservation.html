@@ -121,11 +121,17 @@
              <option value="Lansing" >Lansing</option>
 
           </select>
+          <div style="margin-top: 5px;">
+            <button type="button" id="add-address-btn" style="padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 3px; font-size: 0.9em; cursor: pointer;">+ Add New Address</button>
+          </div>
           <select id="payment" name="payment" required>
             <option value=""disabled selected>-- Choose Payment --</option>
             <option value="Visa" >Visa</option>
 
           </select>
+          <div style="margin-top: 5px;">
+            <button type="button" id="add-payment-btn" style="padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 3px; font-size: 0.9em; cursor: pointer;">+ Add New Payment Method</button>
+          </div>
           <!-- Hidden input for selected equipment -->
           <input type="hidden" name="equipment_ids" id="selected-equipment">
           <input type="hidden" name="total_cost" id="total-cost">

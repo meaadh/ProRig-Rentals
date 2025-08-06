@@ -586,19 +586,169 @@ function showPaymentModal(totalPrice, onConfirm) {
     document.getElementById('address-error').textContent = '';
     document.getElementById('address-success').textContent = '';
   });*/
+  // Function to populate payment dropdown with user's saved payment methods
+  function populatePaymentDropdown() {
+    fetch('/api/mypayments')
+      .then(res => res.json())
+      .then(payments => {
+        const paymentSelect = document.getElementById('payment');
+        if (paymentSelect && payments && payments.length > 0) {
+          // Clear existing options except the default
+          paymentSelect.innerHTML = '<option value="" disabled selected>-- Choose Payment --</option>';
+          
+          // Add user's saved payment methods
+          payments.forEach((payment, index) => {
+            const option = document.createElement('option');
+            option.value = payment.payment_nickname || `payment_${index}`;
+            option.textContent = `${payment.card_type} ending in ${payment.last4} (${payment.payment_nickname || 'Card ' + (index + 1)})`;
+            paymentSelect.appendChild(option);
+          });
+        }
+      })
+      .catch(err => {
+        console.log('Could not load payment methods:', err);
+        // Keep default options if API fails
+      });
+  }
+
+  // Function to populate address dropdown with user's saved addresses
+  function populateAddressDropdown() {
+    fetch('/api/myaddress')
+      .then(res => res.json())
+      .then(addresses => {
+        const addressSelect = document.getElementById('address');
+        if (addressSelect && addresses && addresses.length > 0) {
+          // Clear existing options except the default
+          addressSelect.innerHTML = '<option value="" disabled selected>-- Choose Billing address--</option>';
+          
+          // Add user's saved addresses
+          addresses.forEach((address, index) => {
+            const option = document.createElement('option');
+            option.value = address.address_nickname || `address_${index}`;
+            option.textContent = `${address.address_line1}, ${address.city}, ${address.state} ${address.zip_code} (${address.address_nickname || 'Address ' + (index + 1)})`;
+            addressSelect.appendChild(option);
+          });
+        }
+      })
+      .catch(err => {
+        console.log('Could not load addresses:', err);
+        // Keep default options if API fails
+      });
+  }
+
   // Replace sessionStorage logic with API call to get user's name from server
   document.addEventListener('DOMContentLoaded', function() {
     fetch('/api/userinfo')
       .then(res => res.json())
       .then(data => {
         if (data && data.name) {
-          document.getElementById('customer_name').value = data.name;
-          document.getElementById('user-welcome-name').textContent = data.name;
+          const customerNameField = document.getElementById('customer_name');
+          const welcomeNameField = document.getElementById('user-welcome-name');
+          if (customerNameField) customerNameField.value = data.name;
+          if (welcomeNameField) welcomeNameField.textContent = data.name;
         }
       })
       .catch(() => {
         // fallback: do nothing, default is "Customer"
       });
+
+    // Load user's payment and address information for equipment reservation page
+    if (window.location.pathname.endsWith('equipment-reservation.html')) {
+      populatePaymentDropdown();
+      populateAddressDropdown();
+      
+      // Add event listeners for "Add New" buttons
+      const addPaymentBtn = document.getElementById('add-payment-btn');
+      const addAddressBtn = document.getElementById('add-address-btn');
+      const paymentForm = document.getElementById('Payment-form');
+      const addressForm = document.getElementById('Address-form');
+      
+      if (addPaymentBtn && paymentForm) {
+        addPaymentBtn.addEventListener('click', function() {
+          paymentForm.classList.toggle('hidden-form');
+          addPaymentBtn.textContent = paymentForm.classList.contains('hidden-form') 
+            ? '+ Add New Payment Method' 
+            : '- Hide Payment Form';
+        });
+      }
+      
+      if (addAddressBtn && addressForm) {
+        addAddressBtn.addEventListener('click', function() {
+          addressForm.classList.toggle('hidden-form');
+          addAddressBtn.textContent = addressForm.classList.contains('hidden-form') 
+            ? '+ Add New Address' 
+            : '- Hide Address Form';
+        });
+      }
+      
+      // Handle payment form submission and refresh dropdowns
+      if (paymentForm) {
+        paymentForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const formData = new FormData(paymentForm);
+          
+          fetch('/payments', {
+            method: 'POST',
+            body: new URLSearchParams([...formData])
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.message || data.success || !data.error) {
+              document.getElementById('payments-success').textContent = 'Payment method added successfully!';
+              document.getElementById('payments-error').textContent = '';
+              paymentForm.reset();
+              // Refresh payment dropdown
+              setTimeout(() => {
+                populatePaymentDropdown();
+                paymentForm.classList.add('hidden-form');
+                addPaymentBtn.textContent = '+ Add New Payment Method';
+              }, 1000);
+            } else {
+              document.getElementById('payments-error').textContent = data.error || 'Failed to add payment method';
+              document.getElementById('payments-success').textContent = '';
+            }
+          })
+          .catch(err => {
+            document.getElementById('payments-error').textContent = 'Failed to add payment method';
+            document.getElementById('payments-success').textContent = '';
+          });
+        });
+      }
+      
+      // Handle address form submission and refresh dropdowns
+      if (addressForm) {
+        addressForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const formData = new FormData(addressForm);
+          
+          fetch('/addresses', {
+            method: 'POST',
+            body: new URLSearchParams([...formData])
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.message || data.success || !data.error) {
+              document.getElementById('address-success').textContent = 'Address added successfully!';
+              document.getElementById('address-error').textContent = '';
+              addressForm.reset();
+              // Refresh address dropdown
+              setTimeout(() => {
+                populateAddressDropdown();
+                addressForm.classList.add('hidden-form');
+                addAddressBtn.textContent = '+ Add New Address';
+              }, 1000);
+            } else {
+              document.getElementById('address-error').textContent = data.error || 'Failed to add address';
+              document.getElementById('address-success').textContent = '';
+            }
+          })
+          .catch(err => {
+            document.getElementById('address-error').textContent = 'Failed to add address';
+            document.getElementById('address-success').textContent = '';
+          });
+        });
+      }
+    }
 
     // Show success modal with "Okay" after reload if flag is set
     if (localStorage.getItem('showReservationModal') === '1') {
