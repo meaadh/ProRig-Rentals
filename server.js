@@ -433,7 +433,7 @@ app.post("/addresses", async(req,res)=>{
           $set:{updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)}}
         );
         console.log(`Address added to ${dbname} database for userId:`,user.fname+" "+user.lname);
-        res.json({ message: 'Address added successfully', ...paymentEntry });
+        res.json({ message: 'Address added successfully', ...addressEntry });
 
       }
       else

@@ -146,9 +146,9 @@
             <form id="Payment-form" class="hidden-form" action="http://localhost:3000/payments" method="post">
               <h3>Add Payment Info</h3>
               <input type="text" name="customer_name" id="payment_cardholder_name" required placeholder="Cardholder Name">
-              <input type="text" name="card_number" id="card_number" required placeholder="Card Number (16 digits)" pattern="\\d{16}" maxlength="16" minlength="16" inputmode="numeric" title="Card number must be 16 digits">
+              <input type="text" name="card_number" id="card_number" required placeholder="Card Number (16 digits)" pattern="\d{16}" maxlength="16" minlength="16" inputmode="numeric" title="Card number must be 16 digits">
               <input type="date" name="expiration" id="expiration" required placeholder="Expiration Date:">
-              <input type="text" name="cvv" id="cvv" required placeholder="CVV (4 digits)" pattern="\\d{4}" maxlength="4" minlength="3" inputmode="numeric" title="CVV must be 3 or 4 digits">
+              <input type="text" name="cvv" id="cvv" required placeholder="CVV (3 or 4 digits)" pattern="\d{3,4}" maxlength="4" minlength="3" inputmode="numeric" title="CVV must be 3 or 4 digits">
               <select id="card_type" name="card_type" required>
                 <option value=""disabled selected>-- Choose Card Type --</option>
                 <option value="Visa">Visa</option>
@@ -156,7 +156,7 @@
                 <option value="Discover">Discover</option>
                 <option value="American Express">American Express</option>
               </select>
-              <input type="text" name="zip_code" id="zip_code" required placeholder="Zip Code (5 digits)" pattern="\\d{5}" maxlength="5" minlength="5" inputmode="numeric" title="Zip code must be 5 digits">
+              <input type="text" name="zip_code" id="zip_code" required placeholder="Zip Code (5 digits)" pattern="\d{5}" maxlength="5" minlength="5" inputmode="numeric" title="Zip code must be 5 digits">
               <input type="text" name="payment_nickname" id="payment_nickname" required placeholder="Payment Nickname">
               <input type="submit" name="submit" value="Add Payment Card to Account" class="form-btn">
               <div id="payments-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
@@ -166,10 +166,10 @@
           <div class="reservation-form-container">
             <form id="Address-form" class="hidden-form" action="http://localhost:3000/addresses" method="post">
               <h3>Add Address Info</h3>
-              <label for="city">Street</label>
-              <input type="text" name="street" id="street" required placeholder="e.g., Evergreen">
+              <label for="street">Street</label>
+              <input type="text" name="street" id="street" required placeholder="e.g., Evergreen" minlength="2">
               <label for="city">City</label>
-              <input type="text" name="city" id="city" required placeholder="e.g., Dearborn">
+              <input type="text" name="city" id="city" required placeholder="e.g., Dearborn" minlength="2">
               <label for="state">State</label>
               <select name="state" id="state" required>
                 <option value="" disabled selected>Select State</option>
@@ -225,11 +225,11 @@
                 <option value="WY">Wyoming</option>
               </select>
               <label for="zip_code">Zip Code</label>
-              <input type="text" name="zip_code" id="zip_code" required placeholder="e.g., 48128">
+              <input type="text" name="zip_code" id="zip_code" required placeholder="e.g., 48128" pattern="\d{5}" maxlength="5" minlength="5" inputmode="numeric" title="Zip code must be 5 digits">
               <label for="phone_number">Phone Number</label>
-              <input type="text" name="phone_number" id="phone_number" required placeholder="e.g., 248-420-6969">
+              <input type="text" name="phone_number" id="phone_number" required placeholder="e.g., 248-420-6969" pattern="\d{3}-\d{3}-\d{4}" title="Phone number must be in the format 248-420-6969">
               <label for="address_nickname">Address Nickname</label>
-              <input type="text" name="address_nickname" id="address_nickname" required placeholder="Default">
+              <input type="text" name="address_nickname" id="address_nickname" required placeholder="Default" minlength="2">
               <input type="submit" name="submit" value="Add Address to Account" class="form-btn">
               <div id="address-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
               <div id="address-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
@@ -311,7 +311,125 @@
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
   <script>
-    
+    // Client-side validation for Add Address form
+    document.addEventListener('DOMContentLoaded', function() {
+      const addressForm = document.getElementById('Address-form');
+      if (addressForm) {
+        addressForm.addEventListener('submit', function(e) {
+          let valid = true;
+          let errorMsg = '';
+          const street = document.getElementById('street');
+          const city = document.getElementById('city');
+          const state = document.getElementById('state');
+          const zip = document.getElementById('zip_code');
+          const phone = document.getElementById('phone_number');
+          const nickname = document.getElementById('address_nickname');
+          // Check required fields
+          if (!street.value.trim() || street.value.length < 2) {
+            valid = false;
+            errorMsg += 'Street is required and must be at least 2 characters.\n';
+          }
+          if (!city.value.trim() || city.value.length < 2) {
+            valid = false;
+            errorMsg += 'City is required and must be at least 2 characters.\n';
+          }
+          if (!state.value) {
+            valid = false;
+            errorMsg += 'State is required.\n';
+          }
+          if (!zip.value.match(/^\d{5}$/)) {
+            valid = false;
+            errorMsg += 'Zip code must be exactly 5 digits.\n';
+          }
+          if (!phone.value.match(/^\d{3}-\d{3}-\d{4}$/)) {
+            valid = false;
+            errorMsg += 'Phone number must be in the format 248-420-6969.\n';
+          }
+          if (!nickname.value.trim() || nickname.value.length < 2) {
+            valid = false;
+            errorMsg += 'Address nickname is required and must be at least 2 characters.';
+          }
+          if (!valid) {
+            e.preventDefault();
+            const errorDiv = document.getElementById('address-error');
+            errorDiv.textContent = errorMsg;
+            errorDiv.style.display = 'block';
+            // Hide success if error
+            document.getElementById('address-success').textContent = '';
+          } else {
+            const errorDiv = document.getElementById('address-error');
+            errorDiv.textContent = '';
+            errorDiv.style.display = 'none';
+          }
+        });
+      }
+    });
+  </script>
+  <script>
+    // Show modal popup on successful payment method or address creation
+    document.addEventListener('DOMContentLoaded', function() {
+      // Payment modal logic
+      const paymentForm = document.getElementById('Payment-form');
+      const paymentModal = document.getElementById('payment-modal');
+      const paymentModalTitle = document.getElementById('payment-modal-title');
+      const paymentModalBody = document.getElementById('payment-modal-body');
+      if (paymentForm) {
+        paymentForm.addEventListener('submit', function(e) {
+          setTimeout(function() {
+            const successDiv = document.getElementById('payments-success');
+            if (successDiv && successDiv.textContent.trim() !== '') {
+              if (paymentModal && paymentModalTitle && paymentModalBody) {
+                paymentModalTitle.textContent = 'Payment method added successfully!';
+                paymentModalBody.innerHTML = '<button id="close-payment-modal-btn" style="margin-top:20px;padding:8px 24px;background:#28a745;color:#fff;border:none;border-radius:5px;font-size:1.1em;cursor:pointer;">Okay</button>';
+                paymentModal.style.display = 'flex';
+                // Close button handler
+                document.getElementById('close-payment-modal-btn').onclick = function() {
+                  paymentModal.style.display = 'none';
+                };
+              }
+            }
+          }, 500);
+        });
+      }
+      if (paymentModal) {
+        paymentModal.addEventListener('click', function(e) {
+          if (e.target === paymentModal) {
+            paymentModal.style.display = 'none';
+          }
+        });
+      }
+
+      // Address modal logic
+      const addressForm = document.getElementById('Address-form');
+      const addressModal = document.getElementById('address-modal');
+      const addressModalTitle = document.getElementById('address-modal-title');
+      const addressModalBody = document.getElementById('address-modal-body');
+      if (addressForm) {
+        addressForm.addEventListener('submit', function(e) {
+          setTimeout(function() {
+            const successDiv = document.getElementById('address-success');
+            if (successDiv && successDiv.textContent.trim() !== '') {
+              if (addressModal && addressModalTitle && addressModalBody) {
+                addressModalTitle.textContent = 'Address added successfully!';
+                addressModalBody.innerHTML = '<button id="close-address-modal-btn" style="margin-top:20px;padding:8px 24px;background:#007bff;color:#fff;border:none;border-radius:5px;font-size:1.1em;cursor:pointer;">Okay</button>';
+                addressModal.style.display = 'flex';
+                // Close button handler
+                document.getElementById('close-address-modal-btn').onclick = function() {
+                  addressModal.style.display = 'none';
+                };
+              }
+            }
+          }, 500);
+        });
+      }
+      if (addressModal) {
+        addressModal.addEventListener('click', function(e) {
+          if (e.target === addressModal) {
+            addressModal.style.display = 'none';
+          }
+        });
+      }
+    });
   </script>
 
 </body>
