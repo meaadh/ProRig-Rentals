@@ -22,7 +22,6 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({
     extended: true
 }));
-
 app.use(session({
   secret: 'ProRigs123',
   resave: false,
@@ -94,6 +93,33 @@ app.post("/contact_us", async(req,res)=>{
   }
 })
 app.post("/sign_up", async(req,res)=>{
+  const{fname,lname,email,username,password}=req.body;
+  const hash=crypto.createHash("sha256").update(password).digest("hex");
+  try {
+    const userId= await getNextUserID();
+    const data = {
+      userId,
+      fname,
+      lname,
+      email,
+      username,
+      password: hash,
+      user_type:"customer",
+      address:[],
+      payment:[],
+      created_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
+      updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
+    };
+  
+    await db.collection("RentalUsers").insertOne(data);
+    console.log(`Successfully into to the ${dbname} database with userId:`,userId);
+    return res.redirect("loginform.html");
+  } catch(err) {
+    console.log(`Insert error to the ${dbname} database`,err);
+    return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Failed: " + err.message)}`);
+  }
+})
+app.post("/managment", async(req,res)=>{
   const{fname,lname,email,username,password,user_type}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
   try {
@@ -112,7 +138,9 @@ app.post("/sign_up", async(req,res)=>{
       email,
       username,
       password: hash,
-      user_type
+      user_type,
+      created_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
+      updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
   
     await db.collection("RentalUsers").insertOne(data);
@@ -123,7 +151,6 @@ app.post("/sign_up", async(req,res)=>{
     return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Failed: " + err.message)}`);
   }
 })
-
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -137,16 +164,16 @@ app.post('/login', async (req, res) => {
 
     if (user) {
       // Print user's full name to the console at login
-      console.log("User logged in:", user.fname + " " + user.lname);
+      console.log("User Logged In:", user.fname + " " + user.lname);
       if (user.user_type === 'admin') {
-        req.session.admin_name = user.lname;
+        req.session.userData ={fname:user.fname,lname:user.lname,useName:user.username};
         return res.redirect('/adminPage.html');
       } else {
         req.session.user_name = user.lname;
+        req.session.userData ={fname:user.fname,lname:user.lname,useName:user.username};
 
-        if (user.user_type === 'customer') return res.redirect('/customer.html');
-        if (user.user_type === 'maintainance') return res.redirect('/maintainance.html');
-        if (user.user_type === 'user') return res.redirect('/userpage.html');
+        if (user.user_type === 'customer') return res.redirect('/equipment-reservation.html');
+        if (user.user_type === 'maintainance') return res.redirect('/maintainancePage.html');
 
         return res.send('Unknown user type');
       }
@@ -158,31 +185,40 @@ app.post('/login', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
-
-app.get('/adminPage.html', (req, res) => {
-  res.send(`Welcome User: ${req.session.user_name}`);
-});
-app.get('/userPage.html', (req, res) => {
-  res.send(`Welcome User: ${req.session.user_name}`);
-});
-app.get('/maintainance.html', (req, res) => {
-  res.send(`Welcome Family: ${req.session.user_name}`);
-});
-app.get('/customer.html', (req, res) => {
-  res.send(`Welcome Customer: ${req.session.user_name}`);
-});
 app.get("/",(req,res)=>{
   res.set({"Access-control-Allow-Origin": "*" });
   return res.redirect("register_form.html");
 });
 app.get('/logout', (req, res) => {
+  const user=req.session.userData;
+  if(user)
+  {
+    console.log("User Logged Out",user.fname + " " + user.lname);
+  }
+  else
+  {
+    console.log("user not found in database");
+
+  }
   req.session.destroy(err => {
     if (err) {
       console.error("Logout failed:", err);
       return res.status(500).send("Logout failed");
     }
-    res.redirect('/loginform.html');
+    res.redirect('/home.html');
   });
+});
+app.get('/userdetail', (req, res) => {
+  const user=req.session.userData;
+
+  if(user)
+    {
+    res.json({ name: user.fname + " " + user.lname });
+    }
+    else
+    {
+      console.log("User not found in database");
+    }
 });
 app.get('/api/equipments', async (req, res) => {
   try {
@@ -193,10 +229,11 @@ app.get('/api/equipments', async (req, res) => {
     res.status(500).json({ error: "Failedd to fetch equipments" });
   }
 });
+
 app.post('/api/reservations', async (req, res) => {
   try {
-    const { customer_name, end_date, equipment_ids, total_cost } = req.body;
-    if (!customer_name || !end_date || !equipment_ids) {
+    const { customer_name, end_date, location, address, payment, equipment_ids, total_cost } = req.body;
+    if (!customer_name || !end_date|| !location|| !address|| !payment || !equipment_ids) {
       return res.status(400).json({ error: 'All fields are required' });
     }
     // Parse equipment_ids if it's a JSON string
@@ -230,13 +267,19 @@ app.post('/api/reservations', async (req, res) => {
       }
     }
     // --- End new code ---
-
     const data = {
       customer_name,
       end_date,
+      order_date:new Date().toISOString().split('T')[0],
+      location,
+      address,
+      payment,
+      status: "Renting",
+      history_equipment_ids: equipmentIds,
       equipment_ids: equipmentIds,
       ...(user_id && { user_id }), // Only add user_id if found
-      ...(total_cost && { total_cost: Number(total_cost) }) // Added  total_cost if present
+      ...(total_cost && { total_cost: Number(total_cost) }), // Added  total_cost if present
+      created_at:new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
     await db.collection("Reservations").insertOne(data);
 
@@ -279,6 +322,214 @@ app.post('/api/reservations', async (req, res) => {
     res.status(500).json({ error: "Failed to create reservation: " + err.message });
   }
 });
+app.post("/payments", async(req,res)=>{
+  const{customer_name,card_number,expiration,card_type,payment_nickname}=req.body;
+  if (!customer_name || !card_number|| !expiration|| !card_type|| !payment_nickname) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+  try {
+    let user_id = null;
+    if (req.session && req.session.user_name) 
+    {
+      const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+      if (user && user._id) {
+        user_id = user._id;
+      }
+      if(user&&user._id)
+      {
+        function formatExpiration(dateString)
+        {
+          const date=new Date(dateString);
+          const month= String(date.getMonth()+1).padStart(2,'0');
+          const year=String(date.getFullYear()).slice(-2);
+          return`${month}/${year}`;
+        }
+
+        const cleanedExpiration=formatExpiration(expiration);
+        const card_last4=card_number.slice(-4);
+
+        const paymentEntry = {
+          customer_name,
+          last4:card_last4,
+          card_type,
+          expiration:cleanedExpiration,
+          payment_nickname,
+          status:"active",
+          added_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
+        };
+        await db.collection("RentalUsers").updateOne(
+          {_id:user._id},
+          {$push:{payment:paymentEntry},
+          $set:{updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)}}
+        );
+        console.log(`Payment method added to ${dbname} database for userId:`,user.fname+" "+user.lname);
+        res.json({ message: 'Payment added successfully', ...paymentEntry });
+
+      }
+      else
+      {
+        throw new Error("User not found in session.");
+      }
+    }
+    else
+    {
+      throw new Error("User session is not available");
+
+    }
+
+   
+  } catch(err) {
+    console.log(`Payment Insert error to the ${dbname} database`,err);
+    return res.redirect(`equipment-reservation.html`);
+  }
+})
+app.post("/addresses", async(req,res)=>{
+  const{street,city,state,zip_code,phone_number,address_nickname}=req.body;
+  if (!street|| !city|| !state||!zip_code|| !phone_number|| !address_nickname) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+  try {
+    let user_id = null;
+    if (req.session && req.session.user_name) 
+    {
+      const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+      if (user && user._id) {
+        user_id = user._id;
+      }
+   
+      if(user&&user._id)
+      {
+        const addressEntry = {
+          customer_name:user.fname+" "+user.lname,
+          address_line1:street,
+          city,
+          state,
+          zip_code,
+          phone_number,
+          address_nickname,
+          added_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
+        };
+        await db.collection("RentalUsers").updateOne(
+          {_id:user._id},
+          {$push:{address:addressEntry},
+          $set:{updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)}}
+        );
+        console.log(`Address added to ${dbname} database for userId:`,user.fname+" "+user.lname);
+        res.json({ message: 'Address added successfully', ...paymentEntry });
+
+      }
+      else
+      {
+        throw new Error("User not found in session.");
+      }
+    }
+    else
+    {
+      throw new Error("User session is not available");
+
+    }
+
+   
+  } catch(err) {
+    console.log(`Address Insert error to the ${dbname} database`,err);
+    return res.redirect(`equipment-reservation.html`);
+  }
+})
+app.post('/api/return', async (req, res) => {
+  try {
+    if (!req.session || !req.session.user_name) {
+      return res.status(401).json({ success: false, error: "Not logged in" });
+    }
+    const { equipmentId } = req.body;
+    if (!equipmentId) {
+      return res.status(400).json({ success: false, error: "No equipment ID provided" });
+    }
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    // Find reservation(s) containing this equipment for this user (compare as string)
+    const reservations = await db.collection('Reservations').find({ user_id: user._id }).toArray();
+    let reservation = null;
+    let matchedIdType = null;
+    for (const resv of reservations) {
+      if (Array.isArray(resv.equipment_ids)) {
+        for (const id of resv.equipment_ids) {
+          if (
+            (typeof id === 'object' && id && id._bsontype && id.toString() === equipmentId) ||
+            (typeof id === 'string' && id === equipmentId)
+          ) {
+            reservation = resv;
+            matchedIdType = typeof id;
+            break;
+          }
+        }
+      }
+      if (reservation) break;
+    }
+    if (!reservation) {
+      return res.status(404).json({ success: false, error: "Reservation not found for this equipment" });
+    }
+
+    // Remove equipment from reservation
+    let updatedEquipmentIds = reservation.equipment_ids.filter(id => {
+      if (typeof id === 'object' && id && id._bsontype) {
+        return id.toString() !== equipmentId;
+      }
+      return id !== equipmentId;
+    });
+    if (updatedEquipmentIds.length === 0) {
+     await db.collection('Reservations').updateOne(
+      {_id:reservation._id},
+      {$set: {equipment_ids:[],status:"Complete",updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)} }
+     );
+    } else {
+      await db.collection('Reservations').updateOne(
+        { _id: reservation._id },
+        { $set: { equipment_ids: updatedEquipmentIds } }
+      );
+    }
+
+    // --- NEW LOGIC: Increment quantity_available and update availability ---
+    let eqId = ObjectId.isValid(equipmentId) ? new ObjectId(equipmentId) : equipmentId;
+    const equipment = await db.collection('Equipments').findOne({ _id: eqId });
+    if (equipment) {
+      const newQty = (equipment.quantity_available || 0) + 1;
+      await db.collection('Equipments').updateOne(
+        { _id: eqId },
+        {
+          $set: {
+            quantity_available: newQty,
+            availability: newQty > 0
+          },
+          $unset: { unavailable_until: "" }
+        }
+      );
+    }
+    // --- END NEW LOGIC ---
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("Return error:", err);
+    return res.status(500).json({ success: false, error: "Server error: " + err.message });
+  }
+});
+
+// Automatically make equipment available again after the return date
+setInterval(async () => {
+  try {
+    const now = new Date();
+    // --- NEW LOGIC: Only set availability true if quantity_available > 0 ---
+    await db.collection("Equipments").updateMany(
+      { unavailable_until: { $lte: now }, availability: false, quantity_available: { $gt: 0 } },
+      { $set: { availability: true }, $unset: { unavailable_until: "" } }
+    );
+    // --- END NEW LOGIC ---
+  } catch (err) {
+    console.error("Error updating equipment availability:", err);
+  }
+}, 60 * 1000); // Runs every 1 minute
 
 app.get('/api/userinfo', async (req, res) => {
   try {
@@ -301,7 +552,6 @@ app.get('/api/userinfo', async (req, res) => {
     return res.json({ name: "Customer" });
   }
 });
-
 app.get('/api/myrentals', async (req, res) => {
   try {
     // Check if user is logged in
@@ -353,96 +603,123 @@ app.get('/api/myrentals', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user rentals" });
   }
 });
-
-app.post('/api/return', async (req, res) => {
+app.get('/api/myreservations', async (req, res) => {
   try {
     if (!req.session || !req.session.user_name) {
-      return res.status(401).json({ success: false, error: "Not logged in" });
+      return res.status(401).json({ error: "Not logged in" });
     }
-    const { equipmentId } = req.body;
-    if (!equipmentId) {
-      return res.status(400).json({ success: false, error: "No equipment ID provided" });
-    }
+
     const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
-    if (!user) {
-      return res.status(404).json({ success: false, error: "User not found" });
-    }
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-    // Find reservation(s) containing this equipment for this user (compare as string)
     const reservations = await db.collection('Reservations').find({ user_id: user._id }).toArray();
-    let reservation = null;
-    let matchedIdType = null;
-    for (const resv of reservations) {
-      if (Array.isArray(resv.equipment_ids)) {
-        for (const id of resv.equipment_ids) {
-          if (
-            (typeof id === 'object' && id && id._bsontype && id.toString() === equipmentId) ||
-            (typeof id === 'string' && id === equipmentId)
-          ) {
-            reservation = resv;
-            matchedIdType = typeof id;
-            break;
-          }
-        }
-      }
-      if (reservation) break;
-    }
-    if (!reservation) {
-      return res.status(404).json({ success: false, error: "Reservation not found for this equipment" });
-    }
+    if (reservations.length === 0) return res.json([]);
 
-    // Remove equipment from reservation
-    let updatedEquipmentIds = reservation.equipment_ids.filter(id => {
-      if (typeof id === 'object' && id && id._bsontype) {
-        return id.toString() !== equipmentId;
-      }
-      return id !== equipmentId;
+    const allEquipmentIds = reservations.flatMap(r => r.history_equipment_ids || []);
+    const uniqueIds = [...new Set(allEquipmentIds.map(id => id.toString()))];
+    const objectIds = uniqueIds.map(id => ObjectId.isValid(id) ? new ObjectId(id) : null).filter(Boolean);
+
+    const equipmentMap = {};
+    const equipmentDocs = await db.collection('Equipments').find({ _id: { $in: objectIds } }).toArray();
+    equipmentDocs.forEach(eq => {
+      equipmentMap[eq._id.toString()] = eq.name || eq.equipmentName || "Equipment";
     });
-    if (updatedEquipmentIds.length === 0) {
-      await db.collection('Reservations').deleteOne({ _id: reservation._id });
-    } else {
-      await db.collection('Reservations').updateOne(
-        { _id: reservation._id },
-        { $set: { equipment_ids: updatedEquipmentIds } }
-      );
-    }
 
-    // --- NEW LOGIC: Increment quantity_available and update availability ---
-    let eqId = ObjectId.isValid(equipmentId) ? new ObjectId(equipmentId) : equipmentId;
-    const equipment = await db.collection('Equipments').findOne({ _id: eqId });
-    if (equipment) {
-      const newQty = (equipment.quantity_available || 0) + 1;
-      await db.collection('Equipments').updateOne(
-        { _id: eqId },
-        {
-          $set: {
-            quantity_available: newQty,
-            availability: newQty > 0
-          },
-          $unset: { unavailable_until: "" }
-        }
-      );
-    }
-    // --- END NEW LOGIC ---
+    // Build result
+    const result = reservations.map(r => ({
+      order_id: r._id || 'N/A',
+      order_date: r.order_date,
+      end_date: r.end_date,
+      status: r.status || "Renting",
+      location: r.location || "",
+      total_cost: r.total_cost || 0,
+      items: (r.history_equipment_ids || []).map(id => equipmentMap[id.toString()] || "Unknown")
+    }));
 
-    return res.json({ success: true });
+    res.json(result);
   } catch (err) {
-    console.error("Return error:", err);
-    return res.status(500).json({ success: false, error: "Server error: " + err.message });
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch reservations" });
   }
 });
-
-// Automatically make equipment available again after the return date
-setInterval(async () => {
+app.get('/api/mypayments', async (req, res) => {
   try {
-    const now = new Date();
-    // --- NEW LOGIC: Only set availability true if quantity_available > 0 ---
-    await db.collection("Equipments").updateMany(
-      { unavailable_until: { $lte: now }, availability: false, quantity_available: { $gt: 0 } },
-      { $set: { availability: true }, $unset: { unavailable_until: "" } }
-    );
-    // --- END NEW LOGIC ---
+    if (!req.session || !req.session.user_name) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const payments =user.payment||[];
+
+
+    // Build result
+    const result = payments.map((p,index) => ({
+      customer_name: p.customer_name || 'N/A',
+      last4: p.last4,
+      expiration: p.expiration,
+      status: p.status || "Active",
+      card_type:p.card_type|| "N/A",
+      payment_nickname: p.payment_nickname || "N/A"
+    }));
+
+    res.json(result);
   } catch (err) {
-    console.error("Error updating equipment availability:", err);
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch Payment Methods" });
   }
-}, 60 * 1000); // Runs every 1 minute
+});
+app.get('/api/myaddress', async (req, res) => {
+  try {
+    if (!req.session || !req.session.user_name) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const addresses = user.address||[];
+
+    // Build result
+    const result = addresses.map((p,index) => ({
+      customer_name:p.custumer_name||"N/A",
+      address_line1: p.address_line1,
+      city: p.city,
+      state: p.state,
+      zip_code:p.zip_code,
+      phone_number:p.phone_number ||"N/A",
+      address_nickname: p.address_nickname || "Saved Address"
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch Address Book" });
+  }
+});
+app.delete('/api/delete-payment', async (req, res) => {
+  const{last4,expiration}=req.body;
+  if (!req.session || !req.session.user_name) {
+    return res.status(401).json({ error: "Not logged in" });
+  }
+
+  try {
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const result =await db.collection('RentalUsers').updateOne({_id:user._id},{$pull:{payment:{last4,expiration}}});
+    if(result.modifiedCount>0)
+    {
+      res.json({success:true});
+    }
+    else
+    {
+      res.json({success:false,error: "Payment not found"});
+
+    }
+  } catch (err) {
+    console.error('Delete payment error',err);
+    res.status(500).json({ error: "Failed to remove Payment Method" });
+  }
+});

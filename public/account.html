@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>ProRigs Rentals</title>
+  <meta content="" name="descriptison">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon_io/favicon.ico" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,600,600i,700,700i,900" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/icofont/icofont.min.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/animate.css/animate.min.css" rel="stylesheet">
+  <link href="assets/vendor/venobox/venobox.css" rel="stylesheet">
+  <link href="assets/vendor/owl.carousel/assets/owl.carousel.min.css" rel="stylesheet">
+  <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: Mamba - v2.3.0
+  * Template URL: https://bootstrapmade.com/mamba-one-page-bootstrap-template-free/
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body>
+ <header id="header">
+    <div class="container">
+
+      <div class="logo float-left">
+        <a href="home.html"><img src="assets/img/ProRigRental Full Logo.png" alt="" class="img-fluid"></a>
+      </div>
+      <div class="mobile">
+        <div class="login float-right">
+          <h1><a href="home.html" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
+              | Logout</a></h1>
+        </div>
+      </div>
+      <nav class="nav-menu float-right d-none d-lg-block">
+        <ul id="main-navbar-list">
+          <li><a href="home.html">Home</a></li>
+          <li><a href="home.html#about">About Us</a></li>
+          <li><a href="home.html#location">Locations</a></li>
+          <li><a href="Home.html#contact">Contact Us</a></li>
+          <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
+          <li id="login-link-li">
+            <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-logout"></i>
+              | Logout</a>
+          </li>
+        </ul>
+      </nav><!-- .nav-menu -->
+
+    </div>
+  </header><!-- End Header -->
+  <div class="hero-text">
+    <h2 class="animate__animated animate__fadeInDown"><span>ProRigs Rental Corporation</span></h2>
+    <h6 class="animate__animated animate__fadeInUp">A Heavy Equipment Solutions Company</h6>
+  </div>
+  <main id="main" style="margin-top: 80px;">
+
+    <div class="user-container">
+      <div class="content">
+        <h1><span>Account Dashboard</span>
+        <h3>Welcome Back, <span id="user-welcome-name">Customer</span></h3>
+      </div>
+    </div>
+
+    <section id="account" class="container" style="max-width: 1200px;">
+
+      <button class="collapsible">All Orders</button>
+      <div class="content">
+        <section class="account-section">
+          <h3>Your Latest Orders</h3>
+          <div class="table-wrapper">
+            <table class="responsive-table">
+                <thead>
+                  <tr>
+                    <th>OrderID</th>
+                    <th>Start Date</th>
+                    <th>Return Date</th>
+                    <th>Status</th>
+                    <th>Items</th>
+                    <th>Pick-Up Location</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-body">
+                </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      
+      <button class="collapsible">Address Saved</button>
+      <div class="content">
+        <section class="address-section">
+          <h3>Address</h3>
+          <button id="add-address">Add Address</button>
+            <div class="row" id="address-card-container">
+            </div>
+        </section>
+      </div>
+      
+      <button class="collapsible">Payment Saved</button>
+      <div class="content">
+        <section class="payment-section">
+          <h3>Payments</h3>
+            <table class="responsive-table">
+                <thead>
+                  <tr>
+                    <th>last4</th>
+                    <th>Name</th>
+                    <th>Expiration</th>
+                    <th>Status</th>
+                    <th>card_type</th>
+                    <th>Payment Nickname</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="payment-body">
+                </tbody>
+            </table>
+        </section>
+      </div>
+
+
+    </section>
+    <section id="return" class="container" style="max-width: 800px;">
+      <div class="section-title">
+        <h2>Return Your Rented Equipment</h2>
+        <p>Select the equipment you want to return from your current rentals.</p>
+      </div>
+      <div id="return-success" class="alert alert-success" style="display:none;"></div>
+      <div id="return-error" class="alert alert-danger" style="display:none;"></div>
+      <form id="return-form">
+        <div class="form-group">
+          <label for="equipmentSelect">Your Rented Equipment</label>
+          <select class="form-control" id="equipmentSelect" name="equipmentId" required>
+            <option value="">Loading...</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Return Equipment</button>
+      </form>
+      <div id="no-equipment-message" class="alert alert-info" style="display:none;">You have no equipment to return.</div>
+    </section>
+  </main>
+  <footer id="footer">
+    <div class="footer-top">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12 footer-links">            
+            <ul>
+              <li><a href="tos.html">Terms of Services </a></li>
+              <li><a href="privacy.html">Privacy Policy</a></li>
+              <li><a href="cookies_settings.html">Cookies Settings</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="copyright">
+        &copy; Copyright <strong><span>ProRigs Rentals Corporation</span></strong>. All Rights Reserved
+      </div>
+      <div class="credits">
+        <!-- All the links in the footer should remain intact. -->
+        <!-- You can delete the links only if you purchased the pro version. -->
+        <!-- Licensing information: https://bootstrapmade.com/license/ -->
+        <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/mamba-one-page-bootstrap-template-free/ -->
+        Template by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/jquery/jquery.min.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
+  <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
+  <script src="assets/vendor/venobox/venobox.min.js"></script>
+  <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
+  <script src="assets/vendor/counterup/counterup.min.js"></script>
+  <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
+  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+  <script>
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+      coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.maxHeight){
+          content.style.maxHeight = null;
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+        } 
+      });
+    }
+    // Prevent navbar from lifting up when clicking "Return Equipment" on this page
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropdownLink = document.getElementById('account-dropdown');
+      if (dropdownLink && window.location.pathname.endsWith('account.html')) {
+        dropdownLink.addEventListener('click', function(e) {
+          e.preventDefault();
+        });
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/userdetail')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.name) {
+            document.getElementById('user-welcome-name').textContent = data.name;
+          }
+        })
+        .catch(() => {
+          // fallback: do nothing, default is "Customer"
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/myreservations')
+      .then(res => res.json())
+      .then(reservations => {
+        const tbody = document.getElementById('orders-body');
+        tbody.innerHTML = '';
+        reservations.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td data-label="OrderID">${r.order_id}</td>
+            <td data-label="Start Date">${new Date(r.order_date).toLocaleDateString()}</td>
+            <td data-label="Return Date">${new Date(r.end_date).toLocaleDateString()}</td>
+            <td data-label="Status">${r.status}</td>
+            <td data-label="Items">${r.items.join(', ')}</td>
+            <td data-label="Pick-Up Location">${r.location}</td>
+            <td data-label="Total">${r.total_cost}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+     })
+        .catch(err => {
+          console.error('Error loading reservations:', err);
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/mypayments')
+      .then(res => res.json())
+      .then(mypayment => {
+        const tbody = document.getElementById('payment-body');
+        tbody.innerHTML = '';
+        mypayment.forEach(p => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td data-label="last4">${p.last4}</td>
+            <td data-label="Name">${p.customer_name}</td>
+            <td data-label="Expiration">${p.expiration}</td>
+            <td data-label="Status">${p.status}</td>
+            <td data-label="card_type">${p.card_type}</td>
+            <td data-label="Payment Nickname">${p.payment_nickname}</td>
+            <td data-label="Actions"><button id="delete" class="delete-btn" data-last4="${p.last4}" data-expiration="${p.expiration}">Delete</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+     })
+        .catch(err => {
+          console.error('Error loading payments:', err);
+        });
+    });
+    document.addEventListener('click', () => {
+      if(e.target.classList.contains('delete-btn'))
+      {
+        const last4=e.target.dataset.last4;
+        const expiration=e.target.dataset.expiration;
+        fetch('/api/deletepayment',{method:'DELETE',headers:{'Content-Type':'application/json'}, body: JSON.stringify({last4,expiration})})
+        .then(res => res.json())
+        .then(data => {
+          if(data.success)
+          {
+            e.target.closest('tr').remove();
+          }
+          else
+          {
+            alert('Failed to delete payment');
+          }
+        })
+        .catch(err => {
+          console.error('Error deleting payment:', err);
+        });
+      }
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/myaddress')
+      .then(res => res.json())
+      .then(myaddress => {
+        const container=document.getElementById('address-card-container');
+        container.innerHTML='';
+          myaddress.forEach(addr=>{
+            const card=document.createElement('div');
+            card.className= 'col-md-6 d-flex align-items-stretch';
+            card.innerHTML=`
+              <div class="info-box w-100">
+                <h3>${addr.address_nickname||'Saved Address'}</h3>
+                <div class="info-line">
+                  <i class="bx bx-user"></i>
+                  ${addr.customer_name}
+                </div>
+                <div class="info-line">
+                  <i class="bx bx-map"></i>
+                  ${addr.address_line1} ${addr.city}, ${addr.state} ${addr.zip_code}
+                </div>
+                <div class="info-line">
+                  <i class="bx bx-phone-call"></i>
+                  ${addr.phone_number}
+                </div>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        })
+        .catch(err => {
+          console.error('Error loading address:', err);
+        });
+    });
+
+    // Fetch user's rented equipment and populate the select
+    function loadUserEquipment() {
+      fetch('/api/myrentals')
+        .then(res => {
+          if (!res.ok) throw new Error('Network response was not ok');
+          return res.json();
+        })
+        .then(data => {
+          const select = document.getElementById('equipmentSelect');
+          const noMsg = document.getElementById('no-equipment-message');
+          select.innerHTML = '';
+          if (Array.isArray(data) && data.length > 0) {
+            data.forEach(item => {
+              const option = document.createElement('option');
+              // Show quantity if available
+              option.value = item.id;
+              option.textContent = (item.name ? item.name + ' - ' : '') + item.id + (item.quantity_available !== undefined ? ` (Available: ${item.quantity_available})` : '');
+              select.appendChild(option);
+            });
+            select.required = true;
+            select.style.display = '';
+            noMsg.style.display = 'none';
+          } else {
+            select.style.display = 'none';
+            noMsg.textContent = 'You have no equipment to return.';
+            noMsg.style.display = '';
+          }
+        })
+        .catch(() => {
+          const select = document.getElementById('equipmentSelect');
+          const noMsg = document.getElementById('no-equipment-message');
+          select.style.display = 'none';
+          noMsg.textContent = 'Unable to load your rentals. Please make sure you are logged in and have active rentals.';
+          noMsg.style.display = '';
+        });
+    }
+    loadUserEquipment();
+
+    // Handle return form submission
+    document.getElementById('return-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const select = document.getElementById('equipmentSelect');
+      const equipmentId = select.value;
+      document.getElementById('return-success').style.display = 'none';
+      document.getElementById('return-error').style.display = 'none';
+      if (!equipmentId) {
+        document.getElementById('return-error').textContent = 'Please select equipment to return.';
+        document.getElementById('return-error').style.display = 'block';
+        return;
+      }
+      fetch('/api/return', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ equipmentId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('return-success').textContent = 'Equipment returned successfully!';
+          document.getElementById('return-success').style.display = 'block';
+          document.getElementById('return-form').reset();
+          loadUserEquipment();
+        } else {
+          document.getElementById('return-error').textContent = data.error || 'Failed to return equipment.';
+          document.getElementById('return-error').style.display = 'block';
+        }
+      })
+      .catch(() => {
+        document.getElementById('return-error').textContent = 'Server error. Please try again.';
+        document.getElementById('return-error').style.display = 'block';
+      });
+    });
+  </script>
+</body>
+
+</html>

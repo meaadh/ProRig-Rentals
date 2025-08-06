@@ -29,81 +29,6 @@
 
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
-  <style>
-    /* Ensure equipment cards are the same height and organized */
-    .event-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px 0;
-    }
-
-    .event-item {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 24px;
-    }
-
-    .event-item .card {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: stretch;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      border-radius: 8px;
-      border: 1px solid #eee;
-      min-height: 370px;
-    }
-
-    .event-item .card img {
-      width: 100%;
-      height: 180px;
-      object-fit: contain;
-      background: #f8f8f8;
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
-    }
-
-    /* Ensure location/team images fit nicely */
-    .picture img {
-      width: 100%;
-      max-height: 220px;
-      object-fit: cover;
-      border-radius: 8px;
-      background: #f8f8f8;
-      display: block;
-      margin: 0 auto;
-    }
-
-    .event-item .card-text {
-      flex: 1 1 auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 16px;
-    }
-
-    .event-item h2,
-    .event-item h3 {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .event-item p {
-      margin-bottom: 0.5rem;
-      font-size: 0.97rem;
-    }
-
-    @media (max-width: 991.98px) {
-      .event-item {
-        margin-bottom: 20px;
-      }
-
-      .picture img {
-        max-height: 160px;
-      }
-    }
-  </style>
-
   <!-- =======================================================
   * Template Name: Mamba - v2.3.0
   * Template URL: https://bootstrapmade.com/mamba-one-page-bootstrap-template-free/
@@ -113,32 +38,6 @@
 </head>
 
 <body>
-   <div id="error-message" style="color: red; font-weight: bold;"></div>
-   <div id="success-message" style="color: rgb(34, 255, 0); font-weight: bold;"></div>
-
-   <script>
-      const params = new URLSearchParams(window.location.search);
-      const error = params.get("error");
-      const success = params.get("success");
-
-      if (error) {
-         document.getElementById("error-message").textContent = decodeURIComponent(error);
-
-         const cleanUrl = window.location.origin + window.location.pathname;
-         window.history.replaceState({}, document.title, cleanUrl);
-      }
-      else if (success) {
-         document.getElementById("success-message").textContent = decodeURIComponent(success);
-
-         const cleanUrl = window.location.origin + window.location.pathname;
-         window.history.replaceState({}, document.title, cleanUrl);
-
-         // Reload the page after 2 seconds
-         setTimeout(() => {
-           window.location.reload();
-         }, 500);
-      }
-   </script>
   <!-- ======= Top Bar ======= -->
   <section id="topbar" class="d-none d-lg-block">
     <div class="container clearfix">
@@ -160,9 +59,9 @@
         <a href="Home.html"><img src="assets/img/ProRigRental Full Logo.png" alt="" class="img-fluid"></a>
       </div>
       <div class="mobile">
-        <div class="donate float-right">
-          <h1><a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-login"></i>
-              | Login</a></h1>
+        <div class="login float-right">
+        <h1><a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link-2"><i class="icofont-login"></i>
+        | Login</a></h1>
         </div>
       </div>
       <nav class="nav-menu float-right d-none d-lg-block">
@@ -183,8 +82,6 @@
 
     </div>
   </header><!-- End Header -->
-
-  <!-- ======= Hero Section ======= -->
   <section id="hero">
     <div class="hero-container">
       <div id="heroCarousel" class="carousel slide carousel-fade" data-ride="carousel">
@@ -203,7 +100,7 @@
       </div>
     </div>
   </section><!-- End Hero -->
-
+  <!-- ======= Hero Section ======= -->
   <main id="main">
 
     <!-- ======= About Us Section ======= -->
@@ -213,7 +110,7 @@
 
           <div class="col-lg-6">
             <div class="image">
-              <img src="assets/img/about-pic.jpg" class="img-fluid" />
+              <img src="assets/img/about.jpg" class="img-fluid" />
             </div>
           </div>
 
@@ -302,8 +199,8 @@
               </div>
               <div class="location-content">
                 <h3 class="name">Warren</h3>
-                <h4 class="title"><a href="https://maps.app.goo.gl/ghhN9Yndd9h77gUU9" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
-                2468 Frazo Rd Warren, MI 48092</h4></a>
+                <h4 class="title"><a href="https://maps.app.goo.gl/mBwuM9z5oyZTHVGL7" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                2468 12 Mile Rd Warren, MI 48092</h4></a>
               </div>
               <ul class="maps">
                 <h4 class="name">M-S 7:00am-6:00am</h4>
@@ -318,8 +215,8 @@
               </div>
               <div class="location-content">
                 <h3 class="name">Dearborn Heights</h3>
-                <h4 class="title"><a href="https://maps.app.goo.gl/ghhN9Yndd9h77gUU9" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
-                2468 Warren Rd Dearborn Heights, MI 48128</h4></a>
+                <h4 class="title"><a href="https://maps.app.goo.gl/Q3JxBshHR9ufP1WW7" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                2468 W Warren Ave. Dearborn Heights, MI 48127</h4></a>
               </div>
               <ul class="maps">
                 <h4 class="name">M-S 7:00am-6:00am</h4>
@@ -334,8 +231,8 @@
               </div>
               <div class="location-content">
                 <h3 class="name">Ann Arobor</h3>
-                <h4 class="title"><a href="https://maps.app.goo.gl/ghhN9Yndd9h77gUU9" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
-                2468 Van Borne Rd Ann Arbor, MI 48120</h4></a>
+                <h4 class="title"><a href="https://maps.app.goo.gl/2Ddfk6iCPzg5qpxbA" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                2468 State St. Ann Arbor, MI 48109</h4></a>
               </div>
               <ul class="maps">
                 <h4 class="name">M-S 7:00am-6:00am</h4>
@@ -350,8 +247,8 @@
               </div>
               <div class="location-content">
                 <h3 class="name">Grand Rapids</h3>
-                <h4 class="title"><a href="https://maps.app.goo.gl/ghhN9Yndd9h77gUU9" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
-                2468 Van Borne Rd Grand Rapids, MI 48120</h4></a>
+                <h4 class="title"><a href="https://maps.app.goo.gl/5yvBpkADUu7xUxX9A" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                2468 Monroe Ave. NW Grand Rapids, MI 49503</h4></a>
               </div>
               <ul class="maps">
                 <h4 class="name">M-S 7:00am-6:00am</h4>
@@ -366,8 +263,8 @@
               </div>
               <div class="location-content">
                 <h3 class="name">Lansing</h3>
-                <h4 class="title"><a href="https://maps.app.goo.gl/ghhN9Yndd9h77gUU9" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
-                2468 Van Borne Rd Lansing, MI 48120</h4></a>
+                <h4 class="title"><a href="https://maps.app.goo.gl/r2hV1ZisoCeUWPQ5A" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                2468 S Capital Ave. Lansing, MI 48933</h4></a>
               </div>
               <ul class="maps">
                 <h4 class="name">M-S 7:00am-6:00am</h4>
@@ -499,6 +396,7 @@
           </div>
 
           <div class="col-lg-12" data-aos="fade-up" data-aos-delay="300">
+            <div id="form-message" class="alert" style="display: none;"></div>
             <form action="http://localhost:3000/contact_us" method="post" class="js-email-form">
               <div class="row">
                 <div class="col-lg-6 d-flex align-items-stretch">
@@ -517,6 +415,41 @@
               <div class="text-center"><input type="submit" name="submit" value="Send Message" class="form-btn"></div>
 
             </form>
+            <script>
+              document.getElementById("contact-form").addEventListener("submit", async function (e) {
+                e.preventDefault(); // Prevent normal form submit
+
+                const form = e.target;
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                  const response = await fetch("http://localhost:3000/contact_us", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                  });
+
+                  const result = await response.json(); // Expect JSON response from backend
+
+                  const messageBox = document.getElementById("form-message");
+                  if (result.success) {
+                    messageBox.textContent = result.success;
+                    messageBox.className = "alert alert-success";
+                  } else {
+                    messageBox.textContent = result.error || "Unknown error occurred.";
+                    messageBox.className = "alert alert-danger";
+                  }
+
+                  messageBox.style.display = "block";
+                  form.reset(); // Optional: clear form fields
+                } catch (err) {
+                  console.error("Form submission error:", err);
+                }
+              });
+            </script>
           </div>
 
         </div>
@@ -533,7 +466,7 @@
         <div class="row">
             <div class="col-md-5 d-flex align-items-stretch" data-aos="fade-up">
               <div class="info-box">
-                <a href="" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                <a href="https://maps.app.goo.gl/ghhN9Yndd9h77gUU9" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
                 <h3>Our Headquarter Address</h3>
                 <p>4901 Evergreen Rd Dearborn, MI 48128</p></a>
               </div>
@@ -574,7 +507,7 @@
           <!-- You can delete the links only if you purchased the pro version. -->
           <!-- Licensing information: https://bootstrapmade.com/license/ -->
           <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/mamba-one-page-bootstrap-template-free/ -->
-           Template by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+          Template by <a href="https://bootstrapmade.com/">BootstrapMade</a>
         </div>
       </div>
 
@@ -586,7 +519,6 @@
   <script src="assets/vendor/jquery/jquery.min.js"></script>
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/jquery.easing/jquery.easing.min.js"></script>
-  <script src="assets/vendor/php-email-form/validate.js"></script>
   <script src="assets/vendor/jquery-sticky/jquery.sticky.js"></script>
   <script src="assets/vendor/venobox/venobox.min.js"></script>
   <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
@@ -597,74 +529,6 @@
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
-  <script>
-    // Add Customer Page link if user is logged in
-    fetch('/api/userinfo')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.name && data.name !== "Customer") {
-          // Change login link to logout if logged in
-          const loginLink = document.getElementById('login-link');
-          if (loginLink) {
-            loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
-            loginLink.href = '/logout';
-          }
-
-          const navbar = document.getElementById('main-navbar-list');
-          // Remove customer/return links if already present (avoid duplicates)
-          if (document.getElementById('customer-page-link')) document.getElementById('customer-page-link').remove();
-          if (document.getElementById('return-page-link')) document.getElementById('return-page-link').remove();
-
-          // Find the logout/login anchor (should be the last child)
-          const logoutAnchorLi = document.getElementById('login-link-li');
-          // Create Rent Equipment link
-          const rentLi = document.createElement('li');
-          rentLi.id = 'customer-page-link';
-          rentLi.innerHTML = '<a href="customer.html" id="customer-page-link-anchor">Rent Equipment</a>';
-
-          // Create Return Equipment link
-          const returnLi = document.createElement('li');
-          returnLi.id = 'return-page-link';
-          returnLi.innerHTML = '<a href="return.html" id="return-page-link-anchor">Return Equipment</a>';
-
-          // Insert before the logout/login anchor
-          if (logoutAnchorLi && logoutAnchorLi.parentNode === navbar) {
-            navbar.insertBefore(rentLi, logoutAnchorLi);
-            navbar.insertBefore(returnLi, logoutAnchorLi);
-          } else {
-            navbar.appendChild(rentLi);
-            navbar.appendChild(returnLi);
-          }
-
-          // Highlight nav links if on those pages
-          if (window.location.pathname.endsWith('customer.html')) {
-            const anchor = document.getElementById('customer-page-link-anchor');
-            if (anchor && anchor.parentElement) {
-              anchor.parentElement.classList.add('active');
-            }
-          }
-          if (window.location.pathname.endsWith('return.html')) {
-            const anchor = document.getElementById('return-page-link-anchor');
-            if (anchor && anchor.parentElement) {
-              anchor.parentElement.classList.add('active');
-            }
-          }
-        }
-      })
-      .catch(() => { /* not logged in, do nothing */ });
-
-    // Hide hero login button if logged in
-    fetch('/api/userinfo')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.name && data.name !== "Customer") {
-          // Hide hero login button if logged in
-          const heroLoginBtn = document.getElementById('hero-login-btn');
-          if (heroLoginBtn) heroLoginBtn.style.display = 'none';
-        }
-      })
-      .catch(() => { /* not logged in, do nothing */ });
-  </script>
 </body>
 
 </html>
