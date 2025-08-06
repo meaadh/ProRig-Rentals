@@ -55,23 +55,23 @@ connectToDB();
 
 async function getNextUserID() 
 {
+  try{
   const counter = await db.collection("counters").findOneAndUpdate(
     { _id: "userId" },
     { $inc: { sequence_value: 1 } },
     { returnDocument: "after", upsert: true }
   );
-  if (!counter || typeof counter !== "object" || !counter.value || typeof counter.value.sequence_value !== null) 
-  {
-     await db.collection("counters").updateOne(
-      { _id: "userId" },
-      { $set: { sequence_value: 0 } },
-    );
-    console.log("Full updateResult:", counter);
-    console.log("updateResult:", counter.value);
-    return 1;
-  }
   console.log("Full updateResult:", counter.value);
+  if(!counter.value)
+  {
+    throw new Error("Failed to update counter document");
+  }
   return counter.value.sequence_value;
+  } catch(err)
+  {
+    console.error("error getting teh next user ID",err);
+    throw err;
+  }
 }
 
 app.post("/contact_us", async(req,res)=>{
