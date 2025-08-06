@@ -37,11 +37,12 @@ async function connectToDB() {
     await client.connect();
     db= client.db(dbname);
     console.log(` Successfully connected to the ${dbname} database`);
-    await db.collection("counters").updateOne(
-      { _id: "userId" },
-      { $setOnInsert: { sequence_value: 0 } },
-      { upsert: true }
-    );
+    // Initialize counter only if it doesn't exist, starting from 0
+    const counterExists = await db.collection("counters").findOne({ _id: "userId" });
+    if (!counterExists) {
+      await db.collection("counters").insertOne({ _id: "userId", sequence_value: 0 });
+      console.log("Initialized userId counter to 0");
+    }
     app.listen(3000,()=>
     {
       console.log("server listening at port 3000");
@@ -55,22 +56,32 @@ connectToDB();
 
 async function getNextUserID() 
 {
-  try{
-  const counter = await db.collection("counters").findOneAndUpdate(
-    { _id: "userId" },
-    { $inc: { sequence_value: 1 } },
-    { returnDocument: "after", upsert: true }
-  );
-  console.log("Full updateResult:", counter.value);
-  if(!counter.value)
-  {
-    throw new Error("Failed to update counter document");
-  }
-  return counter.value.sequence_value;
-  } catch(err)
-  {
-    console.error("error getting teh next user ID",err);
-    throw err;
+  try {
+    const counter = await db.collection("counters").findOneAndUpdate(
+      { _id: "userId" },
+      { $inc: { sequence_value: 1 } },
+      { returnDocument: "after", upsert: true }
+    );
+    
+    console.log("Counter result:", counter);
+    
+    // Check if counter exists and has the sequence_value
+    if (counter && counter.sequence_value && typeof counter.sequence_value === 'number') {
+      console.log("Returning userId:", counter.sequence_value);
+      return counter.sequence_value;
+    } else {
+      console.log("Counter not found or invalid, initializing...");
+      // If counter doesn't exist or is invalid, initialize it
+      await db.collection("counters").updateOne(
+        { _id: "userId" },
+        { $set: { sequence_value: 1 } },
+        { upsert: true }
+      );
+      return 1;
+    }
+  } catch (err) {
+    console.error("Error in getNextUserID:", err);
+    return 1;
   }
 }
 
@@ -96,6 +107,13 @@ app.post("/sign_up", async(req,res)=>{
   const{fname,lname,email,username,password}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
   try {
+    // Check if username already exists
+    const existingUser = await db.collection("RentalUsers").findOne({ username: username });
+    if (existingUser) {
+      console.log(`Registration failed: Username '${username}' already exists`);
+      return res.redirect(`register_form.html?error=${encodeURIComponent("Username already exists. Please choose a different username.")}`);
+    }
+
     const userId= await getNextUserID();
     const data = {
       userId,
@@ -123,6 +141,13 @@ app.post("/managment", async(req,res)=>{
   const{fname,lname,email,username,password,user_type}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
   try {
+    // Check if username already exists
+    const existingUser = await db.collection("RentalUsers").findOne({ username: username });
+    if (existingUser) {
+      console.log(`Registration failed: Username '${username}' already exists`);
+      return res.redirect(`register_form.html?error=${encodeURIComponent("Username already exists. Please choose a different username.")}`);
+    }
+
     const userId= await getNextUserID();
     const data = {
       userId,
@@ -137,7 +162,7 @@ app.post("/managment", async(req,res)=>{
     };
   
     await db.collection("RentalUsers").insertOne(data);
-    console.log(`Successfully into to the ${dbname} database with userId:`,userId);
+    console.log(`Successfully registered user to the ${dbname} database with userId:`,userId);
     return res.redirect("loginform.html");
   } catch(err) {
     console.log(`Insert error to the ${dbname} database`,err);
