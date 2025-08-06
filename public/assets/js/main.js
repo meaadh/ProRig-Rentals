@@ -1,3 +1,17 @@
+// Auto-fill cardholder name in Add Payment Info form
+document.addEventListener('DOMContentLoaded', function() {
+  // Only run on equipment-reservation.html
+  if (window.location.pathname.endsWith('equipment-reservation.html')) {
+    fetch('/api/userinfo')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.name) {
+          var cardholderField = document.getElementById('payment_cardholder_name');
+          if (cardholderField) cardholderField.value = data.name;
+        }
+      });
+  }
+});
 /**
 * Template Name: Mamba - v2.3.0
 * Template URL: https://bootstrapmade.com/mamba-one-page-bootstrap-template-free/
@@ -685,8 +699,24 @@ function showPaymentModal(totalPrice, onConfirm) {
       if (paymentForm) {
         paymentForm.addEventListener('submit', function(e) {
           e.preventDefault();
+          // Custom validation for card number, zip code, and cvv
+          const cardNumber = paymentForm.card_number.value.trim();
+          const zipCode = paymentForm.zip_code.value.trim();
+          const cvv = paymentForm.cvv.value.trim();
+          let errorMsg = '';
+          if (!/^\d{16}$/.test(cardNumber)) {
+            errorMsg = 'Card number must be exactly 16 digits.';
+          } else if (!/^\d{5}$/.test(zipCode)) {
+            errorMsg = 'Zip code must be exactly 5 digits.';
+          } else if (!/^\d{3,4}$/.test(cvv)) {
+            errorMsg = 'CVV must be 3 or 4 digits.';
+          }
+          if (errorMsg) {
+            document.getElementById('payments-error').textContent = errorMsg;
+            document.getElementById('payments-success').textContent = '';
+            return;
+          }
           const formData = new FormData(paymentForm);
-          
           fetch('/payments', {
             method: 'POST',
             body: new URLSearchParams([...formData])
@@ -712,6 +742,16 @@ function showPaymentModal(totalPrice, onConfirm) {
             document.getElementById('payments-error').textContent = 'Failed to add payment method';
             document.getElementById('payments-success').textContent = '';
           });
+        });
+
+        // Enforce numeric input for card number, zip code, and cvv fields
+        ['card_number', 'zip_code', 'cvv'].forEach(function(fieldId) {
+          const field = document.getElementById(fieldId);
+          if (field) {
+            field.addEventListener('input', function(e) {
+              this.value = this.value.replace(/[^\d]/g, '');
+            });
+          }
         });
       }
       

@@ -145,10 +145,10 @@
           <div class="reservation-form-container">
             <form id="Payment-form" class="hidden-form" action="http://localhost:3000/payments" method="post">
               <h3>Add Payment Info</h3>
-              <input type="text" name="customer_name" id="customer_name" required placeholder="Cardholder Name">
-              <input type="text" name="card_number" id="card_number" required placeholder="Card Number:">
+              <input type="text" name="customer_name" id="payment_cardholder_name" required placeholder="Cardholder Name">
+              <input type="text" name="card_number" id="card_number" required placeholder="Card Number (16 digits)" pattern="\\d{16}" maxlength="16" minlength="16" inputmode="numeric" title="Card number must be 16 digits">
               <input type="date" name="expiration" id="expiration" required placeholder="Expiration Date:">
-              <input type="text" name="cvv" id="cvv" required placeholder="CVV">
+              <input type="text" name="cvv" id="cvv" required placeholder="CVV (4 digits)" pattern="\\d{4}" maxlength="4" minlength="3" inputmode="numeric" title="CVV must be 3 or 4 digits">
               <select id="card_type" name="card_type" required>
                 <option value=""disabled selected>-- Choose Card Type --</option>
                 <option value="Visa">Visa</option>
@@ -156,6 +156,7 @@
                 <option value="Discover">Discover</option>
                 <option value="American Express">American Express</option>
               </select>
+              <input type="text" name="zip_code" id="zip_code" required placeholder="Zip Code (5 digits)" pattern="\\d{5}" maxlength="5" minlength="5" inputmode="numeric" title="Zip code must be 5 digits">
               <input type="text" name="payment_nickname" id="payment_nickname" required placeholder="Payment Nickname">
               <input type="submit" name="submit" value="Add Payment Card to Account" class="form-btn">
               <div id="payments-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
