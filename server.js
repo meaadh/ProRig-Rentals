@@ -701,7 +701,7 @@ app.get('/api/myaddress', async (req, res) => {
 
     // Build result
     const result = addresses.map((p,index) => ({
-      customer_name:p.custumer_name||"N/A",
+      customer_name:p.customer_name||"N/A",
       address_line1: p.address_line1,
       city: p.city,
       state: p.state,

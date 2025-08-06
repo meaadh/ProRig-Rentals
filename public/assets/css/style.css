@@ -1445,22 +1445,26 @@ section {
 
 #account .address-section .info-box {
   color: #000000;
-  text-align: center;
+  text-align: left;
   box-shadow: 0 0 10px rgba(214, 215, 216, 0.6);
-  padding: 10px 0;
+  padding: 20px;
   margin-bottom: 10px;
   width: 100%;
 }
 #account .address-section .info-box .info-line {
- display: flex;
- align-items: center;
- gap: 8px;
- margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  text-align: left;
 }
 #account .address-section .info-box i {
-  font-size: 20px;
+  font-size: 18px;
   color: #000000;
-  padding: 8px;
+  padding: 0;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 #account .address-section .info-box a:hover i {
@@ -1468,10 +1472,11 @@ section {
 }
 
 #account .address-section .info-box h3 {
-  font-size: 15px;
+  font-size: 18px;
   color: #000000;
   font-weight: 700;
-  margin: 5px 0;
+  margin: 0 0 15px 0;
+  text-align: left;
 }
 
 #account .address-section .info-box p {
