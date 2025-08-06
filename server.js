@@ -97,6 +97,13 @@ app.post("/sign_up", async(req,res)=>{
   const{fname,lname,email,username,password,user_type}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
   try {
+    // Check if username already exists
+    const existingUser = await db.collection("RentalUsers").findOne({ username: username });
+    if (existingUser) {
+      console.log(`Registration failed: Username '${username}' already exists`);
+      return res.redirect(`register_form.html?error=${encodeURIComponent("Username already exists. Please choose a different username.")}`);
+    }
+
     const userId= await getNextUserID();
     const data = {
       userId,
@@ -109,7 +116,7 @@ app.post("/sign_up", async(req,res)=>{
     };
   
     await db.collection("RentalUsers").insertOne(data);
-    console.log(`Successfully into to the ${dbname} database with userId:`,userId);
+    console.log(`Successfully registered user to the ${dbname} database with userId:`,userId);
     return res.redirect("loginform.html");
   } catch(err) {
     console.log(`Insert error to the ${dbname} database`,err);
