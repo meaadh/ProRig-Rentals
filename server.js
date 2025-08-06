@@ -741,3 +741,31 @@ app.delete('/api/delete-payment', async (req, res) => {
     res.status(500).json({ error: "Failed to remove Payment Method" });
   }
 });
+
+app.delete('/api/delete-address', async (req, res) => {
+  const{address_nickname,address_line1}=req.body;
+  if (!req.session || !req.session.user_name) {
+    return res.status(401).json({ error: "Not logged in" });
+  }
+
+  try {
+    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const result =await db.collection('RentalUsers').updateOne(
+      {_id:user._id},
+      {$pull:{address:{address_nickname,address_line1}}}
+    );
+    if(result.modifiedCount>0)
+    {
+      res.json({success:true});
+    }
+    else
+    {
+      res.json({success:false,error: "Address not found"});
+    }
+  } catch (err) {
+    console.error('Delete address error',err);
+    res.status(500).json({ error: "Failed to remove Address" });
+  }
+});

@@ -108,7 +108,6 @@
       <div class="content">
         <section class="address-section">
           <h3>Address</h3>
-          <button id="add-address">Add Address</button>
             <div class="row" id="address-card-container">
             </div>
         </section>
@@ -156,6 +155,30 @@
       </form>
       <div id="no-equipment-message" class="alert alert-info" style="display:none;">You have no equipment to return.</div>
     </section>
+    
+    <!-- Address Delete Confirmation Modal -->
+    <div id="delete-address-modal">
+      <div class="modal-content">
+        <h3>Delete Address</h3>
+        <p>Are you sure you want to delete this address? This action cannot be undone.</p>
+        <div class="modal-buttons">
+          <button id="confirm-delete-btn">Delete</button>
+          <button id="cancel-delete-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Delete Confirmation Modal -->
+    <div id="delete-payment-modal">
+      <div class="modal-content">
+        <h3>Delete Payment Method</h3>
+        <p>Are you sure you want to delete this payment method? This action cannot be undone.</p>
+        <div class="modal-buttons">
+          <button id="confirm-delete-payment-btn">Delete</button>
+          <button id="cancel-delete-payment-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
   </main>
   <footer id="footer">
     <div class="footer-top">
@@ -286,26 +309,87 @@
           console.error('Error loading payments:', err);
         });
     });
-    document.addEventListener('click', () => {
+    document.addEventListener('click', (e) => {
       if(e.target.classList.contains('delete-btn'))
       {
         const last4=e.target.dataset.last4;
         const expiration=e.target.dataset.expiration;
-        fetch('/api/deletepayment',{method:'DELETE',headers:{'Content-Type':'application/json'}, body: JSON.stringify({last4,expiration})})
-        .then(res => res.json())
-        .then(data => {
-          if(data.success)
-          {
-            e.target.closest('tr').remove();
+        const paymentElement = e.target;
+        
+        // Show custom confirmation modal
+        const modal = document.getElementById('delete-payment-modal');
+        modal.style.display = 'flex';
+        
+        // Handle confirmation
+        document.getElementById('confirm-delete-payment-btn').onclick = function() {
+          fetch('/api/delete-payment',{method:'DELETE',headers:{'Content-Type':'application/json'}, body: JSON.stringify({last4,expiration})})
+          .then(res => res.json())
+          .then(data => {
+            if(data.success)
+            {
+              paymentElement.closest('tr').remove();
+              modal.style.display = 'none';
+            }
+            else
+            {
+              alert('Failed to delete payment');
+              modal.style.display = 'none';
+            }
+          })
+          .catch(err => {
+            console.error('Error deleting payment:', err);
+            modal.style.display = 'none';
+          });
+        };
+        
+        // Handle cancellation
+        document.getElementById('cancel-delete-payment-btn').onclick = function() {
+          modal.style.display = 'none';
+        };
+      }
+      
+      if(e.target.classList.contains('delete-address-btn'))
+      {
+        const address_nickname=e.target.dataset.nickname;
+        const address_line1=e.target.dataset.address;
+        const addressElement = e.target;
+        
+        // Show custom confirmation modal
+        const modal = document.getElementById('delete-address-modal');
+        modal.style.display = 'flex';
+        
+        // Handle confirm button
+        document.getElementById('confirm-delete-btn').onclick = function() {
+          modal.style.display = 'none';
+          fetch('/api/delete-address',{method:'DELETE',headers:{'Content-Type':'application/json'}, body: JSON.stringify({address_nickname,address_line1})})
+          .then(res => res.json())
+          .then(data => {
+            if(data.success)
+            {
+              addressElement.closest('.col-md-6').remove();
+            }
+            else
+            {
+              alert('Failed to delete address');
+            }
+          })
+          .catch(err => {
+            console.error('Error deleting address:', err);
+            alert('Error deleting address');
+          });
+        };
+        
+        // Handle cancel button
+        document.getElementById('cancel-delete-btn').onclick = function() {
+          modal.style.display = 'none';
+        };
+        
+        // Handle clicking outside modal
+        modal.onclick = function(event) {
+          if (event.target === modal) {
+            modal.style.display = 'none';
           }
-          else
-          {
-            alert('Failed to delete payment');
-          }
-        })
-        .catch(err => {
-          console.error('Error deleting payment:', err);
-        });
+        };
       }
     });
     document.addEventListener('DOMContentLoaded', () => {
@@ -319,7 +403,15 @@
             card.className= 'col-md-6 d-flex align-items-stretch';
             card.innerHTML=`
               <div class="info-box w-100">
-                <h3>${addr.address_nickname||'Saved Address'}</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3>${addr.address_nickname||'Saved Address'}</h3>
+                  <button class="delete-address-btn" 
+                          data-nickname="${addr.address_nickname}" 
+                          data-address="${addr.address_line1}"
+                          style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; font-size: 12px; cursor: pointer;">
+                    Delete
+                  </button>
+                </div>
                 <div class="info-line">
                   <i class="bx bx-user"></i>
                   ${addr.customer_name}
