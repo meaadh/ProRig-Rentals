@@ -2,6 +2,8 @@ const express=require("express");
 const session = require('express-session');
 const bodyParser=require("body-parser");
 const crypto=require("crypto");
+const multer = require('multer');
+const path = require('path');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
@@ -22,6 +24,46 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/assets/img/equipment/') // Store images in the equipment folder
+  },
+  filename: function (req, file, cb) {
+    // Generate unique filename with timestamp
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    // Accept only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
+
+// Add CORS headers
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 app.use(session({
   secret: 'ProRigs123',
   resave: false,
@@ -777,5 +819,105 @@ app.delete('/api/delete-address', async (req, res) => {
   } catch (err) {
     console.error('Delete address error',err);
     res.status(500).json({ error: "Failed to remove Address" });
+  }
+});
+
+// Equipment management endpoints for maintenance page
+app.post('/api/equipment', upload.single('image'), async (req, res) => {
+  try {
+    const { name, category, description, rental_rate_per_day, quantity_available } = req.body;
+    
+    if (!name || !category || !rental_rate_per_day || !quantity_available) {
+      return res.status(400).json({ error: 'Name, category, rental rate, and quantity are required' });
+    }
+
+    // Handle image path
+    let imagePath = '';
+    if (req.file) {
+      // Store relative path from public folder
+      imagePath = 'assets/img/equipment/' + req.file.filename;
+    }
+
+    const equipmentData = {
+      name: name.trim(),
+      category: category.trim(),
+      description: description ? description.trim() : '',
+      rental_rate_per_day: parseFloat(rental_rate_per_day),
+      quantity_available: parseInt(quantity_available),
+      availability: parseInt(quantity_available) > 0,
+      image: imagePath,
+      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+    };
+
+    const result = await db.collection('Equipments').insertOne(equipmentData);
+    res.json({ message: 'Equipment added successfully', equipment: { _id: result.insertedId, ...equipmentData } });
+  } catch (err) {
+    console.error('Add equipment error:', err);
+    res.status(500).json({ error: 'Failed to add equipment' });
+  }
+});
+
+app.delete('/api/equipment/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid equipment ID' });
+    }
+
+    const result = await db.collection('Equipments').deleteOne({ _id: new ObjectId(id) });
+    
+    if (result.deletedCount > 0) {
+      res.json({ success: true, message: 'Equipment deleted successfully' });
+    } else {
+      res.json({ success: false, error: 'Equipment not found' });
+    }
+  } catch (err) {
+    console.error('Delete equipment error:', err);
+    res.status(500).json({ error: 'Failed to delete equipment' });
+  }
+});
+
+app.put('/api/equipment/:id', upload.single('image'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, category, description, rental_rate_per_day, quantity_available } = req.body;
+    
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid equipment ID' });
+    }
+
+    if (!name || !category || !rental_rate_per_day || quantity_available === undefined) {
+      return res.status(400).json({ error: 'Name, category, rental rate, and quantity are required' });
+    }
+
+    const updateData = {
+      name: name.trim(),
+      category: category.trim(),
+      description: description ? description.trim() : '',
+      rental_rate_per_day: parseFloat(rental_rate_per_day),
+      quantity_available: parseInt(quantity_available),
+      availability: parseInt(quantity_available) > 0,
+      updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+    };
+
+    // Handle image update if new file is uploaded
+    if (req.file) {
+      updateData.image = 'assets/img/equipment/' + req.file.filename;
+    }
+
+    const result = await db.collection('Equipments').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+    
+    if (result.modifiedCount > 0) {
+      res.json({ success: true, message: 'Equipment updated successfully' });
+    } else {
+      res.json({ success: false, error: 'Equipment not found or no changes made' });
+    }
+  } catch (err) {
+    console.error('Update equipment error:', err);
+    res.status(500).json({ error: 'Failed to update equipment' });
   }
 });

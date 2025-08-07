@@ -82,13 +82,136 @@
 
     </div>
   </header><!-- End Header -->
-
-  <section id="hero">
-
-  </section><!-- End Hero -->
   
-  <!-- ======= Hero Section ======= -->
+  <div class="user-container">
+      <div class="content">
+       <h3>HI, <span id="user-welcome-name">Maintainance</span></h3>
+        <h1>Welcome <span>Maintainance</span></h1>
+      </div>
+    </div>
+  
   <main id="main">
+
+    <!-- ======= Equipment Management Section ======= -->
+    <section id="equipment-management" class="equipment-management">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="management-header-box">
+          <div class="section-title">
+            <h2>Equipment Management</h2>
+            <p>Add new equipment or manage existing equipment inventory</p>
+          </div>
+
+          <!-- Management Controls -->
+          <div class="row mb-4 justify-content-center">
+            <div class="col-lg-4 col-md-5 text-center">
+              <button id="add-equipment-btn" class="btn btn-success btn-lg me-2">
+                <i class="icofont-plus"></i> Add New Equipment
+              </button>
+            </div>
+            <div class="col-lg-4 col-md-5 text-center">
+              <button id="manage-equipment-btn" class="btn btn-primary btn-lg ms-2">
+                <i class="icofont-gear"></i> Manage Existing Equipment
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Equipment Form -->
+        <div id="add-equipment-form" class="management-form" style="display: none;">
+          <div class="row">
+            <div class="col-lg-8 mx-auto">
+              <form id="equipment-form">
+                <h3>Add New Equipment</h3>
+                
+                <div class="form-group">
+                  <label for="equipment-name">Equipment Name *</label>
+                  <input type="text" id="equipment-name" name="name" class="form-control" required 
+                         placeholder="e.g., Excavator 20-ton">
+                </div>
+
+                <div class="form-group">
+                  <label for="equipment-category">Category *</label>
+                  <select id="equipment-category" name="category" class="form-control" required>
+                    <option value="">-- Select Category --</option>
+                    <option value="Heavy Equipment">Heavy Equipment</option>
+                    <option value="Landscaping Tools">Landscaping Tools</option>
+                    <option value="Light Equipment">Light Equipment</option>
+                    <option value="Ladder & Lifts">Ladder & Lifts</option>
+                    <option value="Carpet Cleaners & Pressure Washers">Carpet Cleaners & Pressure Washers</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="equipment-description">Description</label>
+                  <textarea id="equipment-description" name="description" class="form-control" rows="3"
+                            placeholder="Brief description of the equipment"></textarea>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="rental-rate">Rental Rate (per day) *</label>
+                      <input type="number" id="rental-rate" name="rental_rate_per_day" class="form-control" 
+                             step="0.01" min="0" required placeholder="150.00">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="quantity">Quantity Available *</label>
+                      <input type="number" id="quantity" name="quantity_available" class="form-control" 
+                             min="0" required placeholder="5">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="equipment-image">Equipment Image</label>
+                  <input type="file" id="equipment-image" name="image" class="form-control" 
+                         accept="image/*" placeholder="Choose an image file">
+                  <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF)</small>
+                </div>
+
+                <div class="form-buttons">
+                  <button type="submit" class="btn btn-success">
+                    <i class="icofont-check"></i> Add Equipment
+                  </button>
+                  <button type="button" id="cancel-add" class="btn btn-secondary">
+                    <i class="icofont-close"></i> Cancel
+                  </button>
+                </div>
+
+                <div id="add-equipment-success" class="alert alert-success mt-3" style="display: none;"></div>
+                <div id="add-equipment-error" class="alert alert-danger mt-3" style="display: none;"></div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manage Equipment Section -->
+        <div id="manage-equipment-section" class="management-form" style="display: none;">
+          <h3>Manage Existing Equipment</h3>
+          <div class="table-responsive">
+            <table class="table table-striped" id="equipment-management-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Rate/Day</th>
+                  <th>Quantity</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="equipment-management-body">
+                <!-- Equipment rows will be populated here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section><!-- End Equipment Management Section -->
 
 
     <!-- ======= Avaliablity Section ======= -->
@@ -96,7 +219,8 @@
       <div class="container" data-aos="fade-up" data-aos-delay="100">
 
         <div class="section-title">
-          <h2>Equipment Avaliablity</h2>
+          <h2>Equipment Inventory</h2>
+          <p>Browse and view current equipment inventory</p>
         </div>
 
         <div class="row">
@@ -126,6 +250,98 @@
 
 
   </main><!-- End #main -->
+
+  <!-- Edit Equipment Modal -->
+  <div id="edit-equipment-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Equipment</h3>
+        <span class="close" id="close-edit-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="edit-equipment-form">
+          <input type="hidden" id="edit-equipment-id">
+          
+          <div class="form-group">
+            <label for="edit-equipment-name">Equipment Name *</label>
+            <input type="text" id="edit-equipment-name" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-equipment-category">Category *</label>
+            <select id="edit-equipment-category" class="form-control" required>
+              <option value="">-- Select Category --</option>
+              <option value="Heavy Equipment">Heavy Equipment</option>
+              <option value="Landscaping Tools">Landscaping Tools</option>
+              <option value="Light Equipment">Light Equipment</option>
+              <option value="Ladder & Lifts">Ladder & Lifts</option>
+              <option value="Carpet Cleaners & Pressure Washers">Carpet Cleaners & Pressure Washers</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-equipment-description">Description</label>
+            <textarea id="edit-equipment-description" class="form-control" rows="3"></textarea>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="edit-rental-rate">Rental Rate (per day) *</label>
+                <input type="number" id="edit-rental-rate" class="form-control" step="0.01" min="0" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="edit-quantity">Quantity Available *</label>
+                <input type="number" id="edit-quantity" class="form-control" min="0" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-equipment-image">Equipment Image</label>
+            <input type="file" id="edit-equipment-image" class="form-control" 
+                   accept="image/*">
+            <small class="form-text text-muted">Choose an image file (JPG, PNG, GIF) - leave empty to keep current image</small>
+          </div>
+
+          <div class="form-buttons">
+            <button type="submit" class="btn btn-primary">
+              <i class="icofont-check"></i> Update Equipment
+            </button>
+            <button type="button" id="cancel-edit" class="btn btn-secondary">
+              <i class="icofont-close"></i> Cancel
+            </button>
+          </div>
+
+          <div id="edit-equipment-success" class="alert alert-success mt-3" style="display: none;"></div>
+          <div id="edit-equipment-error" class="alert alert-danger mt-3" style="display: none;"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="delete-equipment-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Confirm Delete</h3>
+        <span class="close" id="close-delete-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this equipment? This action cannot be undone.</p>
+        <div class="form-buttons">
+          <button id="confirm-delete-equipment" class="btn btn-danger">
+            <i class="icofont-trash"></i> Delete
+          </button>
+          <button id="cancel-delete-equipment" class="btn btn-secondary">
+            <i class="icofont-close"></i> Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ======= Footer ======= -->
   <footer id="footer">
@@ -198,6 +414,604 @@
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
+
+  <!-- Equipment Management JavaScript -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Equipment management variables
+      let currentEquipmentToDelete = null;
+
+      // Form elements
+      const addEquipmentBtn = document.getElementById('add-equipment-btn');
+      const manageEquipmentBtn = document.getElementById('manage-equipment-btn');
+      const addEquipmentForm = document.getElementById('add-equipment-form');
+      const manageEquipmentSection = document.getElementById('manage-equipment-section');
+      const equipmentForm = document.getElementById('equipment-form');
+      const editEquipmentForm = document.getElementById('edit-equipment-form');
+      const editModal = document.getElementById('edit-equipment-modal');
+      const deleteModal = document.getElementById('delete-equipment-modal');
+
+      // Show/hide forms
+      addEquipmentBtn.addEventListener('click', function() {
+        addEquipmentForm.style.display = addEquipmentForm.style.display === 'none' ? 'block' : 'none';
+        manageEquipmentSection.style.display = 'none';
+        if (addEquipmentForm.style.display === 'block') {
+          loadEquipmentForManagement();
+        }
+      });
+
+      manageEquipmentBtn.addEventListener('click', function() {
+        manageEquipmentSection.style.display = manageEquipmentSection.style.display === 'none' ? 'block' : 'none';
+        addEquipmentForm.style.display = 'none';
+        if (manageEquipmentSection.style.display === 'block') {
+          loadEquipmentForManagement();
+        }
+      });
+
+      // Cancel add form
+      document.getElementById('cancel-add').addEventListener('click', function() {
+        addEquipmentForm.style.display = 'none';
+        equipmentForm.reset();
+        clearMessages();
+      });
+
+      // Add equipment form submission
+      equipmentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        clearMessages();
+
+        const formData = new FormData(equipmentForm);
+        
+        // Validate required fields
+        const name = formData.get('name');
+        const category = formData.get('category');
+        const rental_rate_per_day = formData.get('rental_rate_per_day');
+        const quantity_available = formData.get('quantity_available');
+        
+        if (!name || !category || !rental_rate_per_day || !quantity_available) {
+          showMessage('add-equipment-error', 'Please fill in all required fields.');
+          return;
+        }
+
+        console.log('Sending equipment data with FormData'); // Debug log
+
+        fetch('/api/equipment', {
+          method: 'POST',
+          body: formData // Send FormData directly for file upload
+        })
+        .then(res => {
+          console.log('Response status:', res.status); // Debug log
+          return res.json();
+        })
+        .then(data => {
+          console.log('Response data:', data); // Debug log
+          if (data.error) {
+            showMessage('add-equipment-error', data.error);
+          } else {
+            showMessage('add-equipment-success', 'Equipment added successfully!');
+            equipmentForm.reset();
+            // Refresh the entire page after successful addition
+            setTimeout(() => {
+              location.reload();
+            }, 1500);
+          }
+        })
+        .catch(err => {
+          console.error('Fetch error:', err); // Debug log
+          showMessage('add-equipment-error', 'Failed to add equipment. Please check the console for details.');
+        });
+      });
+
+      // Load equipment for management table
+      function loadEquipmentForManagement() {
+        fetch('/api/equipments')
+        .then(res => res.json())
+        .then(equipments => {
+          const tbody = document.getElementById('equipment-management-body');
+          tbody.innerHTML = '';
+
+          if (!equipments || equipments.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No equipment found</td></tr>';
+            return;
+          }
+
+          equipments.forEach(equipment => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${equipment.name || 'N/A'}</td>
+              <td>${equipment.category || 'N/A'}</td>
+              <td>$${equipment.rental_rate_per_day ? Number(equipment.rental_rate_per_day).toFixed(2) : '0.00'}</td>
+              <td>${equipment.quantity_available || 0}</td>
+              <td>
+                <span class="badge ${equipment.availability ? 'badge-success' : 'badge-danger'}">
+                  ${equipment.availability ? 'Available' : 'Unavailable'}
+                </span>
+              </td>
+              <td>
+                <button class="btn btn-sm btn-primary edit-equipment-btn" data-id="${equipment._id}">
+                  <i class="icofont-edit"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-danger delete-equipment-btn" data-id="${equipment._id}" data-name="${equipment.name}">
+                  <i class="icofont-trash"></i> Delete
+                </button>
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+
+          // Add event listeners to edit and delete buttons
+          document.querySelectorAll('.edit-equipment-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const equipmentId = this.getAttribute('data-id');
+              openEditModal(equipmentId);
+            });
+          });
+
+          document.querySelectorAll('.delete-equipment-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const equipmentId = this.getAttribute('data-id');
+              const equipmentName = this.getAttribute('data-name');
+              openDeleteModal(equipmentId, equipmentName);
+            });
+          });
+        })
+        .catch(err => {
+          console.error('Failed to load equipment:', err);
+        });
+      }
+
+      // Open edit modal
+      function openEditModal(equipmentId) {
+        fetch('/api/equipments')
+        .then(res => res.json())
+        .then(equipments => {
+          const equipment = equipments.find(eq => eq._id === equipmentId);
+          if (equipment) {
+            document.getElementById('edit-equipment-id').value = equipment._id;
+            document.getElementById('edit-equipment-name').value = equipment.name || '';
+            document.getElementById('edit-equipment-category').value = equipment.category || '';
+            document.getElementById('edit-equipment-description').value = equipment.description || '';
+            document.getElementById('edit-rental-rate').value = equipment.rental_rate_per_day || '';
+            document.getElementById('edit-quantity').value = equipment.quantity_available || '';
+            // Clear file input - user will select new file if they want to change image
+            document.getElementById('edit-equipment-image').value = '';
+            
+            editModal.style.display = 'block';
+          }
+        });
+      }
+
+      // Open delete modal
+      function openDeleteModal(equipmentId, equipmentName) {
+        currentEquipmentToDelete = equipmentId;
+        deleteModal.querySelector('.modal-body p').textContent = 
+          `Are you sure you want to delete "${equipmentName}"? This action cannot be undone.`;
+        deleteModal.style.display = 'block';
+      }
+
+      // Edit equipment form submission
+      editEquipmentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const equipmentId = document.getElementById('edit-equipment-id').value;
+        const formData = new FormData();
+        
+        // Add all form data
+        formData.append('name', document.getElementById('edit-equipment-name').value);
+        formData.append('category', document.getElementById('edit-equipment-category').value);
+        formData.append('description', document.getElementById('edit-equipment-description').value);
+        formData.append('rental_rate_per_day', document.getElementById('edit-rental-rate').value);
+        formData.append('quantity_available', document.getElementById('edit-quantity').value);
+        
+        // Add image file if selected
+        const imageFile = document.getElementById('edit-equipment-image').files[0];
+        if (imageFile) {
+          formData.append('image', imageFile);
+        }
+
+        fetch(`/api/equipment/${equipmentId}`, {
+          method: 'PUT',
+          body: formData // Send FormData directly for file upload
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            showMessage('edit-equipment-error', data.error);
+          } else {
+            showMessage('edit-equipment-success', 'Equipment updated successfully!');
+            setTimeout(() => {
+              editModal.style.display = 'none';
+              loadEquipmentForManagement();
+              refreshMainEquipmentDisplay(); // Refresh with proper sorting
+            }, 1500);
+          }
+        })
+        .catch(err => {
+          showMessage('edit-equipment-error', 'Failed to update equipment. Please try again.');
+        });
+      });
+
+      // Confirm delete equipment
+      document.getElementById('confirm-delete-equipment').addEventListener('click', function() {
+        if (currentEquipmentToDelete) {
+          fetch(`/api/equipment/${currentEquipmentToDelete}`, {
+            method: 'DELETE'
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              deleteModal.style.display = 'none';
+              loadEquipmentForManagement();
+              refreshMainEquipmentDisplay(); // Refresh with proper sorting
+            } else {
+              alert('Failed to delete equipment: ' + (data.error || 'Unknown error'));
+            }
+          })
+          .catch(err => {
+            alert('Failed to delete equipment. Please try again.');
+          });
+        }
+      });
+
+      // Modal close buttons
+      document.getElementById('close-edit-modal').addEventListener('click', function() {
+        editModal.style.display = 'none';
+      });
+
+      document.getElementById('cancel-edit').addEventListener('click', function() {
+        editModal.style.display = 'none';
+      });
+
+      document.getElementById('close-delete-modal').addEventListener('click', function() {
+        deleteModal.style.display = 'none';
+      });
+
+      document.getElementById('cancel-delete-equipment').addEventListener('click', function() {
+        deleteModal.style.display = 'none';
+      });
+
+      // Close modals when clicking outside
+      window.addEventListener('click', function(e) {
+        if (e.target === editModal) {
+          editModal.style.display = 'none';
+        }
+        if (e.target === deleteModal) {
+          deleteModal.style.display = 'none';
+        }
+      });
+
+      // Utility functions
+      function showMessage(elementId, message) {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.textContent = message;
+          element.style.display = 'block';
+          setTimeout(() => {
+            element.style.display = 'none';
+          }, 5000);
+        }
+      }
+
+      function clearMessages() {
+        ['add-equipment-success', 'add-equipment-error', 'edit-equipment-success', 'edit-equipment-error'].forEach(id => {
+          const element = document.getElementById(id);
+          if (element) {
+            element.style.display = 'none';
+          }
+        });
+      }
+
+      // Function to refresh the main equipment display with proper sorting
+      function refreshMainEquipmentDisplay() {
+        if (typeof $ !== 'undefined' && $('.event-container').length) {
+          fetch('/api/equipments')
+            .then(res => res.json())
+            .then(data => {
+              console.log("Refreshing equipment display:", data);
+              const $container = $('.event-container');
+              $container.empty();
+              if (!Array.isArray(data) || data.length === 0) {
+                $container.append('<div class="col-12"><p style="color:red;font-weight:bold;">No equipment found. Check your API or database.</p></div>');
+                return;
+              }
+              
+              // Sort equipment by category first (Heavy Equipment on top), then by name
+              data.sort((a, b) => {
+                // Priority order for categories
+                const categoryPriority = {
+                  "Heavy Equipment": 0,
+                  "Carpet Cleaners & Pressure Washers": 1,
+                  "Ladder & Lifts": 2,
+                  "Landscaping Tools": 3,
+                  "Light Equipment": 4
+                };
+                
+                if (a.category !== b.category) {
+                  const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
+                  const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
+                  return priorityA - priorityB;
+                }
+                return a.name.localeCompare(b.name);
+              });
+              
+              data.forEach(item => {
+                let filters = [];
+                // Use quantity_available for availability
+                if (item.quantity_available > 0) filters.push("filter-Available");
+                else filters.push("filter-Booked");
+                if (item.category === "Heavy Equipment") filters.push("filter-Heavy");
+                if (item.category === "Landscaping Tools") filters.push("filter-Landscaping");
+                if (item.category === "Light Equipment") filters.push("filter-Light");
+                if (item.category === "Ladder & Lifts") filters.push("filter-Ladder");
+                if (item.category === "Carpet Cleaners & Pressure Washers") filters.push("filter-Cleaner");
+                // Use item.image if present, fallback to item.image_url, then fallback to no-image.png
+                const imgUrl = (item.image && item.image.trim() !== "") 
+                  ? item.image 
+                  : (item.image_url && item.image_url.trim() !== "" 
+                    ? item.image_url 
+                    : "assets/img/no-image.png");
+                $container.append(`
+                  <div class="col-lg-4 col-md-6 event-item ${filters.join(' ')}">
+                    <div class="card">
+                      <img src="${imgUrl}" class="img-fluid" alt="${item.name || item.category}" />
+                      <div class="card-text">
+                        <h2>${item.name || item.category}</h2>
+                        <h3>Available: ${item.quantity_available > 0 ? "Yes" : "No"} (${item.quantity_available || 0} in stock)</h3>
+                        <p>${item.description || ""}</p>
+                        <p>Rate: $${item.rental_rate_per_day} / day</p>
+                      </div>
+                    </div>
+                  </div>
+                `);
+              });
+              if ($container.data('isotope')) {
+                $container.isotope('reloadItems').isotope();
+              } else if (typeof Isotope !== "undefined") {
+                $container.isotope({ itemSelector: '.event-item' });
+              }
+            })
+            .catch(err => {
+              console.error("Error refreshing equipment:", err);
+            });
+        }
+      }
+    });
+  </script>
+
+  <!-- Equipment Management CSS -->
+  <style>
+    .equipment-management {
+      padding: 60px 0;
+      background: #f8f9fa;
+    }
+
+    .management-header-box {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+      border: 1px solid #e9ecef;
+    }
+
+    .management-form {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-top: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .form-control[type="file"] {
+      padding: 8px;
+      background-color: #f8f9fa;
+    }
+
+    .form-text {
+      font-size: 12px;
+      color: #6c757d;
+      margin-top: 5px;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+    }
+
+    .form-buttons {
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin-right: 10px;
+      font-size: 14px;
+    }
+
+    .btn-lg {
+      padding: 12px 24px;
+      font-size: 16px;
+    }
+
+    .btn-success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    .btn-danger {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    .btn:hover {
+      opacity: 0.8;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .table th,
+    .table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .table th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .badge-danger {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 8px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      margin: auto;
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .close {
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      opacity: 0.7;
+    }
+
+    .alert {
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+
+    .alert-success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+
+    .alert-danger {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .modal-content {
+        width: 95%;
+        margin: 20px;
+      }
+      
+      .btn-lg {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      
+      .management-form {
+        padding: 20px;
+      }
+    }
+  </style>
 </body>
 
 </html>

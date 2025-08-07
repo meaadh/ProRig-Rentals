@@ -263,6 +263,26 @@ document.addEventListener('DOMContentLoaded', function() {
             $container.append('<div class="col-12"><p style="color:red;font-weight:bold;">No equipment found. Check your API or database.</p></div>');
             return;
           }
+          
+          // Sort equipment by category first (Heavy Equipment on top), then by name
+          data.sort((a, b) => {
+            // Priority order for categories
+            const categoryPriority = {
+              "Heavy Equipment": 0,
+              "Carpet Cleaners & Pressure Washers": 1,
+              "Ladder & Lifts": 2,
+              "Landscaping Tools": 3,
+              "Light Equipment": 4
+            };
+            
+            if (a.category !== b.category) {
+              const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
+              const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
+              return priorityA - priorityB;
+            }
+            return a.name.localeCompare(b.name);
+          });
+          
           data.forEach(item => {
             let filters = [];
             // Use quantity_available for availability
@@ -419,6 +439,26 @@ document.addEventListener('DOMContentLoaded', function () {
         (eq.category || eq.type || '').toLowerCase() === category.toLowerCase()
       );
     }
+    
+    // Apply the same sorting logic to filtered results
+    filtered.sort((a, b) => {
+      // Priority order for categories
+      const categoryPriority = {
+        "Heavy Equipment": 0,
+        "Carpet Cleaners & Pressure Washers": 1,
+        "Ladder & Lifts": 2,
+        "Landscaping Tools": 3,
+        "Light Equipment": 4
+      };
+      
+      if (a.category !== b.category) {
+        const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
+        const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
+        return priorityA - priorityB;
+      }
+      return a.name.localeCompare(b.name);
+    });
+    
     if (!filtered.length) {
       list.innerHTML = '<div class="col-12"><p>No equipment available for this category.</p></div>';
       return;
@@ -468,6 +508,25 @@ document.addEventListener('DOMContentLoaded', function () {
 fetch('/api/equipments')
   .then(res => res.json())
   .then(data => {
+    // Sort equipment by category first (Heavy Equipment on top), then by name
+    data.sort((a, b) => {
+      // Priority order for categories
+      const categoryPriority = {
+        "Heavy Equipment": 0,
+        "Carpet Cleaners & Pressure Washers": 1,
+        "Ladder & Lifts": 2,
+        "Landscaping Tools": 3,
+        "Light Equipment": 4
+      };
+      
+      if (a.category !== b.category) {
+        const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
+        const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
+        return priorityA - priorityB;
+      }
+      return a.name.localeCompare(b.name);
+    });
+    
     allEquipment = data;
     renderEquipment(""); // Show nothing until category is picked
   })
