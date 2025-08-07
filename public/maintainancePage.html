@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>ProRigs Rentals</title>
+  <title>ProRig Rentals</title>
   <meta content="" name="descriptison">
   <meta content="" name="keywords">
 
@@ -25,10 +24,11 @@
   <link href="assets/vendor/venobox/venobox.css" rel="stylesheet">
   <link href="assets/vendor/owl.carousel/assets/owl.carousel.min.css" rel="stylesheet">
   <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="assets/vendor/fonts/Montserrat/fonts/webfonts/Montserrat-Alt1.css">
+
 
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
-
   <!-- =======================================================
   * Template Name: Mamba - v2.3.0
   * Template URL: https://bootstrapmade.com/mamba-one-page-bootstrap-template-free/
@@ -38,57 +38,123 @@
 </head>
 
 <body>
+  <!-- ======= Top Bar ======= -->
+  <section id="topbar" class="d-none d-lg-block">
+    <div class="container clearfix">
+      <div class="contact-info float-left">
+        <i class="icofont-envelope"></i><a href="mailto:contact@example.com">contact.admin@ProRigRentals.com</a>
+        <i class="icofont-phone"></i><a href="tel:586-489-9689"> +1 248-420-6969</a>
+      </div>
+      <div class="social-links float-right">
+        <a href="#" class="facebook"><i class="icofont-facebook"></i></a>
+      </div>
+    </div>
+  </section>
+
   <!-- ======= Header ======= -->
   <header id="header">
     <div class="container">
 
-      <div class="logo float-left">
-        <a href="home.html"><img src="assets/img/ProRigRental Full Logo.png" alt="" class="img-fluid"></a>
+   <div class="logo float-left">
+        <a href="Home.html"><img src="assets/img/ProRigRental Full Logo.png" alt="" class="img-fluid"></a>
       </div>
       <div class="mobile">
         <div class="login float-right">
-          <h1><a href="Home.html" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
-              | Logout</a></h1>
+        <h1><a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link-2"><i class="icofont-login"></i>
+        | Login</a></h1>
         </div>
       </div>
       <nav class="nav-menu float-right d-none d-lg-block">
-        <ul>
-          <li><a href="home.html">Home</a></li>
-          <li class="active"><a href="maintainancePage.html">Support</a></li>
-          <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
-            | Logout</a>
+        <ul id="main-navbar-list">
+          <li class="active"><a href="#header">Home</a></li>
+          <li><a href="#about">About Us</a></li>
+          <li><a href="#avaliablity">Equipments</a></li>
+          <li><a href="#location">Locations</a></li>
+          <li><a href="#team">Board Members</a></li>
+          <li><a href="#contact">Contact Us</a></li>
+          <!-- The customer/return links will be injected here by JS, so move the login/logout anchor to the end -->
+          <li id="login-link-li">
+            <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-login"></i>
+              | Login</a>
+          </li>
         </ul>
       </nav><!-- .nav-menu -->
 
     </div>
   </header><!-- End Header -->
-  <div class="hero-text">
-    <h2 class="animate__animated animate__fadeInDown"><span>ProRigs Rental Corporation</span></h2>
-    <h6 class="animate__animated animate__fadeInUp">A Heavy Equipment Solutions Company</h6>
-  </div>
+
+  <section id="hero">
+
+  </section><!-- End Hero -->
+  
+  <!-- ======= Hero Section ======= -->
   <main id="main">
-    <div class="user-container">
-      <div class="content">
-       <h3>HI, <span id="user-welcome-name">Maintainance</span></h3>
-        <h1>Welcome <span>Maintainance</span></h1>
-      </div>
-    </div>
-    <div class="form-container">
-      <form action="" method="post">
-        <h3>Equipment Changes</h3>
 
 
+    <!-- ======= Avaliablity Section ======= -->
+    <section id="avaliablity" class="avaliablity section-bg">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="section-title">
+          <h2>Equipment Avaliablity</h2>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-12">
+            <ul id="event-flters">
+              <li data-filter="*" class="filter-active">All</li>
+              <li data-filter=".filter-Available">Available</li>
+              <li data-filter=".filter-Booked">Booked</li>
+            </ul>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-12">
+             <ul id="type-flters">
+              <li data-filter=".filter-Heavy">Heavy Equipment</li>
+              <li data-filter=".filter-Landscaping">Landscaping Tools</li>
+              <li data-filter=".filter-Light">Light Equipment</li>
+              <li data-filter=".filter-Ladder">Ladder & Lifts</li>
+              <li data-filter=".filter-Cleaner">Carpet Cleaners & Pressure Washers</li>
+            </ul>
+          </div>
+        </div>
+        <div class="row event-container">
+          <!-- Dynamic equipment cards will be injected here by JS -->
+        </div>
+    </section><!-- End Avaliablity Section -->
 
 
-        <input type="submit" name="submit" value="Create Conference" class="form-btn">
-      </form>
-    </div>
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
   <footer id="footer">
+    
     <div class="footer-top">
       <div class="container">
+        <div class="row">
+            <div class="col-md-5 d-flex align-items-stretch" data-aos="fade-up">
+              <div class="info-box">
+                <a href="https://maps.app.goo.gl/ghhN9Yndd9h77gUU9" rel="noopener noreferrer" target="_blank"><i class="bx bx-map"></i>
+                <h3>Our Headquarter Address</h3>
+                <p>4901 Evergreen Rd Dearborn, MI 48128</p></a>
+              </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="100">
+              <div class="info-box">
+                <a href="mailto:info@conference.com"><i class="bx bx-envelope"></i>
+                <h3>Email Us</h3>
+                <p>info@ProRigRentals.com</p></a>
+              </div>
+            </div>
+            <div class="col-md-3 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="200">
+              <div class="info-box ">
+                <a href="tel:248-420-6969"><i class="bx bx-phone-call"></i>
+                <h3>Call Us</h3>
+                <p>+1 248-420-6969</p></a>
+              </div>
+            </div>
+        </div>
         <div class="row">
           <div class="col-lg-12 footer-links">            
             <ul>
@@ -101,18 +167,19 @@
       </div>
     </div>
 
-    <div class="container">
-      <div class="copyright">
-        &copy; Copyright <strong><span>ProRigs Rental Corporation</span></strong>. All Rights Reserved
+      <div class="container">
+        <div class="copyright">
+          &copy; Copyright <strong><span>ProRigs Rentals Corporation</span></strong>. All Rights Reserved
+        </div>
+        <div class="credits">
+          <!-- All the links in the footer should remain intact. -->
+          <!-- You can delete the links only if you purchased the pro version. -->
+          <!-- Licensing information: https://bootstrapmade.com/license/ -->
+          <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/mamba-one-page-bootstrap-template-free/ -->
+          Template by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+        </div>
       </div>
-      <div class="credits">
-        <!-- All the links in the footer should remain intact. -->
-        <!-- You can delete the links only if you purchased the pro version. -->
-        <!-- Licensing information: https://bootstrapmade.com/license/ -->
-        <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/mamba-one-page-bootstrap-template-free/ -->
-      Template by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-      </div>
-    </div>
+
   </footer><!-- End Footer -->
 
   <a href="#" class="back-to-top"><i class="icofont-simple-up"></i></a>
@@ -125,25 +192,12 @@
   <script src="assets/vendor/venobox/venobox.min.js"></script>
   <script src="assets/vendor/waypoints/jquery.waypoints.min.js"></script>
   <script src="assets/vendor/counterup/counterup.min.js"></script>
+  <script src="assets/vendor/owl.carousel/owl.carousel.min.js"></script>
   <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      fetch('/userdetail')
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.name) {
-            document.getElementById('user-welcome-name').textContent = data.name;
-          }
-        })
-        .catch(() => {
-          // fallback: do nothing, default is "Customer"
-        });
-   });
-  </script>
 </body>
 
 </html>
