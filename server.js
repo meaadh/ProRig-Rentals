@@ -134,6 +134,10 @@ app.post("/sign_up", async(req,res)=>{
     return res.redirect("loginform.html");
   } catch(err) {
     console.log(`Insert error to the ${dbname} database`,err);
+    console.log("Full error details:", JSON.stringify(err, null, 2));
+    if (err.errInfo && err.errInfo.details) {
+      console.log("Validation details:", JSON.stringify(err.errInfo.details, null, 2));
+    }
     return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Failed: " + err.message)}`);
   }
 })
@@ -157,16 +161,20 @@ app.post("/managment", async(req,res)=>{
       username,
       password: hash,
       user_type,
+      address: [],
+      payment: [],
       created_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
       updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
+    
+    console.log("Data object to be inserted:", JSON.stringify(data, null, 2));
   
     await db.collection("RentalUsers").insertOne(data);
     console.log(`Successfully registered user to the ${dbname} database with userId:`,userId);
     return res.redirect("loginform.html");
   } catch(err) {
     console.log(`Insert error to the ${dbname} database`,err);
-    return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Failed: " + err.message)}`);
+    return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Fail999ed: " + err.message)}`);
   }
 })
 app.post('/login', async (req, res) => {
