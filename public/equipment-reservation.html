@@ -118,16 +118,12 @@
           </select>
           <select id="address" name="address" required>
             <option value="" disabled selected>-- Choose Billing address--</option>
-             <option value="Lansing" >Lansing</option>
-
           </select>
           <div style="margin-top: 5px;">
             <button type="button" id="add-address-btn" style="padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 3px; font-size: 0.9em; cursor: pointer;">+ Add New Address</button>
           </div>
           <select id="payment" name="payment" required>
-            <option value=""disabled selected>-- Choose Payment --</option>
-            <option value="Visa" >Visa</option>
-
+            <option value=""disabled selected>-- Choose Payment Method --</option>
           </select>
           <div style="margin-top: 5px;">
             <button type="button" id="add-payment-btn" style="padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 3px; font-size: 0.9em; cursor: pointer;">+ Add New Payment Method</button>
@@ -167,7 +163,7 @@
             <form id="Address-form" class="hidden-form" action="http://localhost:3000/addresses" method="post">
               <h3>Add Address Info</h3>
               <label for="street">Street</label>
-              <input type="text" name="street" id="street" required placeholder="e.g., Evergreen" minlength="2">
+              <input type="text" name="street" id="street" required placeholder="e.g., 4901 Evergreen Rd" minlength="2">
               <label for="city">City</label>
               <input type="text" name="city" id="city" required placeholder="e.g., Dearborn" minlength="2">
               <label for="state">State</label>

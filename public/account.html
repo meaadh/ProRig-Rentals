@@ -275,7 +275,7 @@
             <td data-label="Status">${r.status}</td>
             <td data-label="Items">${r.items.join(', ')}</td>
             <td data-label="Pick-Up Location">${r.location}</td>
-            <td data-label="Total">${r.total_cost}</td>
+            <td data-label="Total">${"$",r.total_cost}</td>
           `;
           tbody.appendChild(tr);
         });

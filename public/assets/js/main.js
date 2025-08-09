@@ -321,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(err => {
           console.error("Error fetching equipment:", err);
-          $('.event-container').empty().append('<div class="col-12"><p style="color:red;font-weight:bold;">Failed to load equipment data.</p></div>');
+          $('.event-container').empty().append('<div class="col-12"><p style="color:red;font-weight:bold;text-align: center;">Access to the inventory is available to signed-in users only. Please sign in to continue.</p></div>');
         });
     }
   });
@@ -531,7 +531,7 @@ fetch('/api/equipments')
     renderEquipment(""); // Show nothing until category is picked
   })
   .catch(() => {
-    document.getElementById('equipment-list').innerHTML = '<div class="col-12"><p>Error loading equipment.</p></div>';
+    document.getElementById('equipment-list').innerHTML = '<div class="col-12"><p>Access to the inventory is available to signed-in users only. Please sign in to continue.</p></div>';
   });
 
 document.getElementById('equipment-category').addEventListener('change', function() {
