@@ -78,55 +78,83 @@ async function connectToDB() {
   try {
     await client.connect();
     db= client.db(dbname);
-    console.log(` Successfully connected to the ${dbname} database`);
+    console.log(`Successfully connected to the ${dbname} database`);
+
+    await db.collection("AdminUsers").createIndex({ username: 1 }, { unique: true });
+    await db.collection("RentalUsers").createIndex({ username: 1 }, { unique: true });
+    await db.collection("AdminUsers").createIndex({ adminId: 1 }, { unique: true });
+    await db.collection("RentalUsers").createIndex({ userId: 1 }, { unique: true });
+
     // Initialize counter only if it doesn't exist, starting from 0
     const counterExists = await db.collection("counters").findOne({ _id: "userId" });
     if (!counterExists) {
       await db.collection("counters").insertOne({ _id: "userId", sequence_value: 0 });
       console.log("Initialized userId counter to 0");
     }
+    
+    const [a] = await db.collection("AdminUsers")
+      .aggregate([{ $group: { _id: null, maxUserIdFromAdmin: { $max: "$adminId" } } }]).toArray();
+    const [b] = await db.collection("RentalUsers")
+      .aggregate([{ $group: { _id: null, maxUserIdFromRental: { $max: "$userId" } } }]).toArray();
+    
+    const adminIdMax = Math.max(a?.maxUserIdFromAdmin || 0);
+    const userIdMax = Math.max(a?.maxUserIdFromAdmin || 0, b?.maxUserIdFromRental || 0);
+
+    await db.collection("counters").updateOne(
+      { _id: "userId" },
+      { $max: { sequence_value: userIdMax } },
+      { upsert: true }
+    );
+
+    await db.collection("counters").updateOne(
+      { _id: "adminId" },
+      { $max: { sequence_value: adminIdMax } },
+      { upsert: true }
+    );
+
+    console.log(`Sycned userId counters to >=${userIdMax} & adminId counters to >=${adminIdMax}`)
+
     app.listen(3000,()=>
     {
-      console.log("server listening at port 3000");
+      console.log("Server listening at port 3000");
     });
   } catch(err) {
-    console.log(` MongoDB connection failed to the ${dbname} database`,err);
+    console.log(`MongoDB connection failed to the ${dbname} database`,err);
   }
 }
 
 connectToDB();
 
-async function getNextUserID() 
+async function getNextUserID(userType="userId") 
 {
   try {
     const counter = await db.collection("counters").findOneAndUpdate(
-      { _id: "userId" },
+      { _id: userType },
       { $inc: { sequence_value: 1 } },
       { returnDocument: "after", upsert: true }
     );
     
-    console.log("Counter result:", counter);
+    console.log(`${userType} Counter result:`, counter);
     
     // Check if counter exists and has the sequence_value
     if (counter && counter.sequence_value && typeof counter.sequence_value === 'number') {
-      console.log("Returning userId:", counter.sequence_value);
+      console.log(`Returning ${userType}:`, counter.sequence_value);
       return counter.sequence_value;
     } else {
       console.log("Counter not found or invalid, initializing...");
       // If counter doesn't exist or is invalid, initialize it
       await db.collection("counters").updateOne(
-        { _id: "userId" },
+        { _id: userType },
         { $set: { sequence_value: 1 } },
         { upsert: true }
       );
       return 1;
     }
   } catch (err) {
-    console.error("Error in getNextUserID:", err);
+    console.error(`Error in getNextUserID for ${userType}:`, err);
     return 1;
   }
 }
-
 app.post("/contact_us", async(req,res)=>{
   const{name,email,subject,message,}=req.body;
   try {
@@ -156,7 +184,7 @@ app.post("/sign_up", async(req,res)=>{
       return res.redirect(`register_form.html?error=${encodeURIComponent("Username already exists. Please choose a different username.")}`);
     }
 
-    const userId= await getNextUserID();
+    const userId= await getNextUserID("userId");
     const data = {
       userId,
       fname,
@@ -189,77 +217,109 @@ app.post("/managment", async(req,res)=>{
   try {
     // Check if username already exists
     const existingUser = await db.collection("RentalUsers").findOne({ username: username });
-    if (existingUser) {
+    const existingAdminUser = await db.collection("AdminUsers").findOne({ username: username });
+
+     if (existingUser||existingAdminUser) {
       console.log(`Registration failed: Username '${username}' already exists`);
-      return res.redirect(`register_form.html?error=${encodeURIComponent("Username already exists. Please choose a different username.")}`);
+      return res.redirect(`adminPage.html?error=${encodeURIComponent("Username already exists. Please choose a different username.")}`);
     }
 
-    const userId= await getNextUserID();
+    const adminId= await getNextUserID("adminId");
     const data = {
-      userId,
+      adminId,
       fname,
       lname,
       email,
       username,
       password: hash,
       user_type,
-      address: [],
-      payment: [],
       created_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
       updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
     
     console.log("Data object to be inserted:", JSON.stringify(data, null, 2));
   
-    await db.collection("RentalUsers").insertOne(data);
-    console.log(`Successfully registered user to the ${dbname} database with userId:`,userId);
-    return res.redirect("loginform.html");
+    await db.collection("AdminUsers").insertOne(data);
+    console.log(`Successfully registered user to the ${dbname} database with adminId:`,adminId);
+    return res.redirect("adminPage.html");
   } catch(err) {
     console.log(`Insert error to the ${dbname} database`,err);
-    return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Fail999ed: " + err.message)}`);
+    return res.redirect(`adminPage.html?error=${encodeURIComponent("Signup Failed: " + err.message)}`);
   }
 })
+async function findUser(db,username,hashedPass) {
+  const collections=["AdminUsers","RentalUsers"];
+  for (const coll of collections)
+  {
+    const user=await db.collection(coll).findOne({username,password:hashedPass});
+    if(user)
+    {
+      return {...user,_collection:coll };
+    }
+  }
+  return null;
+  
+}
 app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
 
-  const hashedPass = crypto.createHash("sha256").update(password).digest("hex");
 
   try {
-    const user = await db.collection('RentalUsers').findOne({
-      username: username,
-      password: hashedPass
-    });
-
-    if (user) {
-      // Print user's full name to the console at login
-      console.log("User Logged In:", user.fname + " " + user.lname);
-      
-      // Set session data for ALL user types
-      req.session.user_name = user.username;
-      req.session.userData = {fname:user.fname, lname:user.lname, username:user.username};
-      
-      if (user.user_type === 'admin') {
-        return res.redirect('/adminPage.html');
-      } else if (user.user_type === 'customer') {
-        return res.redirect('/equipment-reservation.html');
-      } else if (user.user_type === 'maintainance') {
-        return res.redirect('/maintainancePage.html');
-      } else {
-        return res.send('Unknown user type');
-      }
-    } else {
+    
+    const { username, password } = req.body;
+    if(!username || !password)
+    {
+      return res.status(400).send ("Username and password are required");
+    }
+    const hashedPass = crypto.createHash("sha256").update(password).digest("hex");
+    const user = await findUser(db,username,hashedPass);
+    
+    if (!user) 
+    {
       return res.redirect('/loginform.html?error=' + encodeURIComponent('Incorrect username or password'));
     }
+    const fullName=[user.fname, user.lname].filter(Boolean).join(" ");
+      // Print user's full name to the console at login
+      console.log(`User Logged In: ${fullName} [user_type=${user.user_type|| "Unknown"} from ${user._collection}]`);
+
+      // Set session data for ALL user types
+    req.session.user = {
+      username: user.username,
+      fname: user.fname,
+      lname: user.lname,
+      user_type: user.user_type,
+      source: user._collection
+    };
+    req.session.user_name = user.username;
+    req.session.userData = {fname:user.fname, lname:user.lname, username:user.username};
+  
+    if (user.user_type === 'admin') {
+      return res.redirect('/adminPage.html');
+    } else if (user.user_type === 'customer') {
+      return res.redirect('/equipment-reservation.html');
+    } else if (user.user_type === 'maintainance') {
+      return res.redirect('/maintainancePage.html');
+    } else {
+      return res.status(400).send('Unknown user type');
+    }
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Server error');
   }
 });
+function requireLogin(req,res,next)
+{
+  if(!req.session?.user)
+  {
+    return res.redirect('/loginform.html');
+  }
+  next();
+}
 app.get("/",(req,res)=>{
   res.set({"Access-control-Allow-Origin": "*" });
   return res.redirect("register_form.html");
 });
-app.get('/logout', (req, res) => {
+app.get('/logout',requireLogin, (req, res) => {
   const user=req.session.userData;
   if(user)
   {
@@ -267,7 +327,7 @@ app.get('/logout', (req, res) => {
   }
   else
   {
-    console.log("user not found in database");
+    console.log("Logout failed: User not Failed");
 
   }
   req.session.destroy(err => {
@@ -278,19 +338,18 @@ app.get('/logout', (req, res) => {
     res.redirect('/home.html');
   });
 });
-app.get('/userdetail', (req, res) => {
-  const user=req.session.userData;
+app.get('/userdetail', requireLogin, (req, res) => {
+  const user=req.session?.userData;
 
-  if(user)
-    {
-    res.json({ name: user.fname + " " + user.lname });
-    }
-    else
-    {
-      console.log("User not found in database");
-    }
+  if(!user)
+  {
+  return res.status(401).json({ error:"Not Authenticated"});
+  }
+  const name=[user.fname, user.lname].filter(Boolean).join(" ");
+  return res.json({name})
+
 });
-app.get('/api/equipments', async (req, res) => {
+app.get('/api/equipments',requireLogin, async (req, res) => {
   try {
     // This line fetches all equipment from the 'Equipments' collection in your database
     const equipments = await db.collection("Equipments").find({}).toArray();
@@ -300,7 +359,7 @@ app.get('/api/equipments', async (req, res) => {
   }
 });
 
-app.post('/api/reservations', async (req, res) => {
+app.post('/api/reservations',requireLogin, async (req, res) => {
   try {
     const { customer_name, end_date, location, address, payment, equipment_ids, total_cost } = req.body;
     if (!customer_name || !end_date|| !location|| !address|| !payment || !equipment_ids) {
@@ -392,7 +451,7 @@ app.post('/api/reservations', async (req, res) => {
     res.status(500).json({ error: "Failed to create reservation: " + err.message });
   }
 });
-app.post("/payments", async(req,res)=>{
+app.post("/payments",requireLogin, async(req,res)=>{
   const{customer_name,card_number,expiration,card_type,payment_nickname}=req.body;
   if (!customer_name || !card_number|| !expiration|| !card_type|| !payment_nickname) {
       return res.status(400).json({ error: 'All fields are required' });
@@ -453,7 +512,7 @@ app.post("/payments", async(req,res)=>{
     return res.redirect(`equipment-reservation.html`);
   }
 })
-app.post("/addresses", async(req,res)=>{
+app.post("/addresses",requireLogin, async(req,res)=>{
   const{street,city,state,zip_code,phone_number,address_nickname}=req.body;
   if (!street|| !city|| !state||!zip_code|| !phone_number|| !address_nickname) {
       return res.status(400).json({ error: 'All fields are required' });
@@ -505,7 +564,7 @@ app.post("/addresses", async(req,res)=>{
     return res.redirect(`equipment-reservation.html`);
   }
 })
-app.post('/api/return', async (req, res) => {
+app.post('/api/return', requireLogin, async (req, res) => {
   try {
     if (!req.session || !req.session.user_name) {
       return res.status(401).json({ success: false, error: "Not logged in" });
