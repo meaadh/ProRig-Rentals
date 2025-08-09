@@ -2,6 +2,8 @@ const express=require("express");
 const session = require('express-session');
 const bodyParser=require("body-parser");
 const crypto=require("crypto");
+const multer = require('multer');
+const path = require('path');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
@@ -22,6 +24,46 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/assets/img/equipment/') // Store images in the equipment folder
+  },
+  filename: function (req, file, cb) {
+    // Generate unique filename with timestamp
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    // Accept only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
+
+// Add CORS headers
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 app.use(session({
   secret: 'ProRigs123',
   resave: false,
@@ -134,6 +176,10 @@ app.post("/sign_up", async(req,res)=>{
     return res.redirect("loginform.html");
   } catch(err) {
     console.log(`Insert error to the ${dbname} database`,err);
+    console.log("Full error details:", JSON.stringify(err, null, 2));
+    if (err.errInfo && err.errInfo.details) {
+      console.log("Validation details:", JSON.stringify(err.errInfo.details, null, 2));
+    }
     return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Failed: " + err.message)}`);
   }
 })
@@ -157,16 +203,20 @@ app.post("/managment", async(req,res)=>{
       username,
       password: hash,
       user_type,
+      address: [],
+      payment: [],
       created_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
       updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
+    
+    console.log("Data object to be inserted:", JSON.stringify(data, null, 2));
   
     await db.collection("RentalUsers").insertOne(data);
     console.log(`Successfully registered user to the ${dbname} database with userId:`,userId);
     return res.redirect("loginform.html");
   } catch(err) {
     console.log(`Insert error to the ${dbname} database`,err);
-    return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Failed: " + err.message)}`);
+    return res.redirect(`register_form.html?error=${encodeURIComponent("Signup Fail999ed: " + err.message)}`);
   }
 })
 app.post('/login', async (req, res) => {
@@ -183,16 +233,18 @@ app.post('/login', async (req, res) => {
     if (user) {
       // Print user's full name to the console at login
       console.log("User Logged In:", user.fname + " " + user.lname);
+      
+      // Set session data for ALL user types
+      req.session.user_name = user.username;
+      req.session.userData = {fname:user.fname, lname:user.lname, username:user.username};
+      
       if (user.user_type === 'admin') {
-        req.session.userData ={fname:user.fname,lname:user.lname,useName:user.username};
         return res.redirect('/adminPage.html');
+      } else if (user.user_type === 'customer') {
+        return res.redirect('/equipment-reservation.html');
+      } else if (user.user_type === 'maintainance') {
+        return res.redirect('/maintainancePage.html');
       } else {
-        req.session.user_name = user.lname;
-        req.session.userData ={fname:user.fname,lname:user.lname,useName:user.username};
-
-        if (user.user_type === 'customer') return res.redirect('/equipment-reservation.html');
-        if (user.user_type === 'maintainance') return res.redirect('/maintainancePage.html');
-
         return res.send('Unknown user type');
       }
     } else {
@@ -279,7 +331,7 @@ app.post('/api/reservations', async (req, res) => {
     // --- New: Get user _id if logged in ---
     let user_id = null;
     if (req.session && req.session.user_name) {
-      const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+      const user = await db.collection('RentalUsers').findOne({ username: req.session.user_name });
       if (user && user._id) {
         user_id = user._id;
       }
@@ -349,7 +401,7 @@ app.post("/payments", async(req,res)=>{
     let user_id = null;
     if (req.session && req.session.user_name) 
     {
-      const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+      const user = await db.collection('RentalUsers').findOne({ username: req.session.user_name });
       if (user && user._id) {
         user_id = user._id;
       }
@@ -410,7 +462,7 @@ app.post("/addresses", async(req,res)=>{
     let user_id = null;
     if (req.session && req.session.user_name) 
     {
-      const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+      const user = await db.collection('RentalUsers').findOne({ username: req.session.user_name });
       if (user && user._id) {
         user_id = user._id;
       }
@@ -433,7 +485,7 @@ app.post("/addresses", async(req,res)=>{
           $set:{updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)}}
         );
         console.log(`Address added to ${dbname} database for userId:`,user.fname+" "+user.lname);
-        res.json({ message: 'Address added successfully', ...paymentEntry });
+        res.json({ message: 'Address added successfully', ...addressEntry });
 
       }
       else
@@ -462,7 +514,7 @@ app.post('/api/return', async (req, res) => {
     if (!equipmentId) {
       return res.status(400).json({ success: false, error: "No equipment ID provided" });
     }
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    const user = await db.collection('RentalUsers').findOne({ username: req.session.user_name });
     if (!user) {
       return res.status(404).json({ success: false, error: "User not found" });
     }
@@ -556,13 +608,13 @@ app.get('/api/userinfo', async (req, res) => {
       console.log("User not found or not logged in.");
       return res.json({ name: "Customer" });
     }
-    // Find the user in the DB by last name (as stored in session)
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    // Find the user in the DB by username (as stored in session)
+    const user = await db.collection('RentalUsers').findOne({ username: req.session.user_name });
     if (user) {
       // Return full name: first name + last name
       return res.json({ name: user.fname + " " + user.lname });
     } else {
-      console.log("User not found in database for lname:", req.session.user_name);
+      console.log("User not found in database for username:", req.session.user_name);
       return res.json({ name: req.session.user_name });
     }
   } catch (err) {
@@ -577,7 +629,7 @@ app.get('/api/myrentals', async (req, res) => {
       return res.status(401).json({ error: "Not logged in" });
     }
     // Find user by last name (as stored in session)
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    const user = await db.collection('RentalUsers').findOne({ username: req.session.user_name });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -627,7 +679,7 @@ app.get('/api/myreservations', async (req, res) => {
       return res.status(401).json({ error: "Not logged in" });
     }
 
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    const user = await db.collection('RentalUsers').findOne({ username: req.session.user_name });
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const reservations = await db.collection('Reservations').find({ user_id: user._id }).toArray();
@@ -666,7 +718,7 @@ app.get('/api/mypayments', async (req, res) => {
       return res.status(401).json({ error: "Not logged in" });
     }
 
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    const user = await db.collection('RentalUsers').findOne({ username: req.session.user_name });
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const payments =user.payment||[];
@@ -694,7 +746,7 @@ app.get('/api/myaddress', async (req, res) => {
       return res.status(401).json({ error: "Not logged in" });
     }
 
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    const user = await db.collection('RentalUsers').findOne({ username: req.session.user_name });
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const addresses = user.address||[];
@@ -723,7 +775,7 @@ app.delete('/api/delete-payment', async (req, res) => {
   }
 
   try {
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    const user = await db.collection('RentalUsers').findOne({ username: req.session.user_name });
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const result =await db.collection('RentalUsers').updateOne({_id:user._id},{$pull:{payment:{last4,expiration}}});
@@ -749,7 +801,7 @@ app.delete('/api/delete-address', async (req, res) => {
   }
 
   try {
-    const user = await db.collection('RentalUsers').findOne({ lname: req.session.user_name });
+    const user = await db.collection('RentalUsers').findOne({ username: req.session.user_name });
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const result =await db.collection('RentalUsers').updateOne(
@@ -767,5 +819,105 @@ app.delete('/api/delete-address', async (req, res) => {
   } catch (err) {
     console.error('Delete address error',err);
     res.status(500).json({ error: "Failed to remove Address" });
+  }
+});
+
+// Equipment management endpoints for maintenance page
+app.post('/api/equipment', upload.single('image'), async (req, res) => {
+  try {
+    const { name, category, description, rental_rate_per_day, quantity_available } = req.body;
+    
+    if (!name || !category || !rental_rate_per_day || !quantity_available) {
+      return res.status(400).json({ error: 'Name, category, rental rate, and quantity are required' });
+    }
+
+    // Handle image path
+    let imagePath = '';
+    if (req.file) {
+      // Store relative path from public folder
+      imagePath = 'assets/img/equipment/' + req.file.filename;
+    }
+
+    const equipmentData = {
+      name: name.trim(),
+      category: category.trim(),
+      description: description ? description.trim() : '',
+      rental_rate_per_day: parseFloat(rental_rate_per_day),
+      quantity_available: parseInt(quantity_available),
+      availability: parseInt(quantity_available) > 0,
+      image: imagePath,
+      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+    };
+
+    const result = await db.collection('Equipments').insertOne(equipmentData);
+    res.json({ message: 'Equipment added successfully', equipment: { _id: result.insertedId, ...equipmentData } });
+  } catch (err) {
+    console.error('Add equipment error:', err);
+    res.status(500).json({ error: 'Failed to add equipment' });
+  }
+});
+
+app.delete('/api/equipment/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid equipment ID' });
+    }
+
+    const result = await db.collection('Equipments').deleteOne({ _id: new ObjectId(id) });
+    
+    if (result.deletedCount > 0) {
+      res.json({ success: true, message: 'Equipment deleted successfully' });
+    } else {
+      res.json({ success: false, error: 'Equipment not found' });
+    }
+  } catch (err) {
+    console.error('Delete equipment error:', err);
+    res.status(500).json({ error: 'Failed to delete equipment' });
+  }
+});
+
+app.put('/api/equipment/:id', upload.single('image'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, category, description, rental_rate_per_day, quantity_available } = req.body;
+    
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid equipment ID' });
+    }
+
+    if (!name || !category || !rental_rate_per_day || quantity_available === undefined) {
+      return res.status(400).json({ error: 'Name, category, rental rate, and quantity are required' });
+    }
+
+    const updateData = {
+      name: name.trim(),
+      category: category.trim(),
+      description: description ? description.trim() : '',
+      rental_rate_per_day: parseFloat(rental_rate_per_day),
+      quantity_available: parseInt(quantity_available),
+      availability: parseInt(quantity_available) > 0,
+      updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+    };
+
+    // Handle image update if new file is uploaded
+    if (req.file) {
+      updateData.image = 'assets/img/equipment/' + req.file.filename;
+    }
+
+    const result = await db.collection('Equipments').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+    
+    if (result.modifiedCount > 0) {
+      res.json({ success: true, message: 'Equipment updated successfully' });
+    } else {
+      res.json({ success: false, error: 'Equipment not found or no changes made' });
+    }
+  } catch (err) {
+    console.error('Update equipment error:', err);
+    res.status(500).json({ error: 'Failed to update equipment' });
   }
 });

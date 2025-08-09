@@ -1,3 +1,17 @@
+// Auto-fill cardholder name in Add Payment Info form
+document.addEventListener('DOMContentLoaded', function() {
+  // Only run on equipment-reservation.html
+  if (window.location.pathname.endsWith('equipment-reservation.html')) {
+    fetch('/api/userinfo')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.name) {
+          var cardholderField = document.getElementById('payment_cardholder_name');
+          if (cardholderField) cardholderField.value = data.name;
+        }
+      });
+  }
+});
 /**
 * Template Name: Mamba - v2.3.0
 * Template URL: https://bootstrapmade.com/mamba-one-page-bootstrap-template-free/
@@ -249,6 +263,26 @@
             $container.append('<div class="col-12"><p style="color:red;font-weight:bold;">No equipment found. Check your API or database.</p></div>');
             return;
           }
+          
+          // Sort equipment by category first (Heavy Equipment on top), then by name
+          data.sort((a, b) => {
+            // Priority order for categories
+            const categoryPriority = {
+              "Heavy Equipment": 0,
+              "Carpet Cleaners & Pressure Washers": 1,
+              "Ladder & Lifts": 2,
+              "Landscaping Tools": 3,
+              "Light Equipment": 4
+            };
+            
+            if (a.category !== b.category) {
+              const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
+              const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
+              return priorityA - priorityB;
+            }
+            return a.name.localeCompare(b.name);
+          });
+          
           data.forEach(item => {
             let filters = [];
             // Use quantity_available for availability
@@ -405,6 +439,26 @@ document.addEventListener('DOMContentLoaded', function () {
         (eq.category || eq.type || '').toLowerCase() === category.toLowerCase()
       );
     }
+    
+    // Apply the same sorting logic to filtered results
+    filtered.sort((a, b) => {
+      // Priority order for categories
+      const categoryPriority = {
+        "Heavy Equipment": 0,
+        "Carpet Cleaners & Pressure Washers": 1,
+        "Ladder & Lifts": 2,
+        "Landscaping Tools": 3,
+        "Light Equipment": 4
+      };
+      
+      if (a.category !== b.category) {
+        const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
+        const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
+        return priorityA - priorityB;
+      }
+      return a.name.localeCompare(b.name);
+    });
+    
     if (!filtered.length) {
       list.innerHTML = '<div class="col-12"><p>No equipment available for this category.</p></div>';
       return;
@@ -454,6 +508,25 @@ document.addEventListener('DOMContentLoaded', function () {
 fetch('/api/equipments')
   .then(res => res.json())
   .then(data => {
+    // Sort equipment by category first (Heavy Equipment on top), then by name
+    data.sort((a, b) => {
+      // Priority order for categories
+      const categoryPriority = {
+        "Heavy Equipment": 0,
+        "Carpet Cleaners & Pressure Washers": 1,
+        "Ladder & Lifts": 2,
+        "Landscaping Tools": 3,
+        "Light Equipment": 4
+      };
+      
+      if (a.category !== b.category) {
+        const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
+        const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
+        return priorityA - priorityB;
+      }
+      return a.name.localeCompare(b.name);
+    });
+    
     allEquipment = data;
     renderEquipment(""); // Show nothing until category is picked
   })
@@ -685,8 +758,24 @@ function showPaymentModal(totalPrice, onConfirm) {
       if (paymentForm) {
         paymentForm.addEventListener('submit', function(e) {
           e.preventDefault();
+          // Custom validation for card number, zip code, and cvv
+          const cardNumber = paymentForm.card_number.value.trim();
+          const zipCode = paymentForm.zip_code.value.trim();
+          const cvv = paymentForm.cvv.value.trim();
+          let errorMsg = '';
+          if (!/^\d{16}$/.test(cardNumber)) {
+            errorMsg = 'Card number must be exactly 16 digits.';
+          } else if (!/^\d{5}$/.test(zipCode)) {
+            errorMsg = 'Zip code must be exactly 5 digits.';
+          } else if (!/^\d{3,4}$/.test(cvv)) {
+            errorMsg = 'CVV must be 3 or 4 digits.';
+          }
+          if (errorMsg) {
+            document.getElementById('payments-error').textContent = errorMsg;
+            document.getElementById('payments-success').textContent = '';
+            return;
+          }
           const formData = new FormData(paymentForm);
-          
           fetch('/payments', {
             method: 'POST',
             body: new URLSearchParams([...formData])
@@ -712,6 +801,16 @@ function showPaymentModal(totalPrice, onConfirm) {
             document.getElementById('payments-error').textContent = 'Failed to add payment method';
             document.getElementById('payments-success').textContent = '';
           });
+        });
+
+        // Enforce numeric input for card number, zip code, and cvv fields
+        ['card_number', 'zip_code', 'cvv'].forEach(function(fieldId) {
+          const field = document.getElementById(fieldId);
+          if (field) {
+            field.addEventListener('input', function(e) {
+              this.value = this.value.replace(/[^\d]/g, '');
+            });
+          }
         });
       }
       
