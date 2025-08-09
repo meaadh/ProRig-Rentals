@@ -436,7 +436,9 @@ app.post('/api/reservations',requireLogin, async (req, res) => {
       equipment_ids: equipmentIds,
       ...(user_id && { user_id }), // Only add user_id if found
       ...(total_cost && { total_cost: Number(total_cost) }), // Added  total_cost if present
-      created_at:new Date().toISOString().replace('T', ' ').substring(0, 19)
+      created_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
+      updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)
+
     };
     await db.collection("Reservations").insertOne(data);
 
@@ -480,8 +482,8 @@ app.post('/api/reservations',requireLogin, async (req, res) => {
   }
 });
 app.post("/payments",requireLogin, async(req,res)=>{
-  const{customer_name,card_number,expiration,card_type,payment_nickname}=req.body;
-  if (!customer_name || !card_number|| !expiration|| !card_type|| !payment_nickname) {
+  const{customer_name,card_number,expiration,card_type,payment_nickname,payment_zip_code}=req.body;
+  if (!customer_name || !card_number|| !expiration|| !card_type|| !payment_nickname||!payment_zip_code) {
       return res.status(400).json({ error: 'All fields are required' });
     }
   try {
@@ -510,8 +512,9 @@ app.post("/payments",requireLogin, async(req,res)=>{
           last4:card_last4,
           card_type,
           expiration:cleanedExpiration,
+          payment_zip_code,
           payment_nickname,
-          status:"active",
+          status:"Active",
           added_at:new Date().toISOString().replace('T', ' ').substring(0, 19),
         };
         await db.collection("RentalUsers").updateOne(
@@ -644,7 +647,7 @@ app.post('/api/return', requireLogin, async (req, res) => {
     } else {
       await db.collection('Reservations').updateOne(
         { _id: reservation._id },
-        { $set: { equipment_ids: updatedEquipmentIds } }
+        { $set: { equipment_ids: updatedEquipmentIds,updated_at:new Date().toISOString().replace('T', ' ').substring(0, 19)} }
       );
     }
 
