@@ -518,6 +518,7 @@
           document.getElementById('return-success').textContent = 'Equipment returned successfully!';
           document.getElementById('return-success').style.display = 'block';
           document.getElementById('return-form').reset();
+          window.location.reload();
           loadUserEquipment();
         } else {
           document.getElementById('return-error').textContent = data.error || 'Failed to return equipment.';

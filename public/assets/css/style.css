@@ -1390,7 +1390,7 @@ section {
 
 }
 #account .collapsible {
-  background-color: #777;
+  background-color: #000a54;
   color: white;
   cursor: pointer;
   padding: 18px;
@@ -1402,7 +1402,7 @@ section {
 }
 
 #account .active, .collapsible:hover {
-  background-color: #555;
+  background-color: #004af6;
 }
 
 #account .collapsible:after {
@@ -1422,10 +1422,9 @@ section {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
-  background-color: #f1f1f1;
+  background-color: #f9f9f9;
 }
 #account .address-section {
-  background: #ffffff65;
   border-top: 1px solid #ffffff;
   border-bottom: 0.5px solid #c1c1c1;
   padding: 10px 0;
@@ -1495,7 +1494,22 @@ section {
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+#account .delete-btn{
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
 
+#account .delete-btn:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
 /* Delete Address Modal */
 #delete-address-modal {
   display: none;

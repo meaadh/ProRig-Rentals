@@ -84,6 +84,7 @@ async function connectToDB() {
     await db.collection("RentalUsers").createIndex({ username: 1 }, { unique: true });
     await db.collection("AdminUsers").createIndex({ adminId: 1 }, { unique: true });
     await db.collection("RentalUsers").createIndex({ userId: 1 }, { unique: true });
+    await db.collection("Reservations").createIndex({ orderId: 1 }, { unique: true });
 
     // Initialize counter only if it doesn't exist, starting from 0
     const counterExists = await db.collection("counters").findOne({ _id: "userId" });
@@ -91,14 +92,29 @@ async function connectToDB() {
       await db.collection("counters").insertOne({ _id: "userId", sequence_value: 0 });
       console.log("Initialized userId counter to 0");
     }
+
+    const admincounterExists = await db.collection("counters").findOne({ _id: "adminId" });
+    if (!admincounterExists) {
+      await db.collection("counters").insertOne({ _id: "adminId", sequence_value: 0 });
+      console.log("Initialized userId counter to 0");
+    }
+
+    const OrdercounterExists = await db.collection("counters").findOne({ _id: "orderId" });
+    if (!OrdercounterExists) {
+      await db.collection("counters").insertOne({ _id: "orderId", sequence_value: 1000 });
+      console.log("Initialized userId counter to 1000");
+    }
     
     const [a] = await db.collection("AdminUsers")
       .aggregate([{ $group: { _id: null, maxUserIdFromAdmin: { $max: "$adminId" } } }]).toArray();
     const [b] = await db.collection("RentalUsers")
       .aggregate([{ $group: { _id: null, maxUserIdFromRental: { $max: "$userId" } } }]).toArray();
+    const [c] = await db.collection("Reservations")
+      .aggregate([{ $group: { _id: null, maxOrderIdFromRental: { $max: "$orderId" } } }]).toArray();
     
-    const adminIdMax = Math.max(a?.maxUserIdFromAdmin || 0);
+    const adminIdMax = a?.maxUserIdFromAdmin || 0;
     const userIdMax = Math.max(a?.maxUserIdFromAdmin || 0, b?.maxUserIdFromRental || 0);
+    const orderIdMax = Math.max(c?.maxOrderIdFromRental || 0);
 
     await db.collection("counters").updateOne(
       { _id: "userId" },
@@ -111,8 +127,13 @@ async function connectToDB() {
       { $max: { sequence_value: adminIdMax } },
       { upsert: true }
     );
+     await db.collection("counters").updateOne(
+      { _id: "orderId" },
+      { $max: { sequence_value: orderIdMax } },
+      { upsert: true }
+    );
 
-    console.log(`Sycned userId counters to >=${userIdMax} & adminId counters to >=${adminIdMax}`)
+    console.log(`Sycned userId counters to >=${userIdMax} & adminId counters to >=${adminIdMax} & orderId counters to >=${orderIdMax}`)
 
     app.listen(3000,()=>
     {
@@ -125,33 +146,33 @@ async function connectToDB() {
 
 connectToDB();
 
-async function getNextUserID(userType="userId") 
+async function getNextSequence(counterName) 
 {
   try {
     const counter = await db.collection("counters").findOneAndUpdate(
-      { _id: userType },
+      { _id: counterName },
       { $inc: { sequence_value: 1 } },
       { returnDocument: "after", upsert: true }
     );
     
-    console.log(`${userType} Counter result:`, counter);
+    console.log(`${counterName} Counter result:`, counter);
     
     // Check if counter exists and has the sequence_value
     if (counter && counter.sequence_value && typeof counter.sequence_value === 'number') {
-      console.log(`Returning ${userType}:`, counter.sequence_value);
+      console.log(`Returning ${counterName}:`, counter.sequence_value);
       return counter.sequence_value;
     } else {
       console.log("Counter not found or invalid, initializing...");
       // If counter doesn't exist or is invalid, initialize it
       await db.collection("counters").updateOne(
-        { _id: userType },
+        { _id: counterName },
         { $set: { sequence_value: 1 } },
         { upsert: true }
       );
       return 1;
     }
   } catch (err) {
-    console.error(`Error in getNextUserID for ${userType}:`, err);
+    console.error(`Error in getNextSequence for ${counterName}:`, err);
     return 1;
   }
 }
@@ -184,7 +205,7 @@ app.post("/sign_up", async(req,res)=>{
       return res.redirect(`register_form.html?error=${encodeURIComponent("Username already exists. Please choose a different username.")}`);
     }
 
-    const userId= await getNextUserID("userId");
+    const userId= await getNextSequence("userId");
     const data = {
       userId,
       fname,
@@ -224,7 +245,7 @@ app.post("/managment", async(req,res)=>{
       return res.redirect(`adminPage.html?error=${encodeURIComponent("Username already exists. Please choose a different username.")}`);
     }
 
-    const adminId= await getNextUserID("adminId");
+    const adminId= await getNextSequence("adminId");
     const data = {
       adminId,
       fname,
@@ -401,7 +422,9 @@ app.post('/api/reservations',requireLogin, async (req, res) => {
       }
     }
     // --- End new code ---
+    const orderId= await getNextSequence("orderId");
     const data = {
+      orderId,
       customer_name,
       end_date,
       order_date:new Date().toISOString().split('T')[0],
@@ -761,7 +784,7 @@ app.get('/api/myreservations', async (req, res) => {
 
     // Build result
     const result = reservations.map(r => ({
-      order_id: r._id || 'N/A',
+      order_id: r.orderId || 'N/A',
       order_date: r.order_date,
       end_date: r.end_date,
       status: r.status || "Renting",
