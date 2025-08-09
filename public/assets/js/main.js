@@ -386,7 +386,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!nav) return;
 
         // Remove old versions if they exist
-        ['customer-page-link', 'return-page-link', 'account-dropdown','managment','admin'].forEach(id => {
+        ['customer-page-link', 'return-page-link', 'account-dropdown','managment','admin-page'].forEach(id => {
           const old = nav.querySelector(`#${id}`);
           if (old) old.remove();
         });
@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function () {
         else if(userType === "admin")
         {
           const dropdownLi = document.createElement('li');
-          dropdownLi.id = 'admin';
+          dropdownLi.id = 'admin-page';
           dropdownLi.innerHTML = `
             <a href="adminPage.html">Admin</a>
           `;
