@@ -469,18 +469,16 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 });
-
-
-  fetch('/api/userinfo')
-    .then(res => res.json())
-    .then(data => {
-      if (data && data.name && data.name !== "Customer"||data && data.name && data.name !== "admin"||data && data.name && data.name !== "maintainance") {
-        // Hide hero login button if logged in
-        const heroLoginBtn = document.getElementById('hero-login-btn');
-        if (heroLoginBtn) heroLoginBtn.style.display = 'none';
-      }
-    })
-    .catch(() => { /* not logged in, do nothing */ });
+  fetch('/userdetail', {credentials:"include"})
+  .then(res => {if(!res.ok)throw new Error("Not Logged in"); return res.json();})
+  .then(data => {
+    if (data?.name) {
+      // Hide hero login button if logged in
+      const heroLoginBtn = document.getElementById('login-link-3');
+      if (heroLoginBtn) heroLoginBtn.style.display = 'none';
+    }
+  })
+  .catch(() => { /* not logged in, do nothing */ });
   let allEquipment = [];
   let selectedEquipmentSet = new Set();
 
