@@ -424,7 +424,16 @@ body.mobile-nav-active .mobile {
 #welcome h1 span {
   color: var(--accent-color);
 }
+#welcome h2 {
+  margin: 0;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 56px;
+}
 
+#welcome h2 span {
+  color: #004af6;
+}
 #welcome p {
   color: color-mix(in srgb, var(--default-color), transparent 30%);
   margin: 5px 0 0px 0;
@@ -1345,56 +1354,6 @@ section {
   padding:0 15px;
 }
 
-.user-container .content h1{
-  font-size: 50px;
-  color:#333;
-  padding-bottom: 40px;
-}
-
-.user-container .content h1 span{
-  color:rgb(0, 115, 255);
-}
-
-.user-container .content h2{
-  font-size: 50px;
-  color:#333;
-}
-
-.user-container .content h4 {
-  font-size: 20px;
-  color:#333;
-}
-
-.user-container .content h4 span{
-  font-size: 20px;
-  color:#333;
-  text-decoration-line: underline;
-}
-
-.user-container .content h2 span{
-  color:rgb(0, 115, 255);
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.user-container .content p{
-  font-size: 25px;
-  margin-bottom: 20px;
-}
-
-.user-container .content .btn{
-  display: inline-block;
-  padding:10px 30px;
-  font-size: 20px;
-  background: #333;
-  color:#fff;
-  margin:0 5px;
-  text-transform: capitalize;
-}
-
-.user-container .content .btn:hover{
-  background: rgb(0, 56, 125);
-}
 
 /*--------------------------------------------------------------
 # Account-section
