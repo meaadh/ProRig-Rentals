@@ -1,3 +1,17 @@
+// Auto-fill cardholder name in Add Payment Info form
+document.addEventListener('DOMContentLoaded', function() {
+  // Only run on equipment-reservation.html
+  if (window.location.pathname.endsWith('equipment-reservation.html')) {
+    fetch('/api/userinfo')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.name) {
+          var cardholderField = document.getElementById('payment_cardholder_name');
+          if (cardholderField) cardholderField.value = data.name;
+        }
+      });
+  }
+});
 /**
 * Template Name: Mamba - v2.3.0
 * Template URL: https://bootstrapmade.com/mamba-one-page-bootstrap-template-free/
@@ -106,32 +120,51 @@
   } else if ($(".mobile-nav, .mobile-nav-toggle").length) {
     $(".mobile-nav, .mobile-nav-toggle").hide();
   }
+  // Mark current page as route-active
+  function markRouteActive() {
+    const path = location.pathname.split("/").pop() || "index.html";
+    const lists = document.querySelectorAll(".nav-menu, .mobile-nav ul");
+    lists.forEach(list => {
+      if (!list) return;
+      // clear previous route-active (if any)
+      list.querySelectorAll(".route-active").forEach(li => li.classList.remove("route-active","active"));
+      list.querySelectorAll("a[href]").forEach(a => {
+        const href = a.getAttribute("href");
+        if (!href || href.startsWith("#")) return; // only real page links
+        const file = href.split("/").pop();
+        if (file === path) {
+          a.closest("li")?.classList.add("route-active","active");
+        }
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", markRouteActive);
 
   // Navigation active state on scroll
-  var nav_sections = $('section');
-  var main_nav = $('.nav-menu, .mobile-nav');
+  var nav_sections = $("section");
+  var main_nav = $(".nav-menu, .mobile-nav");
 
-  $(window).on('scroll', function() {
+  $(window).on("scroll", function () {
+    // If no in-page sections, don't touch active state
+    if (nav_sections.length === 0) return;
+
     var cur_pos = $(this).scrollTop() + 200;
-    if (nav_sections.length === 0) 
-    {
-    main_nav.find('li').removeClass('active');
-    return;
-    }
-    nav_sections.each(function() {
+
+    // Only toggle active for in-page hash links; leave .route-active alone
+    main_nav.find('a[href^="#"]').parent("li").removeClass("active");
+
+    nav_sections.each(function () {
       var top = $(this).offset().top,
-        bottom = top + $(this).outerHeight();
+          bottom = top + $(this).outerHeight();
 
       if (cur_pos >= top && cur_pos <= bottom) {
-        if (cur_pos <= bottom) {
-          main_nav.find('li').removeClass('active');
-        }
-        main_nav.find('a[href="#' + $(this).attr('id') + '"]').parent('li').addClass('active');
-      }
-      if (cur_pos < 300) {
-         $(".nav-menu ul:first li:first").addClass('active');
+        main_nav.find('a[href="#' + $(this).attr("id") + '"]').parent("li").addClass("active");
       }
     });
+
+    // Remove this old fallback; it overrides your page active
+    // if (cur_pos < 300) { $(".nav-menu ul:first li:first").addClass('active'); }
   });
 
   // Back to top button
@@ -249,6 +282,26 @@
             $container.append('<div class="col-12"><p style="color:red;font-weight:bold;">No equipment found. Check your API or database.</p></div>');
             return;
           }
+          
+          // Sort equipment by category first (Heavy Equipment on top), then by name
+          data.sort((a, b) => {
+            // Priority order for categories
+            const categoryPriority = {
+              "Heavy Equipment": 0,
+              "Carpet Cleaners & Pressure Washers": 1,
+              "Ladder & Lifts": 2,
+              "Landscaping Tools": 3,
+              "Light Equipment": 4
+            };
+            
+            if (a.category !== b.category) {
+              const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
+              const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
+              return priorityA - priorityB;
+            }
+            return a.name.localeCompare(b.name);
+          });
+          
           data.forEach(item => {
             let filters = [];
             // Use quantity_available for availability
@@ -287,7 +340,7 @@
         })
         .catch(err => {
           console.error("Error fetching equipment:", err);
-          $('.event-container').empty().append('<div class="col-12"><p style="color:red;font-weight:bold;">Failed to load equipment data.</p></div>');
+          $('.event-container').empty().append('<div class="col-12"><p style="color:red;font-weight:bold;text-align: center;">Access to the inventory is available to signed-in users only. Please sign in to continue.</p></div>');
         });
     }
   });
@@ -306,39 +359,39 @@
   });
   
 document.addEventListener('DOMContentLoaded', function () {
-  fetch('/api/userinfo')
+  fetch('/userdetail', {credentials: 'include'})
     .then(res => res.json())
     .then(data => {
-      if (data && data.name && data.name !== "Customer") {
+      const userType=data?.user_type;
+      // Change login text
+      const loginLink = document.getElementById('login-link');
+      const loginLink2 = document.getElementById('login-link-2');
+      
+      if (loginLink) {
+        loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
+        loginLink.href = '/logout';
+      }
+      if (loginLink2) {
+        loginLink2.innerHTML = '<i class="icofont-logout"></i> | Logout';
+        loginLink2.href = '/logout';
+      }
+      
+      // Define desktop and mobile nav targets
+      const navTargets = [
+        document.getElementById('main-navbar-list'),
+        document.querySelector('.mobile-nav ul')
+      ];
 
-        // Change login text
-        const loginLink = document.getElementById('login-link');
-        const loginLink2 = document.getElementById('login-link-2');
-        
-        if (loginLink) {
-          loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
-          loginLink.href = '/logout';
-        }
-        if (loginLink2) {
-          loginLink2.innerHTML = '<i class="icofont-logout"></i> | Logout';
-          loginLink2.href = '/logout';
-        }
-       
-        // Define desktop and mobile nav targets
-        const navTargets = [
-          document.getElementById('main-navbar-list'),
-          document.querySelector('.mobile-nav ul')
-        ];
+      navTargets.forEach(nav => {
+        if (!nav) return;
 
-        navTargets.forEach(nav => {
-          if (!nav) return;
-
-          // Remove old versions if they exist
-          ['customer-page-link', 'return-page-link', 'account-dropdown'].forEach(id => {
-            const old = nav.querySelector(`#${id}`);
-            if (old) old.remove();
-          });
-
+        // Remove old versions if they exist
+        ['customer-page-link', 'return-page-link', 'account-dropdown','managment','admin-page'].forEach(id => {
+          const old = nav.querySelector(`#${id}`);
+          if (old) old.remove();
+        });
+        if(userType==="customer")
+        {
           // Create dropdown container
           const dropdownLi = document.createElement('li');
           dropdownLi.classList.add('drop-down');
@@ -364,35 +417,68 @@ document.addEventListener('DOMContentLoaded', function () {
           } else {
             nav.appendChild(dropdownLi);
           }
-        });
+        }
+        else if(userType === "maintenance")
+        {
+          const dropdownLi = document.createElement('li');
+          dropdownLi.id = 'management';
+          dropdownLi.innerHTML = `
+            <a href="maintainancePage.html">Managment</a>
+          `;
 
-        // Highlight correct link
-        const current = window.location.pathname;
-        if (current.endsWith('account.html')) {
-          document.querySelectorAll('#dashboard-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+          const logoutLi = nav.querySelector('#login-link-li');
+          if (logoutLi) {
+            nav.insertBefore(dropdownLi, logoutLi);
+          } else {
+            nav.appendChild(dropdownLi);
+          }
         }
-        if (current.endsWith('equipment-reservation.html')) {
-          document.querySelectorAll('#customer-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
-        }
-        if (current.endsWith('account.html#return')) {
-          document.querySelectorAll('#return-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
-        }
+        else if(userType === "admin")
+        {
+          const dropdownLi = document.createElement('li');
+          dropdownLi.id = 'admin-page';
+          dropdownLi.innerHTML = `
+            <a href="adminPage.html">Admin</a>
+          `;
 
+          const logoutLi = nav.querySelector('#login-link-li');
+          if (logoutLi) {
+            nav.insertBefore(dropdownLi, logoutLi);
+          } else {
+            nav.appendChild(dropdownLi);
+          }
+        }
+      });
+
+      // Highlight correct link
+      const current = window.location.pathname+ window.location.hash;
+      if (current.endsWith('account.html')) {
+        document.querySelectorAll('#dashboard-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+      }
+      if (current.endsWith('equipment-reservation.html')) {
+        document.querySelectorAll('#customer-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+      }
+      if (current.endsWith('account.html#return')) {
+        document.querySelectorAll('#return-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+      }
+      if (current.endsWith('adminPage.html')) {
+        document.querySelectorAll('a[href$="adminPage.html"]').forEach(a => a.parentElement.classList.add('active'));
+      }
+      if (current.endsWith('maintainancePage.html')) {
+        document.querySelectorAll('a[href$="maintainancePage.html"]').forEach(a => a.parentElement.classList.add('active'));
       }
     });
 });
-
-
-  fetch('/api/userinfo')
-    .then(res => res.json())
-    .then(data => {
-      if (data && data.name && data.name !== "Customer"||data && data.name && data.name !== "admin") {
-        // Hide hero login button if logged in
-        const heroLoginBtn = document.getElementById('hero-login-btn');
-        if (heroLoginBtn) heroLoginBtn.style.display = 'none';
-      }
-    })
-    .catch(() => { /* not logged in, do nothing */ });
+  fetch('/userdetail', {credentials:"include"})
+  .then(res => {if(!res.ok)throw new Error("Not Logged in"); return res.json();})
+  .then(data => {
+    if (data?.name) {
+      // Hide hero login button if logged in
+      const heroLoginBtn = document.getElementById('login-link-3');
+      if (heroLoginBtn) heroLoginBtn.style.display = 'none';
+    }
+  })
+  .catch(() => { /* not logged in, do nothing */ });
   let allEquipment = [];
   let selectedEquipmentSet = new Set();
 
@@ -405,6 +491,26 @@ document.addEventListener('DOMContentLoaded', function () {
         (eq.category || eq.type || '').toLowerCase() === category.toLowerCase()
       );
     }
+    
+    // Apply the same sorting logic to filtered results
+    filtered.sort((a, b) => {
+      // Priority order for categories
+      const categoryPriority = {
+        "Heavy Equipment": 0,
+        "Carpet Cleaners & Pressure Washers": 1,
+        "Ladder & Lifts": 2,
+        "Landscaping Tools": 3,
+        "Light Equipment": 4
+      };
+      
+      if (a.category !== b.category) {
+        const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
+        const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
+        return priorityA - priorityB;
+      }
+      return a.name.localeCompare(b.name);
+    });
+    
     if (!filtered.length) {
       list.innerHTML = '<div class="col-12"><p>No equipment available for this category.</p></div>';
       return;
@@ -454,11 +560,30 @@ document.addEventListener('DOMContentLoaded', function () {
 fetch('/api/equipments')
   .then(res => res.json())
   .then(data => {
+    // Sort equipment by category first (Heavy Equipment on top), then by name
+    data.sort((a, b) => {
+      // Priority order for categories
+      const categoryPriority = {
+        "Heavy Equipment": 0,
+        "Carpet Cleaners & Pressure Washers": 1,
+        "Ladder & Lifts": 2,
+        "Landscaping Tools": 3,
+        "Light Equipment": 4
+      };
+      
+      if (a.category !== b.category) {
+        const priorityA = categoryPriority[a.category] !== undefined ? categoryPriority[a.category] : 999;
+        const priorityB = categoryPriority[b.category] !== undefined ? categoryPriority[b.category] : 999;
+        return priorityA - priorityB;
+      }
+      return a.name.localeCompare(b.name);
+    });
+    
     allEquipment = data;
     renderEquipment(""); // Show nothing until category is picked
   })
   .catch(() => {
-    document.getElementById('equipment-list').innerHTML = '<div class="col-12"><p>Error loading equipment.</p></div>';
+    document.getElementById('equipment-list').innerHTML = '<div class="col-12"><p>Access to the inventory is available to signed-in users only. Please sign in to continue.</p></div>';
   });
 
 document.getElementById('equipment-category').addEventListener('change', function() {
@@ -575,6 +700,66 @@ function showPaymentModal(totalPrice, onConfirm) {
       });
     });
   });
+  /*
+  document.getElementById('Payment-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    document.getElementById('payment-error').textContent = '';
+    document.getElementById('payment-success').textContent = '';
+  });
+    document.getElementById('Address-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    document.getElementById('address-error').textContent = '';
+    document.getElementById('address-success').textContent = '';
+  });*/
+  // Function to populate payment dropdown with user's saved payment methods
+  function populatePaymentDropdown() {
+    fetch('/api/mypayments')
+      .then(res => res.json())
+      .then(payments => {
+        const paymentSelect = document.getElementById('payment');
+        if (paymentSelect && payments && payments.length > 0) {
+          // Clear existing options except the default
+          paymentSelect.innerHTML = '<option value="" disabled selected>-- Choose Payment --</option>';
+          
+          // Add user's saved payment methods
+          payments.forEach((payment, index) => {
+            const option = document.createElement('option');
+            option.value = payment.payment_nickname || `payment_${index}`;
+            option.textContent = `${payment.card_type} ending in ${payment.last4} (${payment.payment_nickname || 'Card ' + (index + 1)})`;
+            paymentSelect.appendChild(option);
+          });
+        }
+      })
+      .catch(err => {
+        console.log('Could not load payment methods:', err);
+        // Keep default options if API fails
+      });
+  }
+
+  // Function to populate address dropdown with user's saved addresses
+  function populateAddressDropdown() {
+    fetch('/api/myaddress')
+      .then(res => res.json())
+      .then(addresses => {
+        const addressSelect = document.getElementById('address');
+        if (addressSelect && addresses && addresses.length > 0) {
+          // Clear existing options except the default
+          addressSelect.innerHTML = '<option value="" disabled selected>-- Choose Billing address--</option>';
+          
+          // Add user's saved addresses
+          addresses.forEach((address, index) => {
+            const option = document.createElement('option');
+            option.value = address.address_nickname || `address_${index}`;
+            option.textContent = `${address.address_line1}, ${address.city}, ${address.state} ${address.zip_code} (${address.address_nickname || 'Address ' + (index + 1)})`;
+            addressSelect.appendChild(option);
+          });
+        }
+      })
+      .catch(err => {
+        console.log('Could not load addresses:', err);
+        // Keep default options if API fails
+      });
+  }
 
   // Replace sessionStorage logic with API call to get user's name from server
   document.addEventListener('DOMContentLoaded', function() {
@@ -582,13 +767,139 @@ function showPaymentModal(totalPrice, onConfirm) {
       .then(res => res.json())
       .then(data => {
         if (data && data.name) {
-          document.getElementById('customer_name').value = data.name;
-          document.getElementById('user-welcome-name').textContent = data.name;
+          const customerNameField = document.getElementById('customer_name');
+          const welcomeNameField = document.getElementById('user-welcome-name');
+          if (customerNameField) customerNameField.value = data.name;
+          if (welcomeNameField) welcomeNameField.textContent = data.name;
         }
       })
       .catch(() => {
         // fallback: do nothing, default is "Customer"
       });
+
+    // Load user's payment and address information for equipment reservation page
+    if (window.location.pathname.endsWith('equipment-reservation.html')) {
+      populatePaymentDropdown();
+      populateAddressDropdown();
+      
+      // Add event listeners for "Add New" buttons
+      const addPaymentBtn = document.getElementById('add-payment-btn');
+      const addAddressBtn = document.getElementById('add-address-btn');
+      const paymentForm = document.getElementById('Payment-form');
+      const addressForm = document.getElementById('Address-form');
+      
+      if (addPaymentBtn && paymentForm) {
+        addPaymentBtn.addEventListener('click', function() {
+          paymentForm.classList.toggle('hidden-form');
+          addPaymentBtn.textContent = paymentForm.classList.contains('hidden-form') 
+            ? '+ Add New Payment Method' 
+            : '- Hide Payment Form';
+        });
+      }
+      
+      if (addAddressBtn && addressForm) {
+        addAddressBtn.addEventListener('click', function() {
+          addressForm.classList.toggle('hidden-form');
+          addAddressBtn.textContent = addressForm.classList.contains('hidden-form') 
+            ? '+ Add New Address' 
+            : '- Hide Address Form';
+        });
+      }
+      
+      // Handle payment form submission and refresh dropdowns
+      if (paymentForm) {
+        paymentForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          // Custom validation for card number, zip code, and cvv
+          const cardNumber = paymentForm.card_number.value.trim();
+          const zipCode = paymentForm.zip_code.value.trim();
+          const cvv = paymentForm.cvv.value.trim();
+          let errorMsg = '';
+          if (!/^\d{16}$/.test(cardNumber)) {
+            errorMsg = 'Card number must be exactly 16 digits.';
+          } else if (!/^\d{5}$/.test(zipCode)) {
+            errorMsg = 'Zip code must be exactly 5 digits.';
+          } else if (!/^\d{3,4}$/.test(cvv)) {
+            errorMsg = 'CVV must be 3 or 4 digits.';
+          }
+          if (errorMsg) {
+            document.getElementById('payments-error').textContent = errorMsg;
+            document.getElementById('payments-success').textContent = '';
+            return;
+          }
+          const formData = new FormData(paymentForm);
+          fetch('/payments', {
+            method: 'POST',
+            body: new URLSearchParams([...formData])
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.message || data.success || !data.error) {
+              document.getElementById('payments-success').textContent = 'Payment method added successfully!';
+              document.getElementById('payments-error').textContent = '';
+              paymentForm.reset();
+              // Refresh payment dropdown
+              setTimeout(() => {
+                populatePaymentDropdown();
+                paymentForm.classList.add('hidden-form');
+                addPaymentBtn.textContent = '+ Add New Payment Method';
+              }, 1000);
+            } else {
+              document.getElementById('payments-error').textContent = data.error || 'Failed to add payment method';
+              document.getElementById('payments-success').textContent = '';
+            }
+          })
+          .catch(err => {
+            document.getElementById('payments-error').textContent = 'Failed to add payment method';
+            document.getElementById('payments-success').textContent = '';
+          });
+        });
+
+        // Enforce numeric input for card number, zip code, and cvv fields
+        ['card_number', 'zip_code', 'cvv'].forEach(function(fieldId) {
+          const field = document.getElementById(fieldId);
+          if (field) {
+            field.addEventListener('input', function(e) {
+              this.value = this.value.replace(/[^\d]/g, '');
+            });
+          }
+        });
+      }
+      
+      // Handle address form submission and refresh dropdowns
+      if (addressForm) {
+        addressForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const formData = new FormData(addressForm);
+          
+          fetch('/addresses', {
+            method: 'POST',
+            body: new URLSearchParams([...formData])
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.message || data.success || !data.error) {
+              document.getElementById('address-success').textContent = 'Address added successfully!';
+              document.getElementById('address-error').textContent = '';
+              addressForm.reset();
+              // Refresh address dropdown
+              setTimeout(() => {
+                populateAddressDropdown();
+                addressForm.classList.add('hidden-form');
+                addAddressBtn.textContent = '+ Add New Address';
+              }, 1000);
+            } else {
+              document.getElementById('address-error').textContent = data.error || 'Failed to add address';
+              document.getElementById('address-success').textContent = '';
+            }
+          })
+          .catch(err => {
+            document.getElementById('address-error').textContent = 'Failed to add address';
+            document.getElementById('address-success').textContent = '';
+          });
+        });
+      }
+    }
 
     // Show success modal with "Okay" after reload if flag is set
     if (localStorage.getItem('showReservationModal') === '1') {

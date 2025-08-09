@@ -67,11 +67,13 @@
     </div>
   </header><!-- End Header -->
   
-  <div class="hero-text">
-    <h2 class="animate__animated animate__fadeInDown"><span>ProRigs Rental Corporation</span></h2>
-    <h6 class="animate__animated animate__fadeInUp">A Heavy Equipment Solutions Company</h6>
+  <div class="container text-center" id="welcome">
+    <div class="d-flex flex-column justify-content-center align-items-center">
+      <h1 data-aos="fade-up">Welcome to <span>ProRig Rentals</span></h1>
+      <p data-aos="fade-up" data-aos-delay="100">A Heavy Equipment Solutions Corporation<br></p>
+    </div>
   </div>
-  <main id="main">
+  <main id="main" class="hidden-page">
     <div class="user-container">
       <div class="content">
         <h3>HI, <span id="user-welcome-name">Customer</span></h3>
@@ -98,43 +100,140 @@
         </div>
       </div>
     </section>
-    <section id="reservation">
-    <div class="form-container">
-      <form id="reservation-form" action="/api/reservations" method="post">
-        <h3>Reservation</h3>
-        <label for="customer_name">Name:</label>
-        <input type="text" name="customer_name" id="customer_name" required>
-        <label for="end_date" style="margin-left:10px;">Return Date:</label>
-        <input type="date" name="end_date" id="end_date" required>
-        <select id="location" name="location" required>
-          <option value=""disabled selected>-- Choose Pickup Location --</option>
-          <option value="Dearborn">Dearborn</option>
-          <option value="Warren">Warren</option>
-          <option value="DearbornHeights">Dearborn Heights</option>
-          <option value="annArbor">Ann Arbor</option>
-          <option value="GrandRapids">Grand Rapids</option>
-          <option value="Lansing">Lansing</option>
-        </select>
-        <select id="address" name="address" required>
-          <option value="" disabled selected>-- Choose Billing address--</option>
-          <option value="default">4901 Evergreen Rd Dearborn, MI 48128</option>
-          <option value="address1">500 S State St, Ann Arbor, MI 48109</option>
-          <option value="address2">428 S Shaw Ln, East Lansing, MI 48824</option>
-        </select>
-        <select id="payment" name="payment" required>
-          <option value=""disabled selected>-- Choose Payment --</option>
-          <option value="default">Default Card ending in 6969</option>
-          <option value="mastercard">ending in 4200</option>
-          <option value="visa">ending in 8008</option>
-        </select>
-        <!-- Hidden input for selected equipment -->
-        <input type="hidden" name="equipment_ids" id="selected-equipment">
-        <input type="hidden" name="total_cost" id="total-cost">
-        <input type="submit" name="submit" value="Reserve Selected Equipment" class="form-btn">
-        <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
-        <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
-      </form>
-    </div>
+    <section class="reservation-section">
+      <div class="forms-wrapper single-form">
+        <div class="reservation-form-container">
+        <form id="reservation-form" action="/api/reservations" method="post">
+          <h3>Reservation</h3>
+          <label for="customer_name">Name:</label>
+          <input type="text" name="customer_name" id="customer_name" required>
+          <label for="end_date" style="margin-left:10px;">Return Date:</label>
+          <input type="date" name="end_date" id="end_date" required>
+          <select id="location" name="location" required>
+            <option value=""disabled selected>-- Choose Pickup Location --</option>
+            <option value="Dearborn">Dearborn</option>
+            <option value="Warren">Warren</option>
+            <option value="DearbornHeights">Dearborn Heights</option>
+            <option value="annArbor">Ann Arbor</option>
+            <option value="GrandRapids">Grand Rapids</option>
+            <option value="Lansing">Lansing</option>
+          </select>
+          <select id="address" name="address" required>
+            <option value="" disabled selected>-- Choose Billing address--</option>
+          </select>
+          <div style="margin-top: 5px;">
+            <button type="button" id="add-address-btn" style="padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 3px; font-size: 0.9em; cursor: pointer;">+ Add New Address</button>
+          </div>
+          <select id="payment" name="payment" required>
+            <option value=""disabled selected>-- Choose Payment Method --</option>
+          </select>
+          <div style="margin-top: 5px;">
+            <button type="button" id="add-payment-btn" style="padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 3px; font-size: 0.9em; cursor: pointer;">+ Add New Payment Method</button>
+          </div>
+          <!-- Hidden input for selected equipment -->
+          <input type="hidden" name="equipment_ids" id="selected-equipment">
+          <input type="hidden" name="total_cost" id="total-cost">
+          <input type="submit" name="submit" value="Reserve Selected Equipment" class="form-btn">
+          <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
+          <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
+        </form>
+        </div>
+      </div>
+        <div class="forms-wrapper">
+          <div class="reservation-form-container">
+            <form id="Payment-form" class="hidden-form" action="/payments" method="post">
+              <h3>Add Payment Info</h3>
+              <input type="text" name="customer_name" id="payment_cardholder_name" required placeholder="Cardholder Name">
+              <input type="text" name="card_number" id="card_number" required placeholder="Card Number (16 digits)" pattern="\d{16}" maxlength="16" minlength="16" inputmode="numeric" title="Card number must be 16 digits">
+              <input type="date" name="expiration" id="expiration" required placeholder="Expiration Date:">
+              <input type="text" name="cvv" id="cvv" required placeholder="CVV (3 or 4 digits)" pattern="\d{3,4}" maxlength="4" minlength="3" inputmode="numeric" title="CVV must be 3 or 4 digits">
+              <select id="card_type" name="card_type" required>
+                <option value=""disabled selected>-- Choose Card Type --</option>
+                <option value="Visa">Visa</option>
+                <option value="Mastercard">Mastercard</option>
+                <option value="Discover">Discover</option>
+                <option value="American Express">American Express</option>
+              </select>
+              <input type="text" name="zip_code" id="payment_zip_code" required placeholder="Zip Code (5 digits)" pattern="\d{5}" maxlength="5" minlength="5" inputmode="numeric" title="Zip code must be 5 digits">
+              <input type="text" name="payment_nickname" id="payment_nickname" required placeholder="Payment Nickname">
+              <input type="submit" name="submit" value="Add Payment Card to Account" class="form-btn">
+              <div id="payments-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
+              <div id="payments-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
+            </form>
+          </div>
+          <div class="reservation-form-container">
+            <form id="Address-form" class="hidden-form" action="/addresses" method="post">
+              <h3>Add Address Info</h3>
+              <label for="street">Street</label>
+              <input type="text" name="street" id="street" required placeholder="e.g., 4901 Evergreen Rd" minlength="2">
+              <label for="city">City</label>
+              <input type="text" name="city" id="city" required placeholder="e.g., Dearborn" minlength="2">
+              <label for="state">State</label>
+              <select name="state" id="state" required>
+                <option value="" disabled selected>Select State</option>
+                <option value="AL">Alabama</option>
+                <option value="AK">Alaska</option>
+                <option value="AZ">Arizona</option>
+                <option value="AR">Arkansas</option>
+                <option value="CA">California</option>
+                <option value="CO">Colorado</option>
+                <option value="CT">Connecticut</option>
+                <option value="DE">Delaware</option>
+                <option value="FL">Florida</option>
+                <option value="GA">Georgia</option>
+                <option value="HI">Hawaii</option>
+                <option value="ID">Idaho</option>
+                <option value="IL">Illinois</option>
+                <option value="IN">Indiana</option>
+                <option value="IA">Iowa</option>
+                <option value="KS">Kansas</option>
+                <option value="KY">Kentucky</option>
+                <option value="LA">Louisiana</option>
+                <option value="ME">Maine</option>
+                <option value="MD">Maryland</option>
+                <option value="MA">Massachusetts</option>
+                <option value="MI">Michigan</option>
+                <option value="MN">Minnesota</option>
+                <option value="MS">Mississippi</option>
+                <option value="MO">Missouri</option>
+                <option value="MT">Montana</option>
+                <option value="NE">Nebraska</option>
+                <option value="NV">Nevada</option>
+                <option value="NH">New Hampshire</option>
+                <option value="NJ">New Jersey</option>
+                <option value="NM">New Mexico</option>
+                <option value="NY">New York</option>
+                <option value="NC">North Carolina</option>
+                <option value="ND">North Dakota</option>
+                <option value="OH">Ohio</option>
+                <option value="OK">Oklahoma</option>
+                <option value="OR">Oregon</option>
+                <option value="PA">Pennsylvania</option>
+                <option value="RI">Rhode Island</option>
+                <option value="SC">South Carolina</option>
+                <option value="SD">South Dakota</option>
+                <option value="TN">Tennessee</option>
+                <option value="TX">Texas</option>
+                <option value="UT">Utah</option>
+                <option value="VT">Vermont</option>
+                <option value="VA">Virginia</option>
+                <option value="WA">Washington</option>
+                <option value="WV">West Virginia</option>
+                <option value="WI">Wisconsin</option>
+                <option value="WY">Wyoming</option>
+              </select>
+              <label for="zip_code">Zip Code</label>
+              <input type="text" name="zip_code" id="zip_code" required placeholder="e.g., 48128" pattern="\d{5}" maxlength="5" minlength="5" inputmode="numeric" title="Zip code must be 5 digits">
+              <label for="phone_number">Phone Number</label>
+              <input type="text" name="phone_number" id="phone_number" required placeholder="e.g., 248-420-6969" pattern="\d{3}-\d{3}-\d{4}" title="Phone number must be in the format 248-420-6969">
+              <label for="address_nickname">Address Nickname</label>
+              <input type="text" name="address_nickname" id="address_nickname" required placeholder="Default" minlength="2">
+              <input type="submit" name="submit" value="Add Address to Account" class="form-btn">
+              <div id="address-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
+              <div id="address-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
+            </form>
+          </div>
+      </div>
     </section>
     <!-- Reservation Success Modal -->
     <div id="reservation-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
@@ -144,7 +243,20 @@
         <!-- <button id="close-modal-btn" ...>Okay</button> -->
       </div>
     </div>
-
+    <div id="payment-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:30px 40px; border-radius:10px; box-shadow:0 2px 20px #0003; text-align:center; max-width:90vw;">
+        <h2 style="margin-bottom:20px;" id="payment-modal-title">Payment Added successful!</h2>
+        <div id="payment-modal-body"></div>
+        <!-- <button id="close-modal-btn" ...>Okay</button> -->
+      </div>
+    </div>
+     <div id="address-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:30px 40px; border-radius:10px; box-shadow:0 2px 20px #0003; text-align:center; max-width:90vw;">
+        <h2 style="margin-bottom:20px;" id="address-modal-title">Address Added successful!</h2>
+        <div id="address-modal-body"></div>
+        <!-- <button id="close-modal-btn" ...>Okay</button> -->
+      </div>
+    </div>
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
@@ -194,7 +306,145 @@
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
   <script>
-    
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/userdetail")
+        .then(res => {
+          if (!res.ok) throw new Error("Not logged in");
+          return res.json();
+        })
+        .then(data => {
+          if (data.user_type !== "customer") {
+            // wrong role → log them out
+            fetch("/logout", { credentials: "include" })
+              .then(() => window.location.href = "/loginform.html");
+          } else {
+            // correct role → reveal content
+            document.getElementById("main").classList.remove("hidden-page");
+          } 
+        })
+        .catch(() => {
+          window.location.href = "/loginform.html"; // optional redirect
+        });
+    });
+    // Client-side validation for Add Address form
+    document.addEventListener('DOMContentLoaded', function() {
+      const addressForm = document.getElementById('Address-form');
+      if (addressForm) {
+        addressForm.addEventListener('submit', function(e) {
+          let valid = true;
+          let errorMsg = '';
+          const street = document.getElementById('street');
+          const city = document.getElementById('city');
+          const state = document.getElementById('state');
+          const zip = document.getElementById('zip_code');
+          const phone = document.getElementById('phone_number');
+          const nickname = document.getElementById('address_nickname');
+          // Check required fields
+          if (!street.value.trim() || street.value.length < 2) {
+            valid = false;
+            errorMsg += 'Street is required and must be at least 2 characters.\n';
+          }
+          if (!city.value.trim() || city.value.length < 2) {
+            valid = false;
+            errorMsg += 'City is required and must be at least 2 characters.\n';
+          }
+          if (!state.value) {
+            valid = false;
+            errorMsg += 'State is required.\n';
+          }
+          if (!zip.value.match(/^\d{5}$/)) {
+            valid = false;
+            errorMsg += 'Zip code must be exactly 5 digits.\n';
+          }
+          if (!phone.value.match(/^\d{3}-\d{3}-\d{4}$/)) {
+            valid = false;
+            errorMsg += 'Phone number must be in the format 248-420-6969.\n';
+          }
+          if (!nickname.value.trim() || nickname.value.length < 2) {
+            valid = false;
+            errorMsg += 'Address nickname is required and must be at least 2 characters.';
+          }
+          if (!valid) {
+            e.preventDefault();
+            const errorDiv = document.getElementById('address-error');
+            errorDiv.textContent = errorMsg;
+            errorDiv.style.display = 'block';
+            // Hide success if error
+            document.getElementById('address-success').textContent = '';
+          } else {
+            const errorDiv = document.getElementById('address-error');
+            errorDiv.textContent = '';
+            errorDiv.style.display = 'none';
+          }
+        });
+      }
+    });
+  </script>
+  <script>
+    // Show modal popup on successful payment method or address creation
+    document.addEventListener('DOMContentLoaded', function() {
+      // Payment modal logic
+      const paymentForm = document.getElementById('Payment-form');
+      const paymentModal = document.getElementById('payment-modal');
+      const paymentModalTitle = document.getElementById('payment-modal-title');
+      const paymentModalBody = document.getElementById('payment-modal-body');
+      if (paymentForm) {
+        paymentForm.addEventListener('submit', function(e) {
+          setTimeout(function() {
+            const successDiv = document.getElementById('payments-success');
+            if (successDiv && successDiv.textContent.trim() !== '') {
+              if (paymentModal && paymentModalTitle && paymentModalBody) {
+                paymentModalTitle.textContent = 'Payment method added successfully!';
+                paymentModalBody.innerHTML = '<button id="close-payment-modal-btn" style="margin-top:20px;padding:8px 24px;background:#28a745;color:#fff;border:none;border-radius:5px;font-size:1.1em;cursor:pointer;">Okay</button>';
+                paymentModal.style.display = 'flex';
+                // Close button handler
+                document.getElementById('close-payment-modal-btn').onclick = function() {
+                  paymentModal.style.display = 'none';
+                };
+              }
+            }
+          }, 500);
+        });
+      }
+      if (paymentModal) {
+        paymentModal.addEventListener('click', function(e) {
+          if (e.target === paymentModal) {
+            paymentModal.style.display = 'none';
+          }
+        });
+      }
+
+      // Address modal logic
+      const addressForm = document.getElementById('Address-form');
+      const addressModal = document.getElementById('address-modal');
+      const addressModalTitle = document.getElementById('address-modal-title');
+      const addressModalBody = document.getElementById('address-modal-body');
+      if (addressForm) {
+        addressForm.addEventListener('submit', function(e) {
+          setTimeout(function() {
+            const successDiv = document.getElementById('address-success');
+            if (successDiv && successDiv.textContent.trim() !== '') {
+              if (addressModal && addressModalTitle && addressModalBody) {
+                addressModalTitle.textContent = 'Address added successfully!';
+                addressModalBody.innerHTML = '<button id="close-address-modal-btn" style="margin-top:20px;padding:8px 24px;background:#007bff;color:#fff;border:none;border-radius:5px;font-size:1.1em;cursor:pointer;">Okay</button>';
+                addressModal.style.display = 'flex';
+                // Close button handler
+                document.getElementById('close-address-modal-btn').onclick = function() {
+                  addressModal.style.display = 'none';
+                };
+              }
+            }
+          }, 500);
+        });
+      }
+      if (addressModal) {
+        addressModal.addEventListener('click', function(e) {
+          if (e.target === addressModal) {
+            addressModal.style.display = 'none';
+          }
+        });
+      }
+    });
   </script>
 
 </body>
