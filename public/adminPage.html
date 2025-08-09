@@ -71,17 +71,18 @@
         <h1>Welcome <span>Admin</span></h1>
       </div>
     </div>
-    <div class="form-container">
-      <form action="http://localhost:3000/managment" method="post">
+    <div id="userManagment"class="form-container hidden-page" >
+      <form action="/managment" method="post">
         <h3>USER MANAGEMENT</h3>
           <select name="user_type">
-                      <option value="maintainance">maintainance</option>
+                      <option value="maintainance">Maintainance</option>
           </select>
           <input type="text" name="fname" required placeholder="enter their first name">
           <input type="text" name="lname" required placeholder="enter their last name">
           <input type="text" name="username" required placeholder="enter a username">
           <input type="email" name="email" required placeholder="enter their email">
           <input type="password" name="password" required placeholder="enter a password">
+          <input type="password" name="cpassword" required placeholder="enter password again">
         <input type="submit" value="Submit" class="form-btn">
       </form>
     </div>
@@ -139,7 +140,24 @@
         .catch(() => {
           // fallback: do nothing, default is "Admin"
         });
-   });
+    });
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/userdetail")
+        .then(res => {
+          if (!res.ok) throw new Error("Not logged in");
+          return res.json();
+        })
+        .then(data => {
+          if (data?.name) {
+            document.getElementById("userManagment").classList.remove("hidden-page");
+          } else {
+            window.location.href = "/loginform.html"; // optional redirect if not logged in
+          }
+        })
+        .catch(() => {
+          window.location.href = "/loginform.html"; // optional redirect
+        });
+    });
   </script>
 </body>
 

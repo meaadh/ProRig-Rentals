@@ -91,7 +91,7 @@
     </div>
   
   <main id="main">
-
+    <section id="maintainance" class="hidden-page">
     <!-- ======= Equipment Management Section ======= -->
     <section id="equipment-management" class="equipment-management">
       <div class="container" data-aos="fade-up" data-aos-delay="100">
@@ -342,7 +342,7 @@
       </div>
     </div>
   </div>
-
+</section>
   <!-- ======= Footer ======= -->
   <footer id="footer">
     
@@ -417,6 +417,24 @@
 
   <!-- Equipment Management JavaScript -->
   <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/userdetail")
+        .then(res => {
+          if (!res.ok) throw new Error("Not logged in");
+          return res.json();
+        })
+        .then(data => {
+          if (data?.name) {
+            document.getElementById("maintainance").classList.remove("hidden-page");
+          } else {
+            window.location.href = "/loginform.html"; // optional redirect if not logged in
+          }
+        })
+        .catch(() => {
+          window.location.href = "/loginform.html"; // optional redirect
+        });
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
       // Equipment management variables
       let currentEquipmentToDelete = null;

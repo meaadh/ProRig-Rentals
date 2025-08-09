@@ -78,6 +78,7 @@
         <h1>Welcome <span>Customer</span></h1>
       </div>
     </div>
+    <section id="reservation" class="hidden-page">
     <!-- Equipment List Section -->
     <section id="equipment"class="equipment-section py-4">
       <div class="container">
@@ -255,7 +256,7 @@
         <!-- <button id="close-modal-btn" ...>Okay</button> -->
       </div>
     </div>
-
+  </section>
   </main><!-- End #main -->
    <!--<option value="default">4901 Evergreen Rd Dearborn, MI 48128</option>
        <option value="address1">500 S State St, Ann Arbor, MI 48109</option>
@@ -307,6 +308,23 @@
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
   <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/userdetail")
+        .then(res => {
+          if (!res.ok) throw new Error("Not logged in");
+          return res.json();
+        })
+        .then(data => {
+          if (data?.name) {
+            document.getElementById("reservation").classList.remove("hidden-page");
+          } else {
+            window.location.href = "/loginform.html"; // optional redirect if not logged in
+          }
+        })
+        .catch(() => {
+          window.location.href = "/loginform.html"; // optional redirect
+        });
+    });
     // Client-side validation for Add Address form
     document.addEventListener('DOMContentLoaded', function() {
       const addressForm = document.getElementById('Address-form');

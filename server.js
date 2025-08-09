@@ -346,8 +346,8 @@ app.get('/userdetail', requireLogin, (req, res) => {
   return res.status(401).json({ error:"Not Authenticated"});
   }
   const name=[user.fname, user.lname].filter(Boolean).join(" ");
+  console.log({name});
   return res.json({name})
-
 });
 app.get('/api/equipments',requireLogin, async (req, res) => {
   try {
