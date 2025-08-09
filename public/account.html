@@ -69,7 +69,7 @@
     <h2 class="animate__animated animate__fadeInDown"><span>ProRigs Rental Corporation</span></h2>
     <h6 class="animate__animated animate__fadeInUp">A Heavy Equipment Solutions Company</h6>
   </div>
-  <main id="main" style="margin-top: 80px;">
+  <main id="main" style="margin-top: 80px;" class="hidden-page">
 
     <div class="user-container">
       <div class="content">
@@ -77,8 +77,7 @@
         <h3>Welcome Back, <span id="user-welcome-name">Customer</span></h3>
       </div>
     </div>
-    <section id="user" class="hidden-page">
-
+    
     <section id="account" class="container" style="max-width: 1200px;">
 
       <button class="collapsible">All Orders</button>
@@ -180,7 +179,6 @@
         </div>
       </div>
     </div>
-  </section>
   </main>
   <footer id="footer">
     <div class="footer-top">
@@ -269,11 +267,16 @@
           return res.json();
         })
         .then(data => {
-          if (data?.name) {
-            document.getElementById("user").classList.remove("hidden-page");
+
+
+          if (data.user_type !== "customer") {
+            // wrong role → log them out
+            fetch("/logout", { credentials: "include" })
+              .then(() => window.location.href = "/loginform.html");
           } else {
-            window.location.href = "/loginform.html"; // optional redirect if not logged in
-          }
+            // correct role → reveal content
+            document.getElementById("main").classList.remove("hidden-page");
+          } 
         })
         .catch(err => {
           window.location.href = "/loginform.html"; // optional redirect

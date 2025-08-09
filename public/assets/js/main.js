@@ -120,32 +120,51 @@ document.addEventListener('DOMContentLoaded', function() {
   } else if ($(".mobile-nav, .mobile-nav-toggle").length) {
     $(".mobile-nav, .mobile-nav-toggle").hide();
   }
+  // Mark current page as route-active
+  function markRouteActive() {
+    const path = location.pathname.split("/").pop() || "index.html";
+    const lists = document.querySelectorAll(".nav-menu, .mobile-nav ul");
+    lists.forEach(list => {
+      if (!list) return;
+      // clear previous route-active (if any)
+      list.querySelectorAll(".route-active").forEach(li => li.classList.remove("route-active","active"));
+      list.querySelectorAll("a[href]").forEach(a => {
+        const href = a.getAttribute("href");
+        if (!href || href.startsWith("#")) return; // only real page links
+        const file = href.split("/").pop();
+        if (file === path) {
+          a.closest("li")?.classList.add("route-active","active");
+        }
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", markRouteActive);
 
   // Navigation active state on scroll
-  var nav_sections = $('section');
-  var main_nav = $('.nav-menu, .mobile-nav');
+  var nav_sections = $("section");
+  var main_nav = $(".nav-menu, .mobile-nav");
 
-  $(window).on('scroll', function() {
+  $(window).on("scroll", function () {
+    // If no in-page sections, don't touch active state
+    if (nav_sections.length === 0) return;
+
     var cur_pos = $(this).scrollTop() + 200;
-    if (nav_sections.length === 0) 
-    {
-    main_nav.find('li').removeClass('active');
-    return;
-    }
-    nav_sections.each(function() {
+
+    // Only toggle active for in-page hash links; leave .route-active alone
+    main_nav.find('a[href^="#"]').parent("li").removeClass("active");
+
+    nav_sections.each(function () {
       var top = $(this).offset().top,
-        bottom = top + $(this).outerHeight();
+          bottom = top + $(this).outerHeight();
 
       if (cur_pos >= top && cur_pos <= bottom) {
-        if (cur_pos <= bottom) {
-          main_nav.find('li').removeClass('active');
-        }
-        main_nav.find('a[href="#' + $(this).attr('id') + '"]').parent('li').addClass('active');
-      }
-      if (cur_pos < 300) {
-         $(".nav-menu ul:first li:first").addClass('active');
+        main_nav.find('a[href="#' + $(this).attr("id") + '"]').parent("li").addClass("active");
       }
     });
+
+    // Remove this old fallback; it overrides your page active
+    // if (cur_pos < 300) { $(".nav-menu ul:first li:first").addClass('active'); }
   });
 
   // Back to top button
@@ -420,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function () {
   fetch('/api/userinfo')
     .then(res => res.json())
     .then(data => {
-      if (data && data.name && data.name !== "Customer"||data && data.name && data.name !== "admin") {
+      if (data && data.name && data.name !== "Customer"||data && data.name && data.name !== "admin"||data && data.name && data.name !== "maintainance") {
         // Hide hero login button if logged in
         const heroLoginBtn = document.getElementById('hero-login-btn');
         if (heroLoginBtn) heroLoginBtn.style.display = 'none';

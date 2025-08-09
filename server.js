@@ -290,7 +290,7 @@ app.post('/login', async (req, res) => {
       source: user._collection
     };
     req.session.user_name = user.username;
-    req.session.userData = {fname:user.fname, lname:user.lname, username:user.username};
+    req.session.userData = {fname:user.fname, lname:user.lname, username:user.username,user_type:user.user_type};
   
     if (user.user_type === 'admin') {
       return res.redirect('/adminPage.html');
@@ -335,19 +335,24 @@ app.get('/logout',requireLogin, (req, res) => {
       console.error("Logout failed:", err);
       return res.status(500).send("Logout failed");
     }
+    res.clearCookie("connect.sid");
     res.redirect('/home.html');
   });
 });
 app.get('/userdetail', requireLogin, (req, res) => {
-  const user=req.session?.userData;
+  const user=req.session.user ||req.session.userData;
 
   if(!user)
   {
   return res.status(401).json({ error:"Not Authenticated"});
   }
-  const name=[user.fname, user.lname].filter(Boolean).join(" ");
-  console.log({name});
-  return res.json({name})
+
+  res.json({
+    name:[user.fname, user.lname].filter(Boolean).join(" "),
+    username:user.username,
+    user_type:user.user_type
+    
+  });
 });
 app.get('/api/equipments',requireLogin, async (req, res) => {
   try {

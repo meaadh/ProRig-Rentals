@@ -52,6 +52,10 @@
       </div>
       <nav class="nav-menu float-right d-none d-lg-block">
         <ul>
+          <li><a href="Home.html">Home</a></li>
+          <li><a href="home.html#about">About Us</a></li>
+          <li><a href="home.html#location">Locations</a></li>
+          <li><a href="home.html#team">Board Members</a></li>
           <li class="active"><a href="adminPage.html">Admin</a></li>
           <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
             | Logout</a>
@@ -64,14 +68,14 @@
     <h2 class="animate__animated animate__fadeInDown"><span>ProRigs Rental Corporation</span></h2>
     <h6 class="animate__animated animate__fadeInUp">A Heavy Equipment Solutions Company</h6>
   </div>
-  <main id="main">
+  <main id="main" class="hidden-page">
     <div class="user-container">
       <div class="content">
         <h3>HI, <span id="user-welcome-name">Admin</span></h3>
         <h1>Welcome <span>Admin</span></h1>
       </div>
     </div>
-    <div id="userManagment"class="form-container hidden-page" >
+    <div class="form-container" >
       <form action="/managment" method="post">
         <h3>USER MANAGEMENT</h3>
           <select name="user_type">
@@ -148,11 +152,14 @@
           return res.json();
         })
         .then(data => {
-          if (data?.name) {
-            document.getElementById("userManagment").classList.remove("hidden-page");
+          if (data.user_type !== "admin") {
+            // wrong role → log them out
+            fetch("/logout", { credentials: "include" })
+              .then(() => window.location.href = "/loginform.html");
           } else {
-            window.location.href = "/loginform.html"; // optional redirect if not logged in
-          }
+            // correct role → reveal content
+            document.getElementById("main").classList.remove("hidden-page");
+          } 
         })
         .catch(() => {
           window.location.href = "/loginform.html"; // optional redirect
