@@ -4,19 +4,20 @@
 * Author: BootstrapMade.com
 * License: https://bootstrapmade.com/license/
 */
-:root {
-  --default-font: "Roboto",  system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --heading-font: "Nunito",  sans-serif;
-  --nav-font: "Inter",  sans-serif;
-}
-:root { 
+
+:root{
+  --prorig-start: #895b00; /* teal-ish */
+  --prorig-end:   #2E7E73; /* deep sea green */
+  --btn-blue-start: #0058c3; /* keep if you still use blue anywhere */
+  --btn-blue-end:   #00458b;
   --background-color: #ffffff; /* Background color for the entire website, including individual sections */
   --default-color: #3d4348; /* Default color used for the majority of the text content across the entire website */
-  --heading-color: #3e5055; /* Color for headings, subheadings and title throughout the website */
-  --accent-color: #388da8; /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
-  --surface-color: #ffffff; /* The surface color is used as a background of boxed elements within sections, such as cards, icon boxes, or other elements that require a visual separation from the global background. */
-  --contrast-color: #ffffff; /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
+  --heading-font: "Nunito",  sans-serif;
 }
+
+@import url("assets/fonts/Montserrat-Alt1/webfonts/Montserrat-Alt1.css");
+
+
 /*--------------------------------------------------------------
 # General
 --------------------------------------------------------------*/
@@ -126,25 +127,11 @@ h1, h2, h3, h4, h5, h6, .font-primary {
   box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
 }
 
-#header .logo h1 {
-  font-size: 28px;
-  margin: 0;
-  padding: 10px 0;
-  line-height: 1;
-  font-weight: 400;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-}
-
-#header .logo h1 a, #header .logo h1 a:hover {
-  color: #336600;
-  text-decoration: none;
-}
 
 #header .logo img {
-  padding: 0;
-  margin: 0;
-  max-height: 40px;
+  margin-top: 5px;
+  max-height: 50px;
+  height: auto;
 }
 #header .login h1 {
   position: fixed;
@@ -186,7 +173,6 @@ h1, h2, h3, h4, h5, h6, .font-primary {
 @media only screen and (min-width: 1000px) {
   .mobile {display: none;}
 }
-
 @media only screen and (max-width: 770px) {
   .desktop {display: none;}
 }
@@ -383,6 +369,11 @@ body.mobile-nav-active .mobile {
   object-fit: cover;
   z-index: 1;
 }
+.hero .logo-img {
+  margin-top: 5px;
+  max-height: 150px;
+  height: auto;
+}
 
 .hero .hero-bg::before {
   content: "";
@@ -401,42 +392,11 @@ body.mobile-nav-active .mobile {
   margin: 0;
   font-size: 48px;
   font-weight: 700;
-  line-height: 56px;
+  line-height: 1.2;
 }
-
-.hero h1 span {
-  color: var(--accent-color);
-}
-
 .hero p {
   color: color-mix(in srgb, var(--default-color), transparent 30%);
   margin: 5px 0 30px 0;
-  font-size: 20px;
-  font-weight: 400;
-}
-#welcome h1 {
-  margin: 0;
-  font-size: 48px;
-  font-weight: 700;
-  line-height: 56px;
-}
-
-#welcome h1 span {
-  color: var(--accent-color);
-}
-#welcome h2 {
-  margin: 0;
-  font-size: 48px;
-  font-weight: 700;
-  line-height: 56px;
-}
-
-#welcome h2 span {
-  color: #004af6;
-}
-#welcome p {
-  color: color-mix(in srgb, var(--default-color), transparent 30%);
-  margin: 5px 0 0px 0;
   font-size: 20px;
   font-weight: 400;
 }
@@ -1329,29 +1289,80 @@ section {
 /*--------------------------------------------------------------
 # Gloabl User-Container
 --------------------------------------------------------------*/
-.user-container{
-  min-height: 20vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding:20px;
-  padding-bottom: 20px;
+#welcome {
+  padding: 2rem 0;
 }
 
+#welcome h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #4a5568;
+  margin-bottom: 0.25rem;
+}
+
+#welcome h2 span {
+  color: #004af6;
+  font-weight: 700;
+}
+
+#welcome h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 0.25rem 0;
+  line-height:1.5;
+}
+#welcome p {
+  color: #6b7280;
+  font-size: 1.1rem;
+  font-weight: 400;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  #welcome h1 {
+    font-size: 1.75rem;
+  }
+  #welcome h2 {
+    font-size: 1.25rem;
+  }
+  #welcome p {
+    font-size: 1rem;
+  }
+}
+.gradient-text{
+  font-family: 'Montserrat-Alt1', sans-serif;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--prorig-start), var(--prorig-end));
+  -webkit-background-clip:text;
+  background-clip:text;
+  color: transparent;
+}
+.user-container {
+  background: #f9fafb;
+  padding: 1rem 0;
+  justify-content: center;
+  padding-bottom: 50px;
+}
 .user-container .content{
   text-align: center;
 }
-
-.user-container .content h3{
-  font-size: 30px;
-  color:#333;
+.user-container h3 {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #4a5568;
+  margin: 0;
 }
 
-.user-container .content h3 span{
-  background: rgb(0, 115, 255);
-  color:#fff;
-  border-radius: 5px;
-  padding:0 15px;
+.user-container .label {
+  margin-right: 0.5rem;
+}
+
+.user-container .username {
+  background:linear-gradient(90deg, var(--btn-blue-start), var(--btn-blue-end));
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.25rem 0.75rem;
+  font-weight: 600;
 }
 
 
@@ -1373,9 +1384,12 @@ section {
   text-align: left;
   outline: none;
   font-size: 15px;
+  font-weight: bold;
 }
-
-#account .active, .collapsible:hover {
+#account .collapsible:hover {
+  background-color: #0036b3;
+}
+#account .active {
   background-color: #004af6;
 }
 
@@ -1390,7 +1404,9 @@ section {
 #account .active:after {
   content: "\2212";
 }
-
+#account h3 {
+  font-weight: bold;
+}
 #account .content {
   padding: 0 18px;
   max-height: 0;
@@ -2049,14 +2065,14 @@ section {
 # Global Footer
 --------------------------------------------------------------*/
 #footer {
-  background:#00569d;
+  background:linear-gradient(90deg, var(--prorig-start), var(--prorig-end));
   padding: 0 0 30px 0;
   color: #fff;
   font-size: 14px;
 }
 
 #footer .footer-top {
-  background:#00569d;
+  background:linear-gradient(90deg, var(--prorig-start), var(--prorig-end));
   border-top: 1px solid #007cb5;
   border-bottom: .5px solid #0000000a ;
   padding: 10px 0 10px 0;
