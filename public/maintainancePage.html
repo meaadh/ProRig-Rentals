@@ -65,14 +65,16 @@
         </div>
       </div>
       <nav class="nav-menu float-right d-none d-lg-block">
-        <ul>
-          <li><a href="Home.html">Home</a></li>
+        <ul id="main-navbar-list">
+          <li><a href="home.html">Home</a></li>
           <li><a href="home.html#about">About Us</a></li>
           <li><a href="home.html#location">Locations</a></li>
-          <li><a href="home.html#team">Board Members</a></li>
-          <li class="active"><a href="maintainancePage.html">Management</a></li>
-          <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
-            | Logout</a>
+          <li><a href="Home.html#team">Team Members</a></li>
+          <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
+          <li id="login-link-li">
+            <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-logout"></i>
+              | Logout</a>
+          </li>
         </ul>
       </nav><!-- .nav-menu -->
 
@@ -81,8 +83,8 @@
   
   <div class="user-container">
       <div class="content">
-       <h3>HI, <span id="user-welcome-name">Maintainance</span></h3>
-        <h1>Welcome <span>Maintainance</span></h1>
+       <h3>HI, <span id="user-welcome-name">maintenance</span></h3>
+        <h1>Welcome <span>maintenance</span></h1>
       </div>
     </div>
   
@@ -417,7 +419,7 @@
           return res.json();
         })
         .then(data => {
-          if (data.user_type !== "maintainance") {
+          if (data.user_type !== "maintenance") {
             // wrong role → log them out
             fetch("/logout", { credentials: "include" })
               .then(() => window.location.href = "/loginform.html");

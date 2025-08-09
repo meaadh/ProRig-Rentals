@@ -359,39 +359,39 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
 document.addEventListener('DOMContentLoaded', function () {
-  fetch('/api/userinfo')
+  fetch('/userdetail', {credentials: 'include'})
     .then(res => res.json())
     .then(data => {
-      if (data && data.name && data.name !== "Customer") {
+      const userType=data?.user_type;
+      // Change login text
+      const loginLink = document.getElementById('login-link');
+      const loginLink2 = document.getElementById('login-link-2');
+      
+      if (loginLink) {
+        loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
+        loginLink.href = '/logout';
+      }
+      if (loginLink2) {
+        loginLink2.innerHTML = '<i class="icofont-logout"></i> | Logout';
+        loginLink2.href = '/logout';
+      }
+      
+      // Define desktop and mobile nav targets
+      const navTargets = [
+        document.getElementById('main-navbar-list'),
+        document.querySelector('.mobile-nav ul')
+      ];
 
-        // Change login text
-        const loginLink = document.getElementById('login-link');
-        const loginLink2 = document.getElementById('login-link-2');
-        
-        if (loginLink) {
-          loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
-          loginLink.href = '/logout';
-        }
-        if (loginLink2) {
-          loginLink2.innerHTML = '<i class="icofont-logout"></i> | Logout';
-          loginLink2.href = '/logout';
-        }
-       
-        // Define desktop and mobile nav targets
-        const navTargets = [
-          document.getElementById('main-navbar-list'),
-          document.querySelector('.mobile-nav ul')
-        ];
+      navTargets.forEach(nav => {
+        if (!nav) return;
 
-        navTargets.forEach(nav => {
-          if (!nav) return;
-
-          // Remove old versions if they exist
-          ['customer-page-link', 'return-page-link', 'account-dropdown'].forEach(id => {
-            const old = nav.querySelector(`#${id}`);
-            if (old) old.remove();
-          });
-
+        // Remove old versions if they exist
+        ['customer-page-link', 'return-page-link', 'account-dropdown','managment','admin'].forEach(id => {
+          const old = nav.querySelector(`#${id}`);
+          if (old) old.remove();
+        });
+        if(userType==="customer")
+        {
           // Create dropdown container
           const dropdownLi = document.createElement('li');
           dropdownLi.classList.add('drop-down');
@@ -417,20 +417,55 @@ document.addEventListener('DOMContentLoaded', function () {
           } else {
             nav.appendChild(dropdownLi);
           }
-        });
+        }
+        else if(userType === "maintenance")
+        {
+          const dropdownLi = document.createElement('li');
+          dropdownLi.id = 'management';
+          dropdownLi.innerHTML = `
+            <a href="maintainancePage.html">Managment</a>
+          `;
 
-        // Highlight correct link
-        const current = window.location.pathname;
-        if (current.endsWith('account.html')) {
-          document.querySelectorAll('#dashboard-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+          const logoutLi = nav.querySelector('#login-link-li');
+          if (logoutLi) {
+            nav.insertBefore(dropdownLi, logoutLi);
+          } else {
+            nav.appendChild(dropdownLi);
+          }
         }
-        if (current.endsWith('equipment-reservation.html')) {
-          document.querySelectorAll('#customer-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
-        }
-        if (current.endsWith('account.html#return')) {
-          document.querySelectorAll('#return-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
-        }
+        else if(userType === "admin")
+        {
+          const dropdownLi = document.createElement('li');
+          dropdownLi.id = 'admin';
+          dropdownLi.innerHTML = `
+            <a href="adminPage.html">Admin</a>
+          `;
 
+          const logoutLi = nav.querySelector('#login-link-li');
+          if (logoutLi) {
+            nav.insertBefore(dropdownLi, logoutLi);
+          } else {
+            nav.appendChild(dropdownLi);
+          }
+        }
+      });
+
+      // Highlight correct link
+      const current = window.location.pathname+ window.location.hash;
+      if (current.endsWith('account.html')) {
+        document.querySelectorAll('#dashboard-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+      }
+      if (current.endsWith('equipment-reservation.html')) {
+        document.querySelectorAll('#customer-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+      }
+      if (current.endsWith('account.html#return')) {
+        document.querySelectorAll('#return-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+      }
+      if (current.endsWith('adminPage.html')) {
+        document.querySelectorAll('a[href$="adminPage.html"]').forEach(a => a.parentElement.classList.add('active'));
+      }
+      if (current.endsWith('maintainancePage.html')) {
+        document.querySelectorAll('a[href$="maintainancePage.html"]').forEach(a => a.parentElement.classList.add('active'));
       }
     });
 });

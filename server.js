@@ -296,7 +296,7 @@ app.post('/login', async (req, res) => {
       return res.redirect('/adminPage.html');
     } else if (user.user_type === 'customer') {
       return res.redirect('/equipment-reservation.html');
-    } else if (user.user_type === 'maintainance') {
+    } else if (user.user_type === 'maintenance') {
       return res.redirect('/maintainancePage.html');
     } else {
       return res.status(400).send('Unknown user type');

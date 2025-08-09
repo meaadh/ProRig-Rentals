@@ -41,29 +41,32 @@
   <header id="header">
     <div class="container">
 
-      <div class="logo float-left">
-        <a href="adminPage.html"><img src="assets/img/ProRigRental Full Logo.png" alt="" class="img-fluid"></a>
+   <div class="logo float-left">
+        <a href="Home.html"><img src="assets/img/ProRigRental Full Logo.png" alt="" class="img-fluid"></a>
       </div>
       <div class="mobile">
         <div class="login float-right">
-          <h1><a href="Home.html" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
-              | Logout</a></h1>
+        <h1><a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link-2"><i class="icofont-login"></i>
+        | Login</a></h1>
         </div>
       </div>
       <nav class="nav-menu float-right d-none d-lg-block">
-        <ul>
-          <li><a href="Home.html">Home</a></li>
+        <ul id="main-navbar-list">
+          <li><a href="home.html">Home</a></li>
           <li><a href="home.html#about">About Us</a></li>
           <li><a href="home.html#location">Locations</a></li>
-          <li><a href="home.html#team">Board Members</a></li>
-          <li class="active"><a href="adminPage.html">Admin</a></li>
-          <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
-            | Logout</a>
+          <li><a href="Home.html#team">Team Members</a></li>
+          <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
+          <li id="login-link-li">
+            <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-logout"></i>
+              | Logout</a>
+          </li>
         </ul>
       </nav><!-- .nav-menu -->
 
     </div>
   </header><!-- End Header -->
+  
   <div class="hero-text">
     <h2 class="animate__animated animate__fadeInDown"><span>ProRigs Rental Corporation</span></h2>
     <h6 class="animate__animated animate__fadeInUp">A Heavy Equipment Solutions Company</h6>
