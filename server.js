@@ -1,83 +1,86 @@
-const express=require("express");
-const session = require('express-session');
-const bodyParser=require("body-parser");
-const crypto=require("crypto");
-const multer = require('multer');
-const path = require('path');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const express = require("express");
+const session = require("express-session");
+const bodyParser = require("body-parser");
+const crypto = require("crypto");
+const multer = require("multer");
+const path = require("path");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
+// ----- Config & Envs -----
+const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || "development";
 
-const uri = require ("./atlas_uri")
-const dbname="ProRigRentals"
+// Prefer Heroku/Atlas env var; fall back to your local file for dev
+let uri = process.env.MONGODB_URI;
+if (!uri) {
+  try {
+    uri = require("./atlas_uri");
+  } catch {
+    console.error("No MONGODB_URI env and ./atlas_uri not found.");
+  }
+}
+const dbname = "ProRigRentals";
 
 const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
+  serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true }
 });
 
-const app=express();
-app.use(bodyParser.json());
-app.use(express.static('public'));
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
+const app = express();
 
-// Configure multer for file uploads
+// Trust Heroku proxy so secure cookies work behind SSL
+app.set("trust proxy", 1);
+
+// Parsers & static
+app.use(bodyParser.json());
+app.use(express.static("public"));
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// ----- Multer (NOTE: Heroku's filesystem is ephemeral) -----
+// For production, consider S3/Cloudinary instead of local 'public/assets/...'
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/assets/img/equipment/') // Store images in the equipment folder
+    cb(null, "public/assets/img/equipment/");
   },
   filename: function (req, file, cb) {
-    // Generate unique filename with timestamp
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
   }
 });
-
-const upload = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  },
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: function (req, file, cb) {
-    // Accept only image files
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed!'), false);
-    }
+    if (file.mimetype.startsWith("image/")) cb(null, true);
+    else cb(new Error("Only image files are allowed!"), false);
   }
 });
 
-// Add CORS headers
+// ----- CORS (kept permissive; tighten if you know your origin) -----
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
+  res.header("Access-Control-Allow-Origin", process.env.CORS_ORIGIN || "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  if (req.method === "OPTIONS") return res.sendStatus(200);
+  next();
 });
 
+// ----- Session (use env secret; secure in production) -----
 app.use(session({
-  secret: 'ProRigs123',
+  secret: process.env.SESSION_SECRET || "dev_only_change_me",
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: false,
+  cookie: {
+    secure: NODE_ENV === "production", // true on Heroku (HTTPS)
+    sameSite: NODE_ENV === "production" ? "none" : "lax"
+  }
 }));
 
 let db;
 
-
-
 async function connectToDB() {
   try {
     await client.connect();
-    db= client.db(dbname);
+    db = client.db(dbname);
     console.log(`Successfully connected to the ${dbname} database`);
 
     await db.collection("AdminUsers").createIndex({ username: 1 }, { unique: true });
@@ -86,65 +89,42 @@ async function connectToDB() {
     await db.collection("RentalUsers").createIndex({ userId: 1 }, { unique: true });
     await db.collection("Reservations").createIndex({ orderId: 1 }, { unique: true });
 
-    // Initialize counter only if it doesn't exist, starting from 0
     const counterExists = await db.collection("counters").findOne({ _id: "userId" });
-    if (!counterExists) {
-      await db.collection("counters").insertOne({ _id: "userId", sequence_value: 0 });
-      console.log("Initialized userId counter to 0");
-    }
+    if (!counterExists) await db.collection("counters").insertOne({ _id: "userId", sequence_value: 0 });
 
     const admincounterExists = await db.collection("counters").findOne({ _id: "adminId" });
-    if (!admincounterExists) {
-      await db.collection("counters").insertOne({ _id: "adminId", sequence_value: 0 });
-      console.log("Initialized userId counter to 0");
-    }
+    if (!admincounterExists) await db.collection("counters").insertOne({ _id: "adminId", sequence_value: 0 });
 
     const OrdercounterExists = await db.collection("counters").findOne({ _id: "orderId" });
-    if (!OrdercounterExists) {
-      await db.collection("counters").insertOne({ _id: "orderId", sequence_value: 1000 });
-      console.log("Initialized userId counter to 1000");
-    }
-    
+    if (!OrdercounterExists) await db.collection("counters").insertOne({ _id: "orderId", sequence_value: 1000 });
+
     const [a] = await db.collection("AdminUsers")
       .aggregate([{ $group: { _id: null, maxUserIdFromAdmin: { $max: "$adminId" } } }]).toArray();
     const [b] = await db.collection("RentalUsers")
       .aggregate([{ $group: { _id: null, maxUserIdFromRental: { $max: "$userId" } } }]).toArray();
     const [c] = await db.collection("Reservations")
       .aggregate([{ $group: { _id: null, maxOrderIdFromRental: { $max: "$orderId" } } }]).toArray();
-    
+
     const adminIdMax = a?.maxUserIdFromAdmin || 0;
     const userIdMax = Math.max(a?.maxUserIdFromAdmin || 0, b?.maxUserIdFromRental || 0);
     const orderIdMax = Math.max(c?.maxOrderIdFromRental || 0);
 
-    await db.collection("counters").updateOne(
-      { _id: "userId" },
-      { $max: { sequence_value: userIdMax } },
-      { upsert: true }
-    );
+    await db.collection("counters").updateOne({ _id: "userId" }, { $max: { sequence_value: userIdMax } }, { upsert: true });
+    await db.collection("counters").updateOne({ _id: "adminId" }, { $max: { sequence_value: adminIdMax } }, { upsert: true });
+    await db.collection("counters").updateOne({ _id: "orderId" }, { $max: { sequence_value: orderIdMax } }, { upsert: true });
 
-    await db.collection("counters").updateOne(
-      { _id: "adminId" },
-      { $max: { sequence_value: adminIdMax } },
-      { upsert: true }
-    );
-     await db.collection("counters").updateOne(
-      { _id: "orderId" },
-      { $max: { sequence_value: orderIdMax } },
-      { upsert: true }
-    );
+    console.log(`Synced userId >= ${userIdMax}, adminId >= ${adminIdMax}, orderId >= ${orderIdMax}`);
 
-    console.log(`Sycned userId counters to >=${userIdMax} & adminId counters to >=${adminIdMax} & orderId counters to >=${orderIdMax}`)
-
-    app.listen(3000,()=>
-    {
-      console.log("Server listening at port 3000");
-    });
-  } catch(err) {
-    console.log(`MongoDB connection failed to the ${dbname} database`,err);
+    // --- IMPORTANT: use Heroku port ---
+    app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
+  } catch (err) {
+    console.error(`MongoDB connection failed to the ${dbname} database`, err);
+    process.exitCode = 1;
   }
 }
 
 connectToDB();
+
 
 async function getNextSequence(counterName) 
 {
