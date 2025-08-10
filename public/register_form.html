@@ -65,7 +65,7 @@
    </header><!-- End Header -->
    <main id="main">
       <div class="form-container">
-         <form action="http://localhost:3000/managment" method="post">
+         <form action="/sign_up" method="post">
             <h3>Register Now</h3>
             <input type="text" name="fname" required placeholder="enter your first name">
             <input type="text" name="lname" required placeholder="enter your last name">
@@ -152,6 +152,38 @@
 
    <!-- Template Main JS File -->
    <script src="assets/js/main.js"></script>
+   <script>
+      document.getElementById("registerForm").addEventListener("submit", function(e) {
+         const password = document.getElementById("password").value;
+         const cpassword = document.getElementById("cpassword").value;
+         const minLength = 8;
+         const upper = /[A-Z]/;
+         const lower = /[a-z]/;
+         const number = /[0-9]/;
+         const special = /[!@#$%^&*(),.?":{}|<>]/;
+
+         let errorMsg = "";
+
+         if (password.length < minLength) {
+            errorMsg = "Password must be at least " + minLength + " characters long.";
+         } else if (!upper.test(password)) {
+            errorMsg = "Password must contain at least one uppercase letter.";
+         } else if (!lower.test(password)) {
+            errorMsg = "Password must contain at least one lowercase letter.";
+         } else if (!number.test(password)) {
+            errorMsg = "Password must contain at least one number.";
+         } else if (!special.test(password)) {
+            errorMsg = "Password must contain at least one special character.";
+         } else if (password !== cpassword) {
+            errorMsg = "Passwords do not match.";
+         }
+
+         if (errorMsg) {
+            e.preventDefault(); // Stop form submission
+            alert(errorMsg);
+         }
+      });
+   </script>
 
 </body>
 

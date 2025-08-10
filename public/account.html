@@ -65,20 +65,27 @@
 
     </div>
   </header><!-- End Header -->
+  <div id="page-header" style="background-color: #f9fafb;">
   <div class="container text-center" id="welcome">
     <div class="d-flex flex-column justify-content-center align-items-center">
-      <h1 data-aos="fade-up">Welcome to <span>ProRig Rentals</span></h1>
+      <h2 data-aos="fade-up">Welcome, <span>Customer</span></h2>
+      <img id="logo-img" src="assets/img/ProRigs-Logo.svg" class="img-fluid logo-img" alt="" data-aos="zoom-out">
+      <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>ProRig Rentals</span></h1>
       <p data-aos="fade-up" data-aos-delay="100">A Heavy Equipment Solutions Corporation<br></p>
     </div>
   </div>
+  <div class="user-container">
+    <div class="content">
+      <h3 data-aos="fade-up" data-aos-delay="100">
+        <span  class="label">Signed in as</span>
+        <span id="user-welcome-name" class="username">Customer</span>
+      </h3>
+    </div>
+  </div>
+  </div>
   <main id="main" style="margin-top: 20px;" class="hidden-page">
 
-    <div class="user-container">
-      <div class="content">
-        <h1><span>Account Dashboard</span>
-        <h3>Welcome Back, <span id="user-welcome-name">Customer</span></h3>
-      </div>
-    </div>
+
     
     <section id="account" class="container" style="max-width: 1200px;">
 
@@ -115,7 +122,7 @@
         </section>
       </div>
       
-      <button class="collapsible">Payment Saved</button>
+      <button class="collapsible" >Payment Saved</button>
       <div class="content">
         <section class="payment-section">
           <h3>Payments</h3>
@@ -140,22 +147,23 @@
 
     </section>
     <section id="return" class="container" style="max-width: 800px;">
-      <div class="section-title">
-        <h2>Return Your Rented Equipment</h2>
-        <p>Select the equipment you want to return from your current rentals.</p>
+      <div class="section-title" id="section-subtext">
+        <h2 style="font-weight: bold;">Return Your Rented Equipment</h2>
+        <p>Please select the item you wish to return from your active rentals</p>
       </div>
       <div id="return-success" class="alert alert-success" style="display:none;"></div>
       <div id="return-error" class="alert alert-danger" style="display:none;"></div>
       <form id="return-form">
         <div class="form-group">
-          <label for="equipmentSelect">Your Rented Equipment</label>
+          <label id="form-header" for="equipmentSelect">Your Rented Equipment</label>
           <select class="form-control" id="equipmentSelect" name="equipmentId" required>
             <option value="">Loading...</option>
           </select>
+          <small id="equipmentHelp" class="form-text text-muted">Equipment IDs are shown for reference.</small>
         </div>
-        <button type="submit" class="btn btn-primary">Return Equipment</button>
+        <button id="submit" type="submit" class="btn btn-primary">Return Equipment</button>
       </form>
-      <div id="no-equipment-message" class="alert alert-info" style="display:none;">You have no equipment to return.</div>
+      <div id="no-equipment-message" class="alert alert-info" style="display:none; text-align: center;">You have no equipments avaliable to return.</div>
     </section>
     
     <!-- Address Delete Confirmation Modal -->
@@ -285,6 +293,21 @@
         });
     });
 
+    document.addEventListener("DOMContentLoaded", function () {
+      const logoImg = document.getElementById("logo-img");
+      const fallbackText = document.getElementById("logo-fallback");
+
+      // Show fallback if image fails to load
+      logoImg.addEventListener("error", function () {
+        logoImg.style.display = "none";
+        fallbackText.style.display = "block";
+      });
+
+      // Optional: If image loads fine, ensure fallback stays hidden
+      logoImg.addEventListener("load", function () {
+        fallbackText.style.display = "none";
+      });
+    });
     document.addEventListener('DOMContentLoaded', () => {
     fetch('/api/myreservations')
       .then(res => res.json())
@@ -469,6 +492,11 @@
         .then(data => {
           const select = document.getElementById('equipmentSelect');
           const noMsg = document.getElementById('no-equipment-message');
+          const msg = document.getElementById('form-header');
+          const equipmentHelp = document.getElementById('equipmentHelp');
+          const submit=document.getElementById('submit');
+          const subtext=document.getElementById('section-subtext');
+
           select.innerHTML = '';
           if (Array.isArray(data) && data.length > 0) {
             data.forEach(item => {
@@ -480,17 +508,34 @@
             });
             select.required = true;
             select.style.display = '';
+            equipmentHelp.style.display='';
+            submit.style.display = '';
+            msg.style.display = '';
+            subtext.style.display = '';
             noMsg.style.display = 'none';
           } else {
             select.style.display = 'none';
+            equipmentHelp.style.display='none';
+            submit.style.display = 'none';
             noMsg.textContent = 'You have no equipment to return.';
+            msg.style.display = 'none';
+            subtext.style.display = 'none';
             noMsg.style.display = '';
           }
         })
         .catch(() => {
           const select = document.getElementById('equipmentSelect');
           const noMsg = document.getElementById('no-equipment-message');
+          const msg = document.getElementById('form-header');
+          const equipmentHelp = document.getElementById('equipmentHelp');
+          const subtext=document.getElementById('section-subtext');
+
+
           select.style.display = 'none';
+          equipmentHelp.style.display='none';
+          submit.style.display = 'none';
+          msg.style.display = 'none';
+          subtext.style.display = 'none';
           noMsg.textContent = 'Unable to load your rentals. Please make sure you are logged in and have active rentals.';
           noMsg.style.display = '';
         });

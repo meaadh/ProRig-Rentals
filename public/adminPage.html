@@ -80,17 +80,25 @@
 
     </div>
   </header><!-- End Header -->
+  
+  <div id="page-header" style="background-color: #f9fafb;">
   <div class="container text-center" id="welcome">
     <div class="d-flex flex-column justify-content-center align-items-center">
-      <h1 data-aos="fade-up">Welcome Admin to <span>ProRig Rentals</span></h1>
+      <h2 data-aos="fade-up">Welcome, <span>Board of Directors</span></h2>
+      <img id="logo-img" src="assets/img/ProRigs-Logo.svg" class="img-fluid logo-img" alt="" data-aos="zoom-out">
+      <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>ProRig Rentals</span></h1>
       <p data-aos="fade-up" data-aos-delay="100">A Heavy Equipment Solutions Corporation<br></p>
     </div>
   </div>
   <div class="user-container">
-      <div class="content">
-       <h3>HI, <span id="user-welcome-name">admin</span></h3>
-      </div>
+    <div class="content">
+      <h3 data-aos="fade-up" data-aos-delay="100">
+        <span  class="label">Signed in as</span>
+        <span id="user-welcome-name" class="username">Management</span>
+      </h3>
     </div>
+  </div>
+  </div>
   
   <main id="main"  class="hidden-page">
     <div class="form-container" >
@@ -203,6 +211,21 @@
         .catch(() => {
           window.location.href = "/loginform.html"; // optional redirect
         });
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+      const logoImg = document.getElementById("logo-img");
+      const fallbackText = document.getElementById("logo-fallback");
+
+      // Show fallback if image fails to load
+      logoImg.addEventListener("error", function () {
+        logoImg.style.display = "none";
+        fallbackText.style.display = "block";
+      });
+
+      // Optional: If image loads fine, ensure fallback stays hidden
+      logoImg.addEventListener("load", function () {
+        fallbackText.style.display = "none";
+      });
     });
   </script>
 </body>
