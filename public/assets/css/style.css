@@ -1285,6 +1285,9 @@ section {
 .hidden-page{
   display: none;
 }
+.hidden-form{
+  display: none;
+}
 
 /*--------------------------------------------------------------
 # Gloabl User-Container

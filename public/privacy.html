@@ -54,31 +54,49 @@
   <!-- ======= Header ======= -->
   <header id="header">
     <div class="container">
-
-      <div class="logo float-left">
-        <a href="home.html"><img src="assets/img/ProRigRental Full Logo.png" alt="" class="img-fluid"></a>
+    <div class="logo float-left">
+          <a href="Home.html"><img src="assets/img/ProRigs-Full-Logo.svg" alt="" class="img-fluid"></a>
+    </div>
+    <div class="mobile">
+      <div class="login float-right">
+      <h1><a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link-2"><i class="icofont-login"></i>
+      | Login</a></h1>
       </div>
-      <div class="mobile">
-        <div class="donate float-right">
-          <h1><a href="logout.php" rel="noopener noreferrer" target="_self" class="btn-get-started"><i class="icofont-logout"></i>
-              | Logout</a></h1>
-        </div>
-      </div>
-      <nav class="nav-menu float-right d-none d-lg-block">
-        <ul>
-          <li><a href="home.html">Home</a></li>
-          <li><a href="home.html#about">About Us</a></li>
-          <li><a href="home.html#avaliablity">Equipments</a></li>
-          <li><a href="home.html#location">Locations</a></li>
-          <li><a href="home.html#team">Board Members</a></li>
-        </ul>
-      </nav><!-- .nav-menu -->
-
+    </div>
+    <nav class="nav-menu float-right d-none d-lg-block">
+      <ul id="main-navbar-list">
+        <li class="active"><a href="#header">Home</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#avaliablity">Equipments</a></li>
+        <li><a href="#location">Locations</a></li>
+        <li><a href="#team">Team Members</a></li>
+        <li><a href="#contact">Contact Us</a></li>
+        <!-- The customer/return links will be injected here by JS, so move the login/logout anchor to the end -->
+        <li id="login-link-li">
+          <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-login"></i>
+            | Login</a>
+        </li>
+      </ul>
+    </nav><!-- .nav-menu -->
     </div>
   </header><!-- End Header -->
-  <div class="hero-text">
-    <h2 class="animate__animated animate__fadeInDown"><span>ProRigs Rental Corporation</span></h2>
-    <h6 class="animate__animated animate__fadeInUp">A Heavy Equipment Solutions Company</h6>
+  <div id="page-header" style="background-color: #f9fafb;">
+  <div class="container text-center" id="welcome">
+    <div class="d-flex flex-column justify-content-center align-items-center">
+      <h2 data-aos="fade-up">Welcome, <span>Board of Directors</span></h2>
+      <img id="logo-img" src="assets/img/ProRigs-Logo.svg" class="img-fluid logo-img" alt="" data-aos="zoom-out">
+      <h1  id="logo-fallback" class="gradient-text" data-aos="fade-up" style="display: none;"><span>ProRig Rentals</span></h1>
+      <p data-aos="fade-up" data-aos-delay="100">A Heavy Equipment Solutions Corporation<br></p>
+    </div>
+  </div>
+  <div class="user-container">
+    <div class="content">
+      <h3 data-aos="fade-up" data-aos-delay="100">
+        <span  class="label">Signed in as</span>
+        <span id="user-welcome-name" class="username">Management</span>
+      </h3>
+    </div>
+  </div>
   </div>
   <main id="main">
     <div class="user-container">

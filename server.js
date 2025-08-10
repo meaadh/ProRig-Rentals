@@ -282,10 +282,7 @@ async function findUser(db,username,hashedPass) {
   
 }
 app.post('/login', async (req, res) => {
-
-
   try {
-    
     const { username, password } = req.body;
     if(!username || !password)
     {
@@ -375,7 +372,7 @@ app.get('/userdetail', requireLogin, (req, res) => {
     
   });
 });
-app.get('/api/equipments',requireLogin, async (req, res) => {
+app.get('/api/equipments', async (req, res) => {
   try {
     // This line fetches all equipment from the 'Equipments' collection in your database
     const equipments = await db.collection("Equipments").find({}).toArray();
@@ -763,7 +760,7 @@ app.get('/api/myrentals', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user rentals" });
   }
 });
-app.get('/api/myreservations', async (req, res) => {
+app.get('/api/myreservations', requireLogin,async (req, res) => {
   try {
     if (!req.session || !req.session.user_name) {
       return res.status(401).json({ error: "Not logged in" });
@@ -858,7 +855,7 @@ app.get('/api/myaddress', async (req, res) => {
     res.status(500).json({ error: "Failed to fetch Address Book" });
   }
 });
-app.delete('/api/delete-payment', async (req, res) => {
+app.delete('/api/delete-payment', requireLogin,async (req, res) => {
   const{last4,expiration}=req.body;
   if (!req.session || !req.session.user_name) {
     return res.status(401).json({ error: "Not logged in" });
@@ -947,7 +944,7 @@ app.post('/api/equipment', upload.single('image'), async (req, res) => {
   }
 });
 
-app.delete('/api/equipment/:id', async (req, res) => {
+app.delete('/api/equipment/:id', requireLogin, async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -968,7 +965,7 @@ app.delete('/api/equipment/:id', async (req, res) => {
   }
 });
 
-app.put('/api/equipment/:id', upload.single('image'), async (req, res) => {
+app.put('/api/equipment/:id', requireLogin, upload.single('image'), async (req, res) => {
   try {
     const { id } = req.params;
     const { name, category, description, rental_rate_per_day, quantity_available } = req.body;
