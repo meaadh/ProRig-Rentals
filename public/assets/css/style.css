@@ -632,194 +632,223 @@ section[id], .content-section[id]{
 /*--------------------------------------------------------------
 # Avaliablity
 --------------------------------------------------------------*/
-.avaliablity .event-item {
-  margin-bottom: 30px;
+:root{
+  --brand:#004af6;
+  --pill-bg:#fff;
+  --pill-active-bg:#51ff00;
+  --pill-active-text:#000;
+  --card-border:#eee;
+  --card-shadow:0 2px 8px rgba(0,0,0,.08);
+  --img-bg:#f8f8f8;
+  --title:#965320;
+  --muted:#838689;
+  --text:#222;
+  --gap:24px;
 }
 
-.avaliablity #event-flters {
-  padding: 0;
-  margin: 0 0 35px 0;
-  list-style: none;
-  text-align: center;
-}
-
-.avaliablity #event-flters li {
-  cursor: pointer;
-  margin: 0 15px 5px 0;
-  display: inline-block;
-  padding: 10px 20px;
-  font-size: 12px;
-  line-height: 30px;
-  color: #004af6;
-  border-radius: 4px;
-  text-transform: uppercase;
-  background: #fff;
-  margin-bottom: 5px;
-  transition: all 0.3s ease-in-out;
-  font-weight:800;
-}
-
-.avaliablity #event-flters li:hover, .avaliablity #event-flters li.filter-active {
-  background:#51ff00;
-  color: #000000;
-  font-weight: bold;
-}
-
-.avaliablity #event-flters li:last-child {
-  margin-right: 0;
-}
-.avaliablity #type-flters {
-  padding: 0;
-  margin: 0 0 35px 0;
-  list-style: none;
-  text-align: center;
-}
-
-.avaliablity #type-flters li {
-  cursor: pointer;
-  margin: 0 15px 15px 0;
-  display: inline-block;
-  padding: 10px 20px;
-  font-size: 12px;
-  line-height: 30px;
-  color: #004af6;
-  border-radius: 4px;
-  text-transform: uppercase;
-  background: #fff;
-  margin-bottom: 5px;
-  transition: all 0.3s ease-in-out;
-  font-weight: 800;
-}
-
-.avaliablity #type-flters li:hover, .avaliablity #type-flters li.filter-active {
-  background:#51ff00;
-  color: #000000;
-  font-weight: bold;
-}
-
-.avaliablity #type-flters li:last-child {
-  margin-right: 0;
-}
-.avaliablity .section-title h2{
+.availability { 
   padding-top: 5px;
-  text-align: center;
-  color: #001f86;
-  font-weight: 600;
-  position: relative;
-}
-.avaliablity .card {
-  border:none;
-  padding: 0px 0px 0px 0px;
-  color:rgb(0, 12, 148);
-
-}
-.avaliablity .card:hover {
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-}
-.avaliablity .img {
-	max-width: 100%;
-	height: auto;
-  vertical-align: bottom;
 }
 
-.avaliablity .card-text {
-  border:none;
-  padding: 10px 10px 10px 10px;
-  color:rgb(148, 0, 0);
-
+.availability .section-title h2,
+.avaliablity .section-title h2{
+  text-align:center;
+  color:#001f86;
+  font-weight:600;
+  margin:0 0 12px;
 }
 
-.avaliablity h2, h3 {
-  margin: 0;
-  font-weight: 200;
+.availability #event-flters,
+.availability #type-flters,
+.avaliablity #event-flters,
+.avaliablity #type-flters{
+  padding:0;
+  margin:0 0 24px 0;
+  list-style:none;
+  text-align:center;
 }
 
-.avaliablity h2 {
-  font-size: 35px;
-  color: #965320;
+.availability #event-flters li,
+.availability #type-flters li,
+.avaliablity #event-flters li,
+.avaliablity #type-flters li{
+  display:inline-block;
+  cursor:pointer;
+  margin:0 12px 8px 0;
+  padding:10px 20px;
+  font-size:12px;
+  line-height:1;
+  text-transform:uppercase;
+  font-weight:800;
+  color:var(--brand);
+  background:var(--pill-bg);
+  border-radius:4px;
+  transition:background .2s ease, color .2s ease, box-shadow .2s ease;
 }
 
-.avaliablity  h3 {
-  font-size: 15px;
-  color: #838689;
+.availability #event-flters li:hover,
+.availability #event-flters li.filter-active,
+.availability #type-flters li:hover,
+.availability #type-flters li.filter-active,
+.avaliablity #event-flters li:hover,
+.avaliablity #event-flters li.filter-active,
+.avaliablity #type-flters li:hover,
+.avaliablity #type-flters li.filter-active{
+  background:var(--pill-active-bg);
+  color:var(--pill-active-text);
 }
 
-.avaliablity p {
-  margin: 1.25em 0;
-  font-size: em(13);
-  font-weight: 400;
-  color: #222222;
-}
-.event-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px 0;
+.event-container{
+  display:flex;
+  flex-wrap:wrap;
+  gap:var(--gap) 0;
 }
 
-.event-item {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 24px;
+.event-item{ display:flex; flex-direction:column; margin-bottom:var(--gap); }
+
+.availability .event-item .card,
+.avaliablity .event-item .card,
+.event-item .card{
+  display:flex;
+  flex-direction:column;
+  justify-content:stretch;
+  min-height:370px;
+  border:1px solid var(--card-border);
+  border-radius:8px;
+  box-shadow:var(--card-shadow);
+  background:#fff;
+  overflow:hidden;
+  transition:box-shadow .2s ease, transform .2s ease;
+}
+.event-item .card:hover{ box-shadow:0 8px 16px rgba(0,0,0,.2); transform:translateY(-2px); }
+
+/* Image */
+.event-item .card img{
+  width:100%;
+  height:180px;
+  object-fit:contain;
+  background:var(--img-bg);
+  display:block;
 }
 
-.event-item .card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: stretch;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border-radius: 8px;
-  border: 1px solid #eee;
-  min-height: 370px;
+.event-item .card-body,
+.event-item .card-text{ 
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:16px;
 }
 
-.event-item .card img {
-  width: 100%;
-  height: 180px;
-  object-fit: contain;
-  background: #f8f8f8;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+.event-item .card-title{
+  margin:0 0 6px;
+  font-size:1.25rem;
+  color:var(--title);
+  font-weight:600;
+}
+/* columns should stretch their children */
+.event-container > [class*="col-"] { display: flex; }
+
+/* cards fill the column and stack content vertically */
+.event-item .card{
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  height:100%;
+  border:1px solid #eee;
+  border-radius:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  overflow:hidden;
 }
 
-/* Ensure location/team images fit nicely */
-.picture img {
-  width: 100%;
-  max-height: 220px;
-  object-fit: cover;
-  border-radius: 8px;
-  background: #f8f8f8;
-  display: block;
-  margin: 0 auto;
+/* consistent image area */
+.event-item .card-media{
+  background:#f8f8f8;
+  /* choose one of these: */
+  height:180px;                 /* fixed height, current behavior */
+  /* aspect-ratio: 16 / 9; */   /* OR use aspect-ratio if you prefer */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.event-item .card-media img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  display:block;
 }
 
-.event-item .card-text {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 16px;
+/* body grows to fill remaining space */
+.event-item .card-body{
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:16px;
 }
 
-.event-item h2,
-.event-item h3 {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
+/* keep titles/descriptions from making cards taller than neighbors */
+.event-item .card-title{
+  margin:0 0 6px;
+  font-size:1.25rem;
+  color:#965320;
+  font-weight:600;
+  display:-webkit-box;
+  -webkit-line-clamp:1;         /* show up to 1 line */
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  min-height:1.5em;             /* reserve space so rows align */
+}
+.event-item h3{
+  margin:0 0 6px;
+  font-size:.95rem;
+  color:#838689;
+  font-weight:500;
+}
+.event-item .card-text{
+  margin:0 0 8px;
+  font-size:.95rem;
+  line-height:1.5;
+  color:#222;
+  display:-webkit-box;
+  -webkit-line-clamp:3;         /* clamp to 3 lines for uniform height */
+  -webkit-box-orient:vertical;
+  overflow:hidden;
 }
 
-.event-item p {
-  margin-bottom: 0.5rem;
-  font-size: 0.97rem;
+/* make the hover subtle and consistent */
+.event-item .card:hover{
+  box-shadow:0 8px 16px rgba(0,0,0,.15);
+  transform:translateY(-2px);
+  transition:.2s;
 }
 
-@media (max-width: 991.98px) {
-  .event-item {
-    margin-bottom: 20px;
-  }
+.event-item h2{ margin:0 0 6px; font-size:1.25rem; color:var(--title); font-weight:600; }
+.event-item h3{ margin:0 0 6px; font-size:.95rem; color:var(--muted); font-weight:500; }
 
-  .picture img {
-    max-height: 160px;
-  }
+.event-item p{
+  margin:0 0 8px;
+  font-size:.95rem;            
+  line-height:1.5;
+  color:var(--text);
+}
+
+.availability .event-item,
+.avaliablity .event-item{ margin-bottom:24px; }
+
+.picture img{
+  width:100%;
+  max-height:220px;
+  object-fit:cover;
+  border-radius:8px;
+  background:var(--img-bg);
+  display:block;
+  margin:0 auto;
+}
+
+@media (max-width: 991.98px){
+  .event-item{ margin-bottom:20px; }
+  .picture img{ max-height:160px; }
 }
 /*--------------------------------------------------------------
 # Location
