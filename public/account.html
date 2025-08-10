@@ -247,7 +247,6 @@
         } 
       });
     }
-    // Prevent navbar from lifting up when clicking "Return Equipment" on this page
     document.addEventListener('DOMContentLoaded', function() {
       const dropdownLink = document.getElementById('account-dropdown');
       if (dropdownLink && window.location.pathname.endsWith('account.html')) {
@@ -266,7 +265,6 @@
           }
         })
         .catch(() => {
-          // fallback: do nothing, default is "Customer"
         });
     });
 
@@ -280,11 +278,9 @@
 
 
           if (data.user_type !== "customer") {
-            // wrong role → log them out
             fetch("/logout", { credentials: "include" })
               .then(() => window.location.href = "/loginform.html");
           } else {
-            // correct role → reveal content
             document.getElementById("main").classList.remove("hidden-page");
           } 
         })
@@ -297,13 +293,11 @@
       const logoImg = document.getElementById("logo-img");
       const fallbackText = document.getElementById("logo-fallback");
 
-      // Show fallback if image fails to load
       logoImg.addEventListener("error", function () {
         logoImg.style.display = "none";
         fallbackText.style.display = "block";
       });
 
-      // Optional: If image loads fine, ensure fallback stays hidden
       logoImg.addEventListener("load", function () {
         fallbackText.style.display = "none";
       });
@@ -364,11 +358,9 @@
         const expiration=e.target.dataset.expiration;
         const paymentElement = e.target;
         
-        // Show custom confirmation modal
         const modal = document.getElementById('delete-payment-modal');
         modal.style.display = 'flex';
         
-        // Handle confirmation
         document.getElementById('confirm-delete-payment-btn').onclick = function() {
           fetch('/api/delete-payment',{method:'DELETE',headers:{'Content-Type':'application/json'}, body: JSON.stringify({last4,expiration})})
           .then(res => res.json())
@@ -390,7 +382,6 @@
           });
         };
         
-        // Handle cancellation
         document.getElementById('cancel-delete-payment-btn').onclick = function() {
           modal.style.display = 'none';
         };
@@ -401,12 +392,9 @@
         const address_nickname=e.target.dataset.nickname;
         const address_line1=e.target.dataset.address;
         const addressElement = e.target;
-        
-        // Show custom confirmation modal
         const modal = document.getElementById('delete-address-modal');
         modal.style.display = 'flex';
         
-        // Handle confirm button
         document.getElementById('confirm-delete-btn').onclick = function() {
           modal.style.display = 'none';
           fetch('/api/delete-address',{method:'DELETE',headers:{'Content-Type':'application/json'}, body: JSON.stringify({address_nickname,address_line1})})
@@ -427,12 +415,10 @@
           });
         };
         
-        // Handle cancel button
         document.getElementById('cancel-delete-btn').onclick = function() {
           modal.style.display = 'none';
         };
         
-        // Handle clicking outside modal
         modal.onclick = function(event) {
           if (event.target === modal) {
             modal.style.display = 'none';
@@ -482,7 +468,6 @@
         });
     });
 
-    // Fetch user's rented equipment and populate the select
     function loadUserEquipment() {
       fetch('/api/myrentals')
         .then(res => {
@@ -501,7 +486,6 @@
           if (Array.isArray(data) && data.length > 0) {
             data.forEach(item => {
               const option = document.createElement('option');
-              // Show quantity if available
               option.value = item.id;
               option.textContent = (item.name ? item.name + ' - ' : '') + item.id + (item.quantity_available !== undefined ? ` (Available: ${item.quantity_available})` : '');
               select.appendChild(option);
@@ -542,7 +526,6 @@
     }
     loadUserEquipment();
 
-    // Handle return form submission
     document.getElementById('return-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const select = document.getElementById('equipmentSelect');

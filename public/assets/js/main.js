@@ -194,7 +194,6 @@ document.addEventListener('DOMContentLoaded', function() {
     time: 1000
   });
 
-  // event details carousel
   $(".event-details-carousel").owlCarousel({
     autoplay: true,
     dots: true,
@@ -202,7 +201,6 @@ document.addEventListener('DOMContentLoaded', function() {
     items: 1
   });
 
-  // Init AOS
   function aos_init() {
     AOS.init({
       duration: 1000,
@@ -213,18 +211,15 @@ document.addEventListener('DOMContentLoaded', function() {
   $(window).on('load', function() {
     aos_init();
   });
-  // Initialize Isotope
   var $grid = $('.event-container').isotope({
     itemSelector: '.event-item'
   });
 
-  // Store filters
   var filters = {
-    event: '*', // default is All
-    type: ''    // default is none
+    event: '*', 
+    type: ''    
   };
 
-  // Event filters
   $('#event-flters').on('click', 'li', function() {
     var $this = $(this);
     var filterValue = $this.attr('data-filter');
@@ -234,22 +229,17 @@ document.addEventListener('DOMContentLoaded', function() {
     var combinedFilter = concatValues(filters);
     $grid.isotope({ filter: combinedFilter });
 
-    // Update active class
     $this.addClass('filter-active').siblings().removeClass('filter-active');
   });
 
-  // Type filters (toggleable)
   $('#type-flters').on('click', 'li', function() {
     var $this = $(this);
     var filterValue = $this.attr('data-filter');
 
-    // Toggle logic:
     if ($this.hasClass('filter-active')) {
-      // If already active, unselect
       filters['type'] = '';
       $this.removeClass('filter-active');
     } else {
-      // Select new filter
       filters['type'] = filterValue;
       $this.addClass('filter-active').siblings().removeClass('filter-active');
     }
@@ -258,7 +248,6 @@ document.addEventListener('DOMContentLoaded', function() {
     $grid.isotope({ filter: combinedFilter });
   });
 
-  // Combine filter values
   function concatValues(obj) {
     var allFilters = [];
     for (var key in obj) {
@@ -268,24 +257,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return allFilters.length ? allFilters.join('') : '*';
   }
-  // Dynamically load equipment data
   $(document).ready(function() {
-    // Only run if .event-container exists
     if ($('.event-container').length) {
       fetch('/api/equipments')
         .then(res => res.json())
         .then(data => {
-          console.log("Fetched equipment data:", data); // DEBUG: See what comes from the API
+          console.log("Fetched equipment data:", data); 
           const $container = $('.event-container');
           $container.empty();
           if (!Array.isArray(data) || data.length === 0) {
             $container.append('<div class="col-12"><p style="color:red;font-weight:bold;">No equipment found. Check your API or database.</p></div>');
             return;
           }
-          
-          // Sort equipment by category first (Heavy Equipment on top), then by name
-          data.sort((a, b) => {
-            // Priority order for categories
+            data.sort((a, b) => {
             const categoryPriority = {
               "Heavy Equipment": 0,
               "Carpet Cleaners & Pressure Washers": 1,
@@ -304,7 +288,6 @@ document.addEventListener('DOMContentLoaded', function() {
           
           data.forEach(item => {
             let filters = [];
-            // Use quantity_available for availability
             if (item.quantity_available > 0) filters.push("filter-Available");
             else filters.push("filter-Booked");
             if (item.category === "Heavy Equipment") filters.push("filter-Heavy");
@@ -312,7 +295,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (item.category === "Light Equipment") filters.push("filter-Light");
             if (item.category === "Ladder & Lifts") filters.push("filter-Ladder");
             if (item.category === "Carpet Cleaners & Pressure Washers") filters.push("filter-Cleaner");
-            // Use item.image if present, fallback to item.image_url, then fallback to no-image.png
             const imgUrl = (item.image && item.image.trim() !== "") 
               ? item.image 
               : (item.image_url && item.image_url.trim() !== "" 
@@ -354,7 +336,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     })
     .catch(() => {
-      // fallback: do nothing, default is "Customer"
     });
   });
   
@@ -363,7 +344,6 @@ document.addEventListener('DOMContentLoaded', function () {
     .then(res => res.json())
     .then(data => {
       const userType=data?.user_type;
-      // Change login text
       const loginLink = document.getElementById('login-link');
       const loginLink2 = document.getElementById('login-link-2');
       
@@ -376,7 +356,6 @@ document.addEventListener('DOMContentLoaded', function () {
         loginLink2.href = '/logout';
       }
       
-      // Define desktop and mobile nav targets
       const navTargets = [
         document.getElementById('main-navbar-list'),
         document.querySelector('.mobile-nav ul')
@@ -385,14 +364,12 @@ document.addEventListener('DOMContentLoaded', function () {
       navTargets.forEach(nav => {
         if (!nav) return;
 
-        // Remove old versions if they exist
         ['customer-page-link', 'return-page-link', 'account-dropdown','managment','admin-page'].forEach(id => {
           const old = nav.querySelector(`#${id}`);
           if (old) old.remove();
         });
         if(userType==="customer")
         {
-          // Create dropdown container
           const dropdownLi = document.createElement('li');
           dropdownLi.classList.add('drop-down');
           dropdownLi.id = 'account-dropdown';
@@ -449,8 +426,6 @@ document.addEventListener('DOMContentLoaded', function () {
           }
         }
       });
-
-      // Highlight correct link
       const current = window.location.pathname+ window.location.hash;
       if (current.endsWith('account.html')) {
         document.querySelectorAll('#dashboard-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
@@ -473,7 +448,6 @@ document.addEventListener('DOMContentLoaded', function () {
   .then(res => {if(!res.ok)throw new Error("Not Logged in"); return res.json();})
   .then(data => {
     if (data?.name) {
-      // Hide hero login button if logged in
       const heroLoginBtn = document.getElementById('login-link-3');
       if (heroLoginBtn) heroLoginBtn.style.display = 'none';
     }
@@ -484,7 +458,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function renderEquipment(category) {
     const list = document.getElementById('equipment-list');
-    // Only show equipment with quantity_available > 0
     let filtered = allEquipment.filter(eq => (eq.quantity_available || 0) > 0);
     if (category) {
       filtered = filtered.filter(eq =>
@@ -492,9 +465,7 @@ document.addEventListener('DOMContentLoaded', function () {
       );
     }
     
-    // Apply the same sorting logic to filtered results
     filtered.sort((a, b) => {
-      // Priority order for categories
       const categoryPriority = {
         "Heavy Equipment": 0,
         "Carpet Cleaners & Pressure Washers": 1,
@@ -516,7 +487,6 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     list.innerHTML = filtered.map(eq => {
-      // Use eq.image if present, fallback to eq.image_url, then fallback to no-image.png
       const imgUrl = (eq.image && eq.image.trim() !== "")
         ? eq.image
         : (eq.image_url && eq.image_url.trim() !== ""
@@ -545,7 +515,6 @@ document.addEventListener('DOMContentLoaded', function () {
       `;
     }).join('');
 
-    // Added  event listeners to checkboxes to update selectedEquipmentSet
   document.querySelectorAll('.equipment-checkbox').forEach(cb => {
     cb.addEventListener('change', function() {
       if (this.checked) {
@@ -560,9 +529,7 @@ document.addEventListener('DOMContentLoaded', function () {
 fetch('/api/equipments')
   .then(res => res.json())
   .then(data => {
-    // Sort equipment by category first (Heavy Equipment on top), then by name
     data.sort((a, b) => {
-      // Priority order for categories
       const categoryPriority = {
         "Heavy Equipment": 0,
         "Carpet Cleaners & Pressure Washers": 1,
@@ -580,7 +547,7 @@ fetch('/api/equipments')
     });
     
     allEquipment = data;
-    renderEquipment(""); // Show nothing until category is picked
+    renderEquipment("");
   })
   .catch(() => {
     document.getElementById('equipment-list').innerHTML = '<div class="col-12"><p>Access to the inventory is available to signed-in users only. Please sign in to continue.</p></div>';
@@ -590,15 +557,12 @@ document.getElementById('equipment-category').addEventListener('change', functio
   renderEquipment(this.value);
 });
 
-// Helper to calculate days between two dates (inclusive)
 function calculateDays(startDate, endDate) {
   const start = new Date(startDate);
   const end = new Date(endDate);
-  // Added  1 to include the end date as a full day
   return Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
 }
 
-// Show modal with price and payment prompt
 function showPaymentModal(totalPrice, onConfirm) {
   const taxRate = 0.06;
   const taxAmount = totalPrice * taxRate;
@@ -615,14 +579,11 @@ function showPaymentModal(totalPrice, onConfirm) {
   document.getElementById('pay-now-btn').onclick = function() {
     document.getElementById('reservation-modal').style.display = 'none';
     onConfirm();
-    // Set flag to show success modal after reload
     localStorage.setItem('showReservationModal', '1');
     window.location.reload();
   };
-    // No "Okay" button here, only Pay Now
   }
 
-  // Collect selected equipment IDs on form submit
   document.getElementById('reservation-form').addEventListener('submit', function(e) {
     e.preventDefault();
     document.getElementById('reservation-error').textContent = '';
@@ -632,7 +593,6 @@ function showPaymentModal(totalPrice, onConfirm) {
       document.getElementById('reservation-error').textContent = "Please select at least one equipment to reserve.";
       return;
     }
-    // Calculate total price
     const selectedIds = Array.from(selectedEquipmentSet);
     const endDate = document.getElementById('end_date').value;
     if (!endDate) {
@@ -649,14 +609,11 @@ function showPaymentModal(totalPrice, onConfirm) {
         totalPrice += Number(eq.rental_rate_per_day) * days;
       }
     });
-    // Set total cost in hidden input before showing modal and submitting
     const taxRate = 0.06;
     const taxAmount = totalPrice * taxRate;
     const totalWithTax = totalPrice + taxAmount;
     document.getElementById('total-cost').value = totalWithTax.toFixed(2);
-    // Show modal and only submit if user confirms
     showPaymentModal(totalPrice, () => {
-      // AJAX submit to show error/success without page reload
       const form = document.getElementById('reservation-form');
       const formData = new FormData(form);
       formData.delete('start_date');
@@ -670,7 +627,6 @@ function showPaymentModal(totalPrice, onConfirm) {
           document.getElementById('reservation-error').textContent = data.error;
           document.getElementById('reservation-success').textContent = '';
         } else {
-          // Show modal with "Okay" button for success
           let msg = "";
           if (data.unavailable_equipment_ids && data.unavailable_equipment_ids.length > 0) {
             msg = `<div style="color:green;font-weight:bold;">Reservation successful for available equipment only.</div>
@@ -700,28 +656,15 @@ function showPaymentModal(totalPrice, onConfirm) {
       });
     });
   });
-  /*
-  document.getElementById('Payment-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    document.getElementById('payment-error').textContent = '';
-    document.getElementById('payment-success').textContent = '';
-  });
-    document.getElementById('Address-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    document.getElementById('address-error').textContent = '';
-    document.getElementById('address-success').textContent = '';
-  });*/
-  // Function to populate payment dropdown with user's saved payment methods
+
   function populatePaymentDropdown() {
     fetch('/api/mypayments')
       .then(res => res.json())
       .then(payments => {
         const paymentSelect = document.getElementById('payment');
         if (paymentSelect && payments && payments.length > 0) {
-          // Clear existing options except the default
           paymentSelect.innerHTML = '<option value="" disabled selected>-- Choose Payment --</option>';
           
-          // Add user's saved payment methods
           payments.forEach((payment, index) => {
             const option = document.createElement('option');
             option.value = payment.payment_nickname || `payment_${index}`;
@@ -732,21 +675,17 @@ function showPaymentModal(totalPrice, onConfirm) {
       })
       .catch(err => {
         console.log('Could not load payment methods:', err);
-        // Keep default options if API fails
       });
   }
 
-  // Function to populate address dropdown with user's saved addresses
   function populateAddressDropdown() {
     fetch('/api/myaddress')
       .then(res => res.json())
       .then(addresses => {
         const addressSelect = document.getElementById('address');
         if (addressSelect && addresses && addresses.length > 0) {
-          // Clear existing options except the default
           addressSelect.innerHTML = '<option value="" disabled selected>-- Choose Billing address--</option>';
           
-          // Add user's saved addresses
           addresses.forEach((address, index) => {
             const option = document.createElement('option');
             option.value = address.address_nickname || `address_${index}`;
@@ -757,11 +696,9 @@ function showPaymentModal(totalPrice, onConfirm) {
       })
       .catch(err => {
         console.log('Could not load addresses:', err);
-        // Keep default options if API fails
       });
   }
 
-  // Replace sessionStorage logic with API call to get user's name from server
   document.addEventListener('DOMContentLoaded', function() {
     fetch('/api/userinfo')
       .then(res => res.json())
@@ -774,15 +711,12 @@ function showPaymentModal(totalPrice, onConfirm) {
         }
       })
       .catch(() => {
-        // fallback: do nothing, default is "Customer"
       });
 
-    // Load user's payment and address information for equipment reservation page
     if (window.location.pathname.endsWith('equipment-reservation.html')) {
       populatePaymentDropdown();
       populateAddressDropdown();
       
-      // Add event listeners for "Add New" buttons
       const addPaymentBtn = document.getElementById('add-payment-btn');
       const addAddressBtn = document.getElementById('add-address-btn');
       const paymentForm = document.getElementById('Payment-form');
@@ -806,11 +740,9 @@ function showPaymentModal(totalPrice, onConfirm) {
         });
       }
       
-      // Handle payment form submission and refresh dropdowns
       if (paymentForm) {
         paymentForm.addEventListener('submit', function(e) {
           e.preventDefault();
-          // Custom validation for card number, zip code, and cvv
           const cardNumber = paymentForm.card_number.value.trim();
           const zipCode = paymentForm.zip_code.value.trim();
           const cvv = paymentForm.cvv.value.trim();
@@ -838,7 +770,6 @@ function showPaymentModal(totalPrice, onConfirm) {
               document.getElementById('payments-success').textContent = 'Payment method added successfully!';
               document.getElementById('payments-error').textContent = '';
               paymentForm.reset();
-              // Refresh payment dropdown
               setTimeout(() => {
                 populatePaymentDropdown();
                 paymentForm.classList.add('hidden-form');
@@ -855,7 +786,6 @@ function showPaymentModal(totalPrice, onConfirm) {
           });
         });
 
-        // Enforce numeric input for card number, zip code, and cvv fields
         ['card_number', 'zip_code', 'cvv'].forEach(function(fieldId) {
           const field = document.getElementById(fieldId);
           if (field) {
@@ -866,7 +796,6 @@ function showPaymentModal(totalPrice, onConfirm) {
         });
       }
       
-      // Handle address form submission and refresh dropdowns
       if (addressForm) {
         addressForm.addEventListener('submit', function(e) {
           e.preventDefault();
@@ -882,7 +811,6 @@ function showPaymentModal(totalPrice, onConfirm) {
               document.getElementById('address-success').textContent = 'Address added successfully!';
               document.getElementById('address-error').textContent = '';
               addressForm.reset();
-              // Refresh address dropdown
               setTimeout(() => {
                 populateAddressDropdown();
                 addressForm.classList.add('hidden-form');
@@ -901,7 +829,6 @@ function showPaymentModal(totalPrice, onConfirm) {
       }
     }
 
-    // Show success modal with "Okay" after reload if flag is set
     if (localStorage.getItem('showReservationModal') === '1') {
       document.getElementById('reservation-modal-title').textContent = "Reservation successful!";
       document.getElementById('reservation-modal-body').innerHTML = `
@@ -915,6 +842,5 @@ function showPaymentModal(totalPrice, onConfirm) {
       };
       localStorage.removeItem('showReservationModal');
     }
-    // ...existing code...
   });    
 })(jQuery);
