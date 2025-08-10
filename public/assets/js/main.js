@@ -325,8 +325,8 @@ document.addEventListener('DOMContentLoaded', function() {
                   <div class="card-text">
                     <h2>${item.name || item.category}</h2>
                     <h3>Available: ${item.quantity_available > 0 ? "Yes" : "No"} (${item.quantity_available || 0} in stock)</h3>
-                    <p>${item.description || ""}</p>
-                    <p>Rate: $${item.rental_rate_per_day} / day</p>
+                    <p class="desc">${item.description || ""}</p>
+                    <p class="rate">Rate: $${item.rental_rate_per_day} / day</p>
                   </div>
                 </div>
               </div>
