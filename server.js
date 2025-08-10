@@ -32,11 +32,10 @@ app.set("trust proxy", 1);
 
 // Parsers & static
 app.use(bodyParser.json());
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname,"public")));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// ----- Multer (NOTE: Heroku's filesystem is ephemeral) -----
-// For production, consider S3/Cloudinary instead of local 'public/assets/...'
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "public/assets/img/equipment/");
@@ -57,9 +56,12 @@ const upload = multer({
 
 // ----- CORS (kept permissive; tighten if you know your origin) -----
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", process.env.CORS_ORIGIN || "*");
+  const origin = process.env.CORS_ORIGIN || "*";
+  res.header("Access-Control-Allow-Origin",origin);
+  res.header("Vary","Origin");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  if(origin !=="*") res.header("Access-Control-Allow-Credentials","true");
   if (req.method === "OPTIONS") return res.sendStatus(200);
   next();
 });
@@ -129,13 +131,13 @@ connectToDB();
 async function getNextSequence(counterName) 
 {
   try {
-    const counter = await db.collection("counters").findOneAndUpdate(
+    const {value} = await db.collection("counters").findOneAndUpdate(
       { _id: counterName },
       { $inc: { sequence_value: 1 } },
       { returnDocument: "after", upsert: true }
     );
     
-    console.log(`${counterName} Counter result:`, counter);
+    console.log(`${counterName} Counter result:`, value);
     
     // Check if counter exists and has the sequence_value
     if (counter && counter.sequence_value && typeof counter.sequence_value === 'number') {
@@ -156,6 +158,8 @@ async function getNextSequence(counterName)
     return 1;
   }
 }
+app.get("/health",(req,res)=> res.status(200).send("OK"));
+
 app.post("/contact_us", async(req,res)=>{
   const{name,email,subject,message,}=req.body;
   try {
@@ -337,7 +341,7 @@ app.get('/logout',requireLogin, (req, res) => {
       return res.status(500).send("Logout failed");
     }
     res.clearCookie("connect.sid");
-    res.redirect('/home.html');
+    res.redirect('/Home.html');
   });
 });
 app.get('/userdetail', requireLogin, (req, res) => {
