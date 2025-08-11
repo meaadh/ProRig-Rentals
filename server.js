@@ -126,25 +126,29 @@ async function connectToDB() {
 }
 
 connectToDB();
-
-async function getNextSequence(counterName) {
+async function getNextSequence(counterName) 
+{
   try {
-    const res = await db.collection('counters').findOneAndUpdate(
+    const counter = await db.collection("counters").findOneAndUpdate(
       { _id: counterName },
-      {
-        $setOnInsert: { sequence_value: 0 },
-        $inc: { sequence_value: 1 }
-      },
-      { upsert: true, returnDocument: 'after' }
+      { $inc: { sequence_value: 1 } },
+      { returnDocument: "after", upsert: true }
     );
-
-    const doc = res && res.value;
-    if (!doc || typeof doc.sequence_value !== 'number') {
-      throw new Error('sequence_value missing after update');
+    
+    console.log(`${counterName} Counter result:`, counter);
+    
+    if (counter && counter.sequence_value && typeof counter.sequence_value === 'number') {
+      console.log(`Returning ${counterName}:`, counter.sequence_value);
+      return counter.sequence_value;
+    } else {
+      console.log("Counter not found or invalid, initializing...");
+      await db.collection("counters").updateOne(
+        { _id: counterName },
+        { $set: { sequence_value: 1 } },
+        { upsert: true }
+      );
+      return 1;
     }
-
-    console.log(`${counterName} Counter result:`, doc);
-    return doc.sequence_value;
   } catch (err) {
     console.error(`Error in getNextSequence for ${counterName}:`, err);
     return 1;
