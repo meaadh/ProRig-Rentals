@@ -359,7 +359,7 @@ app.get('/userdetail', requireLogin, (req, res) => {
     
   });
 });
-app.get('/api/equipments',requireLogin, async (req, res) => {
+app.get('/api/equipments',async (req, res) => {
   try {
     // This line fetches all equipment from the 'Equipments' collection in your database
     const equipments = await db.collection("Equipments").find({}).toArray();
