@@ -127,16 +127,11 @@ async function connectToDB() {
 
 connectToDB();
 
-
-// Works with MongoDB Node driver v4+
-// If you’re on v3, replace `returnDocument: 'after'` with `returnOriginal: false`
-
 async function getNextSequence(counterName) {
   try {
     const res = await db.collection('counters').findOneAndUpdate(
       { _id: counterName },
       {
-        // initialize at 0 only on first insert, then inc to 1 in the same op
         $setOnInsert: { sequence_value: 0 },
         $inc: { sequence_value: 1 }
       },
@@ -149,10 +144,9 @@ async function getNextSequence(counterName) {
     }
 
     console.log(`${counterName} Counter result:`, doc);
-    return doc.sequence_value; // ← your new sequence
+    return doc.sequence_value;
   } catch (err) {
     console.error(`Error in getNextSequence for ${counterName}:`, err);
-    // choose your own fallback (return null or rethrow in prod)
     return 1;
   }
 }
