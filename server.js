@@ -333,7 +333,7 @@ app.get('/logout',requireLogin, (req, res) => {
       return res.status(500).send("Logout failed");
     }
     res.clearCookie("connect.sid");
-    res.redirect('/home.html');
+    res.redirect('/Home.html');
   });
 });
 app.get('/userdetail', requireLogin, (req, res) => {
