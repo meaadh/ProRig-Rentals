@@ -128,36 +128,35 @@ async function connectToDB() {
 connectToDB();
 
 
-async function getNextSequence(counterName) 
-{
+// Works with MongoDB Node driver v4+
+// If you’re on v3, replace `returnDocument: 'after'` with `returnOriginal: false`
+
+async function getNextSequence(counterName) {
   try {
-    const {value} = await db.collection("counters").findOneAndUpdate(
+    const res = await db.collection('counters').findOneAndUpdate(
       { _id: counterName },
-      { $inc: { sequence_value: 1 } },
-      { returnDocument: "after", upsert: true }
+      {
+        // initialize at 0 only on first insert, then inc to 1 in the same op
+        $setOnInsert: { sequence_value: 0 },
+        $inc: { sequence_value: 1 }
+      },
+      { upsert: true, returnDocument: 'after' }
     );
-    
-    console.log(`${counterName} Counter result:`, value);
-    
-    // Check if counter exists and has the sequence_value
-    if (counter && counter.sequence_value && typeof counter.sequence_value === 'number') {
-      console.log(`Returning ${counterName}:`, counter.sequence_value);
-      return counter.sequence_value;
-    } else {
-      console.log("Counter not found or invalid, initializing...");
-      // If counter doesn't exist or is invalid, initialize it
-      await db.collection("counters").updateOne(
-        { _id: counterName },
-        { $set: { sequence_value: 1 } },
-        { upsert: true }
-      );
-      return counter.sequence_value;
+
+    const doc = res && res.value;
+    if (!doc || typeof doc.sequence_value !== 'number') {
+      throw new Error('sequence_value missing after update');
     }
+
+    console.log(`${counterName} Counter result:`, doc);
+    return doc.sequence_value; // ← your new sequence
   } catch (err) {
     console.error(`Error in getNextSequence for ${counterName}:`, err);
+    // choose your own fallback (return null or rethrow in prod)
     return 1;
   }
 }
+
 app.get("/health",(req,res)=> res.status(200).send("OK"));
 
 app.post("/contact_us", async(req,res)=>{
