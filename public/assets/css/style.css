@@ -180,6 +180,7 @@ h1, h2, h3, h4, h5, h6, .font-primary {
   transition: 0.5s;
   line-height: 1;
   margin: 6px;
+  margin-right: 1px;
   color: #000000;
   -webkit-animation-delay: 0.8s;
   animation-delay: 0.8s;
@@ -316,7 +317,7 @@ h1, h2, h3, h4, h5, h6, .font-primary {
 
 .mobile-nav-toggle {
   position: fixed;
-  right: 5px;
+  right: 2px;
   top: 20px;
   z-index: 9998;
   border: 0;
