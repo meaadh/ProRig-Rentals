@@ -65,13 +65,16 @@
    </header><!-- End Header -->
    <main id="main">
       <div class="form-container">
-         <form action="/sign_up" method="post">
+         <form id="registerForm" action="/sign_up" method="post">
             <h3>Register Now</h3>
             <input type="text" name="fname" required placeholder="enter your first name">
             <input type="text" name="lname" required placeholder="enter your last name">
             <input type="text" name="username" required placeholder="enter your username">
             <input type="email" name="email" required placeholder="enter your email">
-            <input type="password" name="password" required placeholder="enter your password">
+            <small id="passwordhelper" class="form-text text-muted">
+            Password must be at least 8 characters and include: one uppercase letter, one lowercase letter, one number, and one special character.
+            </small>     
+            <input type="password" name="password" required placeholder="enter your password">  
             <input type="password" name="cpassword" required placeholder="enter your password again">
             <input type="submit" name="submit" value="register now" class="form-btn">
             <p>Already have an account? <a href="loginform.html"><span>Login Now</span></a></p>
