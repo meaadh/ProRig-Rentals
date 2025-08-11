@@ -37,7 +37,6 @@
 </head>
 
 <body>
-  <!-- Custom popup modal for error messages -->
   <div id="error-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:9999; align-items:center; justify-content:center;">
     <div style="background:#fff; padding:32px 24px; border-radius:8px; box-shadow:0 2px 16px rgba(0,0,0,0.2); min-width:300px; max-width:90vw; text-align:center; position:relative;">
       <span id="error-modal-message" style="color:#c00; font-weight:bold;"></span>
@@ -46,13 +45,11 @@
     </div>
   </div>
   <script>
-  // Show error as custom popup if present in URL
   const params = new URLSearchParams(window.location.search);
   const error = params.get("error");
   if (error) {
       document.getElementById("error-modal-message").textContent = decodeURIComponent(error);
       document.getElementById("error-modal").style.display = "flex";
-      // Clean up URL after showing popup
       const cleanUrl = window.location.origin + window.location.pathname;
       window.history.replaceState({}, document.title, cleanUrl);
   }
