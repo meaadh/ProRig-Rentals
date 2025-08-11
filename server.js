@@ -151,7 +151,7 @@ async function getNextSequence(counterName)
         { $set: { sequence_value: 1 } },
         { upsert: true }
       );
-      return 1;
+      return counter.sequence_value;
     }
   } catch (err) {
     console.error(`Error in getNextSequence for ${counterName}:`, err);
