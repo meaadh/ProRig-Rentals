@@ -120,32 +120,51 @@ document.addEventListener('DOMContentLoaded', function() {
   } else if ($(".mobile-nav, .mobile-nav-toggle").length) {
     $(".mobile-nav, .mobile-nav-toggle").hide();
   }
+  // Mark current page as route-active
+  function markRouteActive() {
+    const path = location.pathname.split("/").pop() || "index.html";
+    const lists = document.querySelectorAll(".nav-menu, .mobile-nav ul");
+    lists.forEach(list => {
+      if (!list) return;
+      // clear previous route-active (if any)
+      list.querySelectorAll(".route-active").forEach(li => li.classList.remove("route-active","active"));
+      list.querySelectorAll("a[href]").forEach(a => {
+        const href = a.getAttribute("href");
+        if (!href || href.startsWith("#")) return; // only real page links
+        const file = href.split("/").pop();
+        if (file === path) {
+          a.closest("li")?.classList.add("route-active","active");
+        }
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", markRouteActive);
 
   // Navigation active state on scroll
-  var nav_sections = $('section');
-  var main_nav = $('.nav-menu, .mobile-nav');
+  var nav_sections = $("section");
+  var main_nav = $(".nav-menu, .mobile-nav");
 
-  $(window).on('scroll', function() {
+  $(window).on("scroll", function () {
+    // If no in-page sections, don't touch active state
+    if (nav_sections.length === 0) return;
+
     var cur_pos = $(this).scrollTop() + 200;
-    if (nav_sections.length === 0) 
-    {
-    main_nav.find('li').removeClass('active');
-    return;
-    }
-    nav_sections.each(function() {
+
+    // Only toggle active for in-page hash links; leave .route-active alone
+    main_nav.find('a[href^="#"]').parent("li").removeClass("active");
+
+    nav_sections.each(function () {
       var top = $(this).offset().top,
-        bottom = top + $(this).outerHeight();
+          bottom = top + $(this).outerHeight();
 
       if (cur_pos >= top && cur_pos <= bottom) {
-        if (cur_pos <= bottom) {
-          main_nav.find('li').removeClass('active');
-        }
-        main_nav.find('a[href="#' + $(this).attr('id') + '"]').parent('li').addClass('active');
-      }
-      if (cur_pos < 300) {
-         $(".nav-menu ul:first li:first").addClass('active');
+        main_nav.find('a[href="#' + $(this).attr("id") + '"]').parent("li").addClass("active");
       }
     });
+
+    // Remove this old fallback; it overrides your page active
+    // if (cur_pos < 300) { $(".nav-menu ul:first li:first").addClass('active'); }
   });
 
   // Back to top button
@@ -321,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(err => {
           console.error("Error fetching equipment:", err);
-          $('.event-container').empty().append('<div class="col-12"><p style="color:red;font-weight:bold;">Failed to load equipment data.</p></div>');
+          $('.event-container').empty().append('<div class="col-12"><p style="color:red;font-weight:bold;text-align: center;">Access to the inventory is available to signed-in users only. Please sign in to continue.</p></div>');
         });
     }
   });
@@ -340,39 +359,39 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
 document.addEventListener('DOMContentLoaded', function () {
-  fetch('/api/userinfo')
+  fetch('/userdetail', {credentials: 'include'})
     .then(res => res.json())
     .then(data => {
-      if (data && data.name && data.name !== "Customer") {
+      const userType=data?.user_type;
+      // Change login text
+      const loginLink = document.getElementById('login-link');
+      const loginLink2 = document.getElementById('login-link-2');
+      
+      if (loginLink) {
+        loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
+        loginLink.href = '/logout';
+      }
+      if (loginLink2) {
+        loginLink2.innerHTML = '<i class="icofont-logout"></i> | Logout';
+        loginLink2.href = '/logout';
+      }
+      
+      // Define desktop and mobile nav targets
+      const navTargets = [
+        document.getElementById('main-navbar-list'),
+        document.querySelector('.mobile-nav ul')
+      ];
 
-        // Change login text
-        const loginLink = document.getElementById('login-link');
-        const loginLink2 = document.getElementById('login-link-2');
-        
-        if (loginLink) {
-          loginLink.innerHTML = '<i class="icofont-logout"></i> | Logout';
-          loginLink.href = '/logout';
-        }
-        if (loginLink2) {
-          loginLink2.innerHTML = '<i class="icofont-logout"></i> | Logout';
-          loginLink2.href = '/logout';
-        }
-       
-        // Define desktop and mobile nav targets
-        const navTargets = [
-          document.getElementById('main-navbar-list'),
-          document.querySelector('.mobile-nav ul')
-        ];
+      navTargets.forEach(nav => {
+        if (!nav) return;
 
-        navTargets.forEach(nav => {
-          if (!nav) return;
-
-          // Remove old versions if they exist
-          ['customer-page-link', 'return-page-link', 'account-dropdown'].forEach(id => {
-            const old = nav.querySelector(`#${id}`);
-            if (old) old.remove();
-          });
-
+        // Remove old versions if they exist
+        ['customer-page-link', 'return-page-link', 'account-dropdown','managment','admin-page'].forEach(id => {
+          const old = nav.querySelector(`#${id}`);
+          if (old) old.remove();
+        });
+        if(userType==="customer")
+        {
           // Create dropdown container
           const dropdownLi = document.createElement('li');
           dropdownLi.classList.add('drop-down');
@@ -398,35 +417,68 @@ document.addEventListener('DOMContentLoaded', function () {
           } else {
             nav.appendChild(dropdownLi);
           }
-        });
+        }
+        else if(userType === "maintenance")
+        {
+          const dropdownLi = document.createElement('li');
+          dropdownLi.id = 'management';
+          dropdownLi.innerHTML = `
+            <a href="maintainancePage.html">Managment</a>
+          `;
 
-        // Highlight correct link
-        const current = window.location.pathname;
-        if (current.endsWith('account.html')) {
-          document.querySelectorAll('#dashboard-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+          const logoutLi = nav.querySelector('#login-link-li');
+          if (logoutLi) {
+            nav.insertBefore(dropdownLi, logoutLi);
+          } else {
+            nav.appendChild(dropdownLi);
+          }
         }
-        if (current.endsWith('equipment-reservation.html')) {
-          document.querySelectorAll('#customer-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
-        }
-        if (current.endsWith('account.html#return')) {
-          document.querySelectorAll('#return-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
-        }
+        else if(userType === "admin")
+        {
+          const dropdownLi = document.createElement('li');
+          dropdownLi.id = 'admin-page';
+          dropdownLi.innerHTML = `
+            <a href="adminPage.html">Admin</a>
+          `;
 
+          const logoutLi = nav.querySelector('#login-link-li');
+          if (logoutLi) {
+            nav.insertBefore(dropdownLi, logoutLi);
+          } else {
+            nav.appendChild(dropdownLi);
+          }
+        }
+      });
+
+      // Highlight correct link
+      const current = window.location.pathname+ window.location.hash;
+      if (current.endsWith('account.html')) {
+        document.querySelectorAll('#dashboard-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+      }
+      if (current.endsWith('equipment-reservation.html')) {
+        document.querySelectorAll('#customer-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+      }
+      if (current.endsWith('account.html#return')) {
+        document.querySelectorAll('#return-page-link-anchor').forEach(a => a.parentElement.classList.add('active'));
+      }
+      if (current.endsWith('adminPage.html')) {
+        document.querySelectorAll('a[href$="adminPage.html"]').forEach(a => a.parentElement.classList.add('active'));
+      }
+      if (current.endsWith('maintainancePage.html')) {
+        document.querySelectorAll('a[href$="maintainancePage.html"]').forEach(a => a.parentElement.classList.add('active'));
       }
     });
 });
-
-
-  fetch('/api/userinfo')
-    .then(res => res.json())
-    .then(data => {
-      if (data && data.name && data.name !== "Customer"||data && data.name && data.name !== "admin") {
-        // Hide hero login button if logged in
-        const heroLoginBtn = document.getElementById('hero-login-btn');
-        if (heroLoginBtn) heroLoginBtn.style.display = 'none';
-      }
-    })
-    .catch(() => { /* not logged in, do nothing */ });
+  fetch('/userdetail', {credentials:"include"})
+  .then(res => {if(!res.ok)throw new Error("Not Logged in"); return res.json();})
+  .then(data => {
+    if (data?.name) {
+      // Hide hero login button if logged in
+      const heroLoginBtn = document.getElementById('login-link-3');
+      if (heroLoginBtn) heroLoginBtn.style.display = 'none';
+    }
+  })
+  .catch(() => { /* not logged in, do nothing */ });
   let allEquipment = [];
   let selectedEquipmentSet = new Set();
 
@@ -531,7 +583,7 @@ fetch('/api/equipments')
     renderEquipment(""); // Show nothing until category is picked
   })
   .catch(() => {
-    document.getElementById('equipment-list').innerHTML = '<div class="col-12"><p>Error loading equipment.</p></div>';
+    document.getElementById('equipment-list').innerHTML = '<div class="col-12"><p>Access to the inventory is available to signed-in users only. Please sign in to continue.</p></div>';
   });
 
 document.getElementById('equipment-category').addEventListener('change', function() {

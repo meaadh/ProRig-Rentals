@@ -65,11 +65,13 @@
 
     </div>
   </header><!-- End Header -->
-  <div class="hero-text">
-    <h2 class="animate__animated animate__fadeInDown"><span>ProRigs Rental Corporation</span></h2>
-    <h6 class="animate__animated animate__fadeInUp">A Heavy Equipment Solutions Company</h6>
+  <div class="container text-center" id="welcome">
+    <div class="d-flex flex-column justify-content-center align-items-center">
+      <h1 data-aos="fade-up">Welcome to <span>ProRig Rentals</span></h1>
+      <p data-aos="fade-up" data-aos-delay="100">A Heavy Equipment Solutions Corporation<br></p>
+    </div>
   </div>
-  <main id="main" style="margin-top: 80px;">
+  <main id="main" style="margin-top: 20px;" class="hidden-page">
 
     <div class="user-container">
       <div class="content">
@@ -77,7 +79,7 @@
         <h3>Welcome Back, <span id="user-welcome-name">Customer</span></h3>
       </div>
     </div>
-
+    
     <section id="account" class="container" style="max-width: 1200px;">
 
       <button class="collapsible">All Orders</button>
@@ -260,6 +262,29 @@
         });
     });
 
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/userdetail")
+        .then(res => {
+          if (!res.ok) throw new Error("Not logged in");
+          return res.json();
+        })
+        .then(data => {
+
+
+          if (data.user_type !== "customer") {
+            // wrong role → log them out
+            fetch("/logout", { credentials: "include" })
+              .then(() => window.location.href = "/loginform.html");
+          } else {
+            // correct role → reveal content
+            document.getElementById("main").classList.remove("hidden-page");
+          } 
+        })
+        .catch(err => {
+          window.location.href = "/loginform.html"; // optional redirect
+        });
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
     fetch('/api/myreservations')
       .then(res => res.json())
@@ -275,7 +300,7 @@
             <td data-label="Status">${r.status}</td>
             <td data-label="Items">${r.items.join(', ')}</td>
             <td data-label="Pick-Up Location">${r.location}</td>
-            <td data-label="Total">${r.total_cost}</td>
+            <td data-label="Total">${"$",r.total_cost}</td>
           `;
           tbody.appendChild(tr);
         });
@@ -495,6 +520,7 @@
           document.getElementById('return-success').textContent = 'Equipment returned successfully!';
           document.getElementById('return-success').style.display = 'block';
           document.getElementById('return-form').reset();
+          window.location.reload();
           loadUserEquipment();
         } else {
           document.getElementById('return-error').textContent = data.error || 'Failed to return equipment.';

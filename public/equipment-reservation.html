@@ -67,11 +67,13 @@
     </div>
   </header><!-- End Header -->
   
-  <div class="hero-text">
-    <h2 class="animate__animated animate__fadeInDown"><span>ProRigs Rental Corporation</span></h2>
-    <h6 class="animate__animated animate__fadeInUp">A Heavy Equipment Solutions Company</h6>
+  <div class="container text-center" id="welcome">
+    <div class="d-flex flex-column justify-content-center align-items-center">
+      <h1 data-aos="fade-up">Welcome to <span>ProRig Rentals</span></h1>
+      <p data-aos="fade-up" data-aos-delay="100">A Heavy Equipment Solutions Corporation<br></p>
+    </div>
   </div>
-  <main id="main">
+  <main id="main" class="hidden-page">
     <div class="user-container">
       <div class="content">
         <h3>HI, <span id="user-welcome-name">Customer</span></h3>
@@ -118,16 +120,12 @@
           </select>
           <select id="address" name="address" required>
             <option value="" disabled selected>-- Choose Billing address--</option>
-             <option value="Lansing" >Lansing</option>
-
           </select>
           <div style="margin-top: 5px;">
             <button type="button" id="add-address-btn" style="padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 3px; font-size: 0.9em; cursor: pointer;">+ Add New Address</button>
           </div>
           <select id="payment" name="payment" required>
-            <option value=""disabled selected>-- Choose Payment --</option>
-            <option value="Visa" >Visa</option>
-
+            <option value=""disabled selected>-- Choose Payment Method --</option>
           </select>
           <div style="margin-top: 5px;">
             <button type="button" id="add-payment-btn" style="padding: 5px 10px; background: #28a745; color: white; border: none; border-radius: 3px; font-size: 0.9em; cursor: pointer;">+ Add New Payment Method</button>
@@ -143,7 +141,7 @@
       </div>
         <div class="forms-wrapper">
           <div class="reservation-form-container">
-            <form id="Payment-form" class="hidden-form" action="http://localhost:3000/payments" method="post">
+            <form id="Payment-form" class="hidden-form" action="/payments" method="post">
               <h3>Add Payment Info</h3>
               <input type="text" name="customer_name" id="payment_cardholder_name" required placeholder="Cardholder Name">
               <input type="text" name="card_number" id="card_number" required placeholder="Card Number (16 digits)" pattern="\d{16}" maxlength="16" minlength="16" inputmode="numeric" title="Card number must be 16 digits">
@@ -156,7 +154,7 @@
                 <option value="Discover">Discover</option>
                 <option value="American Express">American Express</option>
               </select>
-              <input type="text" name="zip_code" id="zip_code" required placeholder="Zip Code (5 digits)" pattern="\d{5}" maxlength="5" minlength="5" inputmode="numeric" title="Zip code must be 5 digits">
+              <input type="text" name="zip_code" id="payment_zip_code" required placeholder="Zip Code (5 digits)" pattern="\d{5}" maxlength="5" minlength="5" inputmode="numeric" title="Zip code must be 5 digits">
               <input type="text" name="payment_nickname" id="payment_nickname" required placeholder="Payment Nickname">
               <input type="submit" name="submit" value="Add Payment Card to Account" class="form-btn">
               <div id="payments-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
@@ -164,10 +162,10 @@
             </form>
           </div>
           <div class="reservation-form-container">
-            <form id="Address-form" class="hidden-form" action="http://localhost:3000/addresses" method="post">
+            <form id="Address-form" class="hidden-form" action="/addresses" method="post">
               <h3>Add Address Info</h3>
               <label for="street">Street</label>
-              <input type="text" name="street" id="street" required placeholder="e.g., Evergreen" minlength="2">
+              <input type="text" name="street" id="street" required placeholder="e.g., 4901 Evergreen Rd" minlength="2">
               <label for="city">City</label>
               <input type="text" name="city" id="city" required placeholder="e.g., Dearborn" minlength="2">
               <label for="state">State</label>
@@ -247,23 +245,20 @@
     </div>
     <div id="payment-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
       <div style="background:#fff; padding:30px 40px; border-radius:10px; box-shadow:0 2px 20px #0003; text-align:center; max-width:90vw;">
-        <h2 style="margin-bottom:20px;" id="payment-modal-title">Reservation successful!</h2>
+        <h2 style="margin-bottom:20px;" id="payment-modal-title">Payment Added successful!</h2>
         <div id="payment-modal-body"></div>
         <!-- <button id="close-modal-btn" ...>Okay</button> -->
       </div>
     </div>
      <div id="address-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
       <div style="background:#fff; padding:30px 40px; border-radius:10px; box-shadow:0 2px 20px #0003; text-align:center; max-width:90vw;">
-        <h2 style="margin-bottom:20px;" id="address-modal-title">Reservation successful!</h2>
+        <h2 style="margin-bottom:20px;" id="address-modal-title">Address Added successful!</h2>
         <div id="address-modal-body"></div>
         <!-- <button id="close-modal-btn" ...>Okay</button> -->
       </div>
     </div>
-
   </main><!-- End #main -->
-   <!--<option value="default">4901 Evergreen Rd Dearborn, MI 48128</option>
-       <option value="address1">500 S State St, Ann Arbor, MI 48109</option>
-       <option value="address2">428 S Shaw Ln, East Lansing, MI 48824</option>-->
+
   <!-- ======= Footer ======= -->
   <footer id="footer">
     <div class="footer-top">
@@ -311,6 +306,26 @@
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
   <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/userdetail")
+        .then(res => {
+          if (!res.ok) throw new Error("Not logged in");
+          return res.json();
+        })
+        .then(data => {
+          if (data.user_type !== "customer") {
+            // wrong role → log them out
+            fetch("/logout", { credentials: "include" })
+              .then(() => window.location.href = "/loginform.html");
+          } else {
+            // correct role → reveal content
+            document.getElementById("main").classList.remove("hidden-page");
+          } 
+        })
+        .catch(() => {
+          window.location.href = "/loginform.html"; // optional redirect
+        });
+    });
     // Client-side validation for Add Address form
     document.addEventListener('DOMContentLoaded', function() {
       const addressForm = document.getElementById('Address-form');

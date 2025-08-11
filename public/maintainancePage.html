@@ -66,32 +66,33 @@
       </div>
       <nav class="nav-menu float-right d-none d-lg-block">
         <ul id="main-navbar-list">
-          <li class="active"><a href="#header">Home</a></li>
-          <li><a href="#about">About Us</a></li>
-          <li><a href="#avaliablity">Equipments</a></li>
-          <li><a href="#location">Locations</a></li>
-          <li><a href="#team">Board Members</a></li>
-          <li><a href="#contact">Contact Us</a></li>
-          <!-- The customer/return links will be injected here by JS, so move the login/logout anchor to the end -->
+          <li><a href="home.html">Home</a></li>
+          <li><a href="home.html#about">About Us</a></li>
+          <li><a href="home.html#location">Locations</a></li>
+          <li><a href="Home.html#team">Team Members</a></li>
+          <!-- The customer/return links will be injected here by JS, so move the logout anchor to the end -->
           <li id="login-link-li">
-            <a href="loginform.html" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-login"></i>
-              | Login</a>
+            <a href="/logout" rel="noopener noreferrer" target="_self" class="btn-get-started" id="login-link"><i class="icofont-logout"></i>
+              | Logout</a>
           </li>
         </ul>
       </nav><!-- .nav-menu -->
 
     </div>
   </header><!-- End Header -->
-  
+  <div class="container text-center" id="welcome">
+    <div class="d-flex flex-column justify-content-center align-items-center">
+      <h1 data-aos="fade-up">Welcome Managment to <span>ProRig Rentals</span></h1>
+      <p data-aos="fade-up" data-aos-delay="100">A Heavy Equipment Solutions Corporation<br></p>
+    </div>
+  </div>
   <div class="user-container">
       <div class="content">
-       <h3>HI, <span id="user-welcome-name">Maintainance</span></h3>
-        <h1>Welcome <span>Maintainance</span></h1>
+       <h3>HI, <span id="user-welcome-name">maintenance</span></h3>
       </div>
     </div>
   
-  <main id="main">
-
+  <main id="main"  class="hidden-page">
     <!-- ======= Equipment Management Section ======= -->
     <section id="equipment-management" class="equipment-management">
       <div class="container" data-aos="fade-up" data-aos-delay="100">
@@ -248,9 +249,6 @@
         </div>
     </section><!-- End Avaliablity Section -->
 
-
-  </main><!-- End #main -->
-
   <!-- Edit Equipment Modal -->
   <div id="edit-equipment-modal" class="modal" style="display: none;">
     <div class="modal-content">
@@ -342,6 +340,7 @@
       </div>
     </div>
   </div>
+  </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
   <footer id="footer">
@@ -417,6 +416,27 @@
 
   <!-- Equipment Management JavaScript -->
   <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch("/userdetail")
+        .then(res => {
+          if (!res.ok) throw new Error("Not logged in");
+          return res.json();
+        })
+        .then(data => {
+          if (data.user_type !== "maintenance") {
+            // wrong role → log them out
+            fetch("/logout", { credentials: "include" })
+              .then(() => window.location.href = "/loginform.html");
+          } else {
+            // correct role → reveal content
+            document.getElementById("main").classList.remove("hidden-page");
+          }
+        })
+        .catch(() => {
+          window.location.href = "/loginform.html"; // optional redirect
+        });
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
       // Equipment management variables
       let currentEquipmentToDelete = null;
@@ -777,241 +797,6 @@
       }
     });
   </script>
-
-  <!-- Equipment Management CSS -->
-  <style>
-    .equipment-management {
-      padding: 60px 0;
-      background: #f8f9fa;
-    }
-
-    .management-header-box {
-      background: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      margin-bottom: 30px;
-      border: 1px solid #e9ecef;
-    }
-
-    .management-form {
-      background: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      margin-top: 30px;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-group label {
-      font-weight: 600;
-      margin-bottom: 5px;
-      display: block;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    .form-control[type="file"] {
-      padding: 8px;
-      background-color: #f8f9fa;
-    }
-
-    .form-text {
-      font-size: 12px;
-      color: #6c757d;
-      margin-top: 5px;
-    }
-
-    .form-control:focus {
-      outline: none;
-      border-color: #007bff;
-      box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
-    }
-
-    .form-buttons {
-      margin-top: 20px;
-    }
-
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-      margin-right: 10px;
-      font-size: 14px;
-    }
-
-    .btn-lg {
-      padding: 12px 24px;
-      font-size: 16px;
-    }
-
-    .btn-success {
-      background-color: #28a745;
-      color: white;
-    }
-
-    .btn-primary {
-      background-color: #007bff;
-      color: white;
-    }
-
-    .btn-secondary {
-      background-color: #6c757d;
-      color: white;
-    }
-
-    .btn-danger {
-      background-color: #dc3545;
-      color: white;
-    }
-
-    .btn-sm {
-      padding: 5px 10px;
-      font-size: 12px;
-    }
-
-    .btn:hover {
-      opacity: 0.8;
-    }
-
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    .table th,
-    .table td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .table th {
-      background-color: #f8f9fa;
-      font-weight: 600;
-    }
-
-    .table-responsive {
-      overflow-x: auto;
-    }
-
-    .badge {
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .badge-success {
-      background-color: #28a745;
-      color: white;
-    }
-
-    .badge-danger {
-      background-color: #dc3545;
-      color: white;
-    }
-
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.5);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-content {
-      background: white;
-      border-radius: 8px;
-      max-width: 600px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      margin: auto;
-      position: relative;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    .modal-header {
-      padding: 20px;
-      border-bottom: 1px solid #ddd;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-body {
-      padding: 20px;
-    }
-
-    .close {
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .close:hover {
-      opacity: 0.7;
-    }
-
-    .alert {
-      padding: 12px;
-      border-radius: 4px;
-      margin-top: 10px;
-    }
-
-    .alert-success {
-      background-color: #d4edda;
-      border: 1px solid #c3e6cb;
-      color: #155724;
-    }
-
-    .alert-danger {
-      background-color: #f8d7da;
-      border: 1px solid #f5c6cb;
-      color: #721c24;
-    }
-
-    .text-center {
-      text-align: center;
-    }
-
-    @media (max-width: 768px) {
-      .modal-content {
-        width: 95%;
-        margin: 20px;
-      }
-      
-      .btn-lg {
-        display: block;
-        width: 100%;
-        margin-bottom: 10px;
-      }
-      
-      .management-form {
-        padding: 20px;
-      }
-    }
-  </style>
 </body>
 
 </html>
