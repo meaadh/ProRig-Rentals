@@ -94,7 +94,7 @@ async function connectToDB() {
 
     const OrdercounterExists = await db.collection("counters").findOne({ _id: "orderId" });
     if (!OrdercounterExists) {
-      await db.collection("counters").insertOne({ _id: "orderId", sequence_value: 1000 });
+      await db.collection("counters").insertOne({ _id: "orderId", sequence_value: 0 });
       console.log("Initialized userId counter to 1000");
     }
     
