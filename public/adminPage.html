@@ -102,18 +102,21 @@
   
   <main id="main"  class="hidden-page">
     <div class="form-container" >
-      <form action="/managment" method="post">
+      <form id="managmentForm" action="/managment" method="post">
         <h3>USER MANAGEMENT</h3>
           <select name="user_type">
-                      <option value="maintainance">Maintainance</option>
+              <option value="maintainance">Maintainance</option>
           </select>
           <input type="text" name="fname" required placeholder="enter their first name">
           <input type="text" name="lname" required placeholder="enter their last name">
           <input type="text" name="username" required placeholder="enter a username">
           <input type="email" name="email" required placeholder="enter their email">
+          <small id="passwordhelper" class="form-text text-muted">
+            Password must be at least 8 characters and include: one uppercase letter, one lowercase letter, one number, and one special character.
+          </small>     
           <input type="password" name="password" required placeholder="enter a password">
-          <input type="password" name="cpassword" required placeholder="enter password again">
-        <input type="submit" value="Submit" class="form-btn">
+          <input type="password" name="cpassword" required placeholder="enter password again">     
+          <input type="submit" value="Submit" class="form-btn">
       </form>
     </div>
   </main><!-- End #main -->
@@ -226,6 +229,36 @@
       logoImg.addEventListener("load", function () {
         fallbackText.style.display = "none";
       });
+    });
+    document.getElementById("managmentForm").addEventListener("submit", function(e) {
+      const password = document.getElementById("password").value;
+      const cpassword = document.getElementById("cpassword").value;
+      const minLength = 8;
+      const upper = /[A-Z]/;
+      const lower = /[a-z]/;
+      const number = /[0-9]/;
+      const special = /[!@#$%^&*(),.?":{}|<>]/;
+
+      let errorMsg = "";
+
+      if (password.length < minLength) {
+        errorMsg = "Password must be at least " + minLength + " characters long.";
+      } else if (!upper.test(password)) {
+        errorMsg = "Password must contain at least one uppercase letter.";
+      } else if (!lower.test(password)) {
+        errorMsg = "Password must contain at least one lowercase letter.";
+      } else if (!number.test(password)) {
+        errorMsg = "Password must contain at least one number.";
+      } else if (!special.test(password)) {
+        errorMsg = "Password must contain at least one special character.";
+      } else if (password !== cpassword) {
+        errorMsg = "Passwords do not match.";
+      }
+
+      if (errorMsg) {
+        e.preventDefault();
+        alert(errorMsg);
+      }
     });
   </script>
 </body>
