@@ -39,15 +39,53 @@
 <body>
    <div id="error-message" style="color: red; font-weight: bold;"></div>
 
+   <style>
+      #error-message {
+         display: none; /* Hide by default */
+         color: red;
+         font-weight: bold;
+         text-align: center;
+         margin: 0;
+         padding: 10px;
+         border: 1px solid red;
+         border-radius: 5px;
+         width: 50%;
+         background-color: #ffe6e6;
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+      #error-message button {
+         margin-top: 10px;
+         padding: 5px 10px;
+         border: none;
+         background-color: red;
+         color: white;
+         border-radius: 3px;
+         cursor: pointer;
+      }
+      #error-message button:hover {
+         background-color: darkred;
+      }
+   </style>
    <script>
       const params = new URLSearchParams(window.location.search);
       const error = params.get("error");
 
       if (error) {
-         document.getElementById("error-message").textContent = decodeURIComponent(error);
+         const errorMessage = document.getElementById("error-message");
+         errorMessage.innerHTML = `${decodeURIComponent(error)}<br><button onclick=\"dismissError()\">Okay</button>`;
+         errorMessage.style.display = "block"; // Show only if error exists
 
          const cleanUrl = window.location.origin + window.location.pathname;
          window.history.replaceState({}, document.title, cleanUrl);
+      }
+
+      function dismissError() {
+         const errorMessage = document.getElementById("error-message");
+         errorMessage.style.display = "none";
       }
    </script>
 
