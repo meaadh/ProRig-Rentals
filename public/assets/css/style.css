@@ -151,7 +151,7 @@ h1, h2, h3, h4, h5, h6, .font-primary {
 
 #header .logo img {
   margin-top: 5px;
-  max-height: 50px;
+  max-height: 40px;
   height: auto;
 }
 #header .login h1 {

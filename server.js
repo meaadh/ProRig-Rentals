@@ -98,7 +98,7 @@ async function connectToDB() {
     if (!admincounterExists) await db.collection("counters").insertOne({ _id: "adminId", sequence_value: 0 });
 
     const OrdercounterExists = await db.collection("counters").findOne({ _id: "orderId" });
-    if (!OrdercounterExists) await db.collection("counters").insertOne({ _id: "orderId", sequence_value: 1000 });
+    if (!OrdercounterExists) await db.collection("counters").insertOne({ _id: "orderId", sequence_value: 0 });
 
     const [a] = await db.collection("AdminUsers")
       .aggregate([{ $group: { _id: null, maxUserIdFromAdmin: { $max: "$adminId" } } }]).toArray();
