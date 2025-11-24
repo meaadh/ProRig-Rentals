@@ -1,5 +1,6 @@
 const express = require("express");
 const session = require("express-session");
+const Keycloak=require("keycloak-connect")
 const bodyParser = require("body-parser");
 const crypto = require("crypto");
 const multer = require("multer");
@@ -66,18 +67,135 @@ app.use((req, res, next) => {
   next();
 });
 
+const memoryStore=new session.MemoryStore();
+
 // ----- Session (use env secret; secure in production) -----
 app.use(session({
   secret: process.env.SESSION_SECRET || "dev_only_change_me",
   resave: false,
   saveUninitialized: false,
+  store: memoryStore,
   cookie: {
     secure: NODE_ENV === "production", // true on Heroku (HTTPS)
     sameSite: NODE_ENV === "production" ? "none" : "lax"
   }
 }));
+// ----- Keycloak config -----
+const keycloakConfig = {
+  "realm": process.env.KEYCLOAK_REALM,
+  "auth-server-url": process.env.KEYCLOAK_URL,          // e.g. "http://localhost:8080"
+  "ssl-required": "external",
+  "resource": process.env.KEYCLOAK_CLIENT_ID,
+  "credentials": {
+    "secret": process.env.KEYCLOAK_CLIENT_SECRET
+  },
+  "confidential-port": 0
+};
+
+const keycloak = new Keycloak({ store: memoryStore }, keycloakConfig);
+
+// Keycloak middleware (handles callbacks, logout, etc.)
+app.use(
+  keycloak.middleware({
+    logout: "/sso/logout",
+    admin: "/sso/admin" // optional
+  })
+);
 
 let db;
+// Utility: make or find local user for a Keycloak account
+async function findOrCreateUserFromKeycloakProfile(profile) {
+  const username = profile.preferred_username;
+  const email = profile.email;
+  const fname = profile.given_name || "";
+  const lname = profile.family_name || "";
+  
+  // 1) See if user already exists in AdminUsers or RentalUsers
+  const existingAdmin = await db.collection("AdminUsers").findOne({ username });
+  if (existingAdmin) {
+    // Block; force them to use local login instead
+    throw new Error("Admin users must log in locally, not via SSO.");
+  }
+
+  // If Rental User exists, force user_type = 'customer'
+  const existingRental = await db.collection("RentalUsers").findOne({ username });
+  if (existingRental) {
+    // FORCE the type to customer even if the DB has something else
+    if (existingRental.user_type !== "customer") {
+      await db.collection("RentalUsers").updateOne(
+        { _id: existingRental._id },
+        { $set: { user_type: "customer" } }
+      );
+      existingRental.user_type = "customer";
+    }
+    return { ...existingRental, _collection: "RentalUsers" };
+  }
+
+  // 2) If not found, create a new RentalUsers record (as customer)
+  const userId = await getNextSequence("userId");
+
+  const data = {
+    userId,
+    fname,
+    lname,
+    email,
+    username,
+    password: null, // SSO user; no local password
+    user_type: "customer",
+    address: [],
+    payment: [],
+    created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
+    updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
+  };
+
+  const result = await db.collection("RentalUsers").insertOne(data);
+  return { ...data, _id: result.insertedId, _collection: "RentalUsers" };
+}
+
+// Route: login using Keycloak SSO
+app.get("/sso/login", keycloak.protect(), async (req, res) => {
+  try {
+    // Keycloak has authenticated the user at this point
+    const token = req.kauth.grant.access_token;
+    const profile = token.content; // JWT payload
+
+    // profile fields: preferred_username, email, given_name, family_name, etc.
+    const user = await findOrCreateUserFromKeycloakProfile(profile);
+    user.user_type = "customer";
+    const fullName = [user.fname, user.lname].filter(Boolean).join(" ");
+    console.log(`SSO User Logged In: ${fullName} [user_type=customer from RentalUsers]`);
+
+    // Make session look just like local login
+    req.session.user = {
+      username: user.username,
+      fname: user.fname,
+      lname: user.lname,
+      user_type: "customer",
+      source: "RentalUsers"
+    };
+    req.session.user_name = user.username;
+    req.session.userData = { 
+      fname: user.fname, 
+      lname: user.lname, 
+      username: user.username,
+      user_type: "customer" 
+    };
+
+    // Reuse your existing redirect logic
+    if (user.user_type === "admin") {
+      return res.redirect("/adminPage.html");
+    } else if (user.user_type === "customer") {
+      return res.redirect("/equipment-reservation.html");
+    } else if (user.user_type === "maintenance") {
+      return res.redirect("/maintainancePage.html");
+    } else {
+      return res.status(400).send("Unknown user type");
+    }
+  } catch (err) {
+    console.error("SSO login error:", err);
+    res.status(500).send("SSO login failed");
+  }
+});
 
 async function connectToDB() {
   try {
@@ -924,4 +1042,14 @@ app.put('/api/equipment/:id', requireLogin, upload.single('image'), async (req, 
     console.error('Update equipment error:', err);
     res.status(500).json({ error: 'Failed to update equipment' });
   }
+  app.get("/sso/logout", (req, res) => {
+  const redirect = encodeURIComponent("http://localhost:3000/Home.html");
+  const keycloakLogout = `${process.env.KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/logout?redirect_uri=${redirect}`;
+
+  req.session.destroy(err => {
+    res.clearCookie("connect.sid");
+    return res.redirect(keycloakLogout);
+  });
+});
+
 });
