@@ -432,7 +432,7 @@ function requireLogin(req,res,next)
 }
 app.get("/",(req,res)=>{
   res.set({"Access-control-Allow-Origin": "*" });
-  return res.redirect("register_form.html");
+  return res.redirect("loginform.html");
 });
 app.get('/logout',requireLogin, (req, res) => {
   const user=req.session.userData;
