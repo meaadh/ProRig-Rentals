@@ -842,5 +842,27 @@ function showPaymentModal(totalPrice, onConfirm) {
       };
       localStorage.removeItem('showReservationModal');
     }
-  });    
+  }); 
+
+  const header = document.getElementById("localLoginHeader");
+  const content = document.getElementById("localLoginContent");
+
+  header.addEventListener("click", () => {
+    
+    const isOpen = content.classList.contains("expanded");
+
+    if (isOpen) {
+      // CLOSE
+      content.style.maxHeight = null;
+      content.classList.remove("expanded");
+      header.classList.remove("open");
+    } else {
+      // OPEN
+      content.classList.add("expanded");
+      content.style.maxHeight = content.scrollHeight + "px";
+      header.classList.add("open");
+    }
+  });
+
+   
 })(jQuery);

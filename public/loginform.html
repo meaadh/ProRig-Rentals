@@ -74,17 +74,32 @@
   </header><!-- End Header -->
   <main id="main">
     <div class="form-container">
-      <form action="/login" method="post">
-        <h3>Welcome to ProRig Rentals</h3>
-        <input type="username" name="username" required placeholder="enter your username">
-        <input type="password" name="password" required placeholder="enter your password">
-        <input type="submit" name="submit" value="login" class="form-btn">
-        <p>Not a User? <a href="register_form.html"><span>Register Now</span></a></p>
-        <p>Single Sign ON<button class="login-link-3"onclick="window.location.href='/sso/login'">Login with SSO</button>
 
+      <h3>Welcome to ProRig Rentals</h3>
+
+      <!-- SSO BUTTON -->
+      <button type="button" class="btn-sso" onclick="window.location.href='/sso/login'">
+        Login with SSO
+      </button>
+
+      <!-- Collapsible Trigger -->
+      <div class="collapsible-header" id="localLoginHeader">
+        <span>Local Login</span>
+        <span class="chevron"></span>
+      </div>
+
+      <!-- COLLAPSIBLE LOCAL LOGIN FORM -->
+      <form action="/login" method="post" id="localLoginContent" class="collapsible-content">
+
+          <input type="username" name="username" required placeholder="enter your username">
+          <input type="password" name="password" required placeholder="enter your password">
+
+          <input type="submit" name="submit" value="Login" class="form-btn">
 
       </form>
+
     </div>
+
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
