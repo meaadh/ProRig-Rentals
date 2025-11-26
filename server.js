@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
 const Keycloak=require("keycloak-connect")
@@ -6,6 +7,11 @@ const crypto = require("crypto");
 const multer = require("multer");
 const path = require("path");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const KEYCLOAK_URL = process.env.KEYCLOAK_URL;
+const KEYCLOAK_REALM = process.env.KEYCLOAK_REALM;
+const KEYCLOAK_CLIENT_ID = process.env.KEYCLOAK_CLIENT_ID;
+const KEYCLOAK_CLIENT_SECRET = process.env.KEYCLOAK_CLIENT_SECRET;
+
 
 // ----- Config & Envs -----
 const PORT = process.env.PORT || 3000;
@@ -102,101 +108,12 @@ app.use(
   })
 );
 
+
 let db;
-// Utility: make or find local user for a Keycloak account
-async function findOrCreateUserFromKeycloakProfile(profile) {
-  const username = profile.preferred_username;
-  const email = profile.email;
-  const fname = profile.given_name || "";
-  const lname = profile.family_name || "";
-  
-  // 1) See if user already exists in AdminUsers or RentalUsers
-  const existingAdmin = await db.collection("AdminUsers").findOne({ username });
-  if (existingAdmin) {
-    // Block; force them to use local login instead
-    throw new Error("Admin users must log in locally, not via SSO.");
-  }
 
-  // If Rental User exists, force user_type = 'customer'
-  const existingRental = await db.collection("RentalUsers").findOne({ username });
-  if (existingRental) {
-    // FORCE the type to customer even if the DB has something else
-    if (existingRental.user_type !== "customer") {
-      await db.collection("RentalUsers").updateOne(
-        { _id: existingRental._id },
-        { $set: { user_type: "customer" } }
-      );
-      existingRental.user_type = "customer";
-    }
-    return { ...existingRental, _collection: "RentalUsers" };
-  }
-
-  // 2) If not found, create a new RentalUsers record (as customer)
-  const userId = await getNextSequence("userId");
-
-  const data = {
-    userId,
-    fname,
-    lname,
-    email,
-    username,
-    password: null, // SSO user; no local password
-    user_type: "customer",
-    address: [],
-    payment: [],
-    created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
-    updated_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
-  };
-
-  const result = await db.collection("RentalUsers").insertOne(data);
-  return { ...data, _id: result.insertedId, _collection: "RentalUsers" };
-}
-
-// Route: login using Keycloak SSO
-app.get("/sso/login", keycloak.protect(), async (req, res) => {
-  try {
-    // Keycloak has authenticated the user at this point
-    const token = req.kauth.grant.access_token;
-    const profile = token.content; // JWT payload
-
-    // profile fields: preferred_username, email, given_name, family_name, etc.
-    const user = await findOrCreateUserFromKeycloakProfile(profile);
-    user.user_type = "customer";
-    const fullName = [user.fname, user.lname].filter(Boolean).join(" ");
-    console.log(`SSO User Logged In: ${fullName} [user_type=customer from RentalUsers]`);
-
-    // Make session look just like local login
-    req.session.user = {
-      username: user.username,
-      fname: user.fname,
-      lname: user.lname,
-      user_type: "customer",
-      source: "RentalUsers"
-    };
-    req.session.user_name = user.username;
-    req.session.userData = { 
-      fname: user.fname, 
-      lname: user.lname, 
-      username: user.username,
-      user_type: "customer" 
-    };
-
-    // Reuse your existing redirect logic
-    if (user.user_type === "admin") {
-      return res.redirect("/adminPage.html");
-    } else if (user.user_type === "customer") {
-      return res.redirect("/equipment-reservation.html");
-    } else if (user.user_type === "maintenance") {
-      return res.redirect("/maintainancePage.html");
-    } else {
-      return res.status(400).send("Unknown user type");
-    }
-  } catch (err) {
-    console.error("SSO login error:", err);
-    res.status(500).send("SSO login failed");
-  }
-});
-
+console.log("KC URL      :", process.env.KEYCLOAK_URL);
+console.log("KC REALM    :", process.env.KEYCLOAK_REALM);
+console.log("KC CLIENT   :", process.env.KEYCLOAK_CLIENT_ID);
 async function connectToDB() {
   try {
     await client.connect();
@@ -273,6 +190,112 @@ async function getNextSequence(counterName)
   }
 }
 
+async function findOrCreateUserFromKeycloakProfile(profile) {
+  let username = profile.preferred_username || profile.email;
+  const email = profile.email || "";
+  const fname = profile.given_name || "";
+  const lname = profile.family_name || "";
+
+  if (!username) {
+    throw new Error("Keycloak profile does not contain a preferred_username or email.");
+  }
+  username = String(username).trim();
+
+  // 1) Block admins from using SSO
+  const existingAdmin = await db.collection("AdminUsers").findOne({ username });
+  if (existingAdmin) {
+    throw new Error("Admin users must log in locally, not via SSO.");
+  }
+
+  // 2) Existing RentalUser? force user_type = customer
+  const existingRental = await db.collection("RentalUsers").findOne({ username });
+  if (existingRental) {
+    if (existingRental.user_type !== "customer") {
+      await db.collection("RentalUsers").updateOne(
+        { _id: existingRental._id },
+        {
+          $set: {
+            user_type: "customer",
+            updated_at: new Date().toISOString().replace("T", " ").substring(0, 19)
+          }
+        }
+      );
+      existingRental.user_type = "customer";
+    }
+    return { ...existingRental, _collection: "RentalUsers" };
+  }
+
+  // 3) New SSO customer
+  const userId = await getNextSequence("userId");
+  const now = new Date().toISOString().replace("T", " ").substring(0, 19);
+
+  // create a random, hashed dummy password so it passes your JSON schema
+  const randomPassword = crypto.randomBytes(32).toString("hex"); // 64 chars
+  const hashedDummy = crypto.createHash("sha256").update(randomPassword).digest("hex");
+
+  const newUser = {
+    userId,
+    fname,
+    lname,
+    email,
+    username,
+    password: hashedDummy,        // ✅ now a valid string
+    user_type: "customer",
+    address: [],
+    payment: [],
+    created_at: now,
+    updated_at: now
+  };
+
+  const result = await db.collection("RentalUsers").insertOne(newUser);
+
+  return {
+    _id: result.insertedId,
+    ...newUser,
+    _collection: "RentalUsers"
+  };
+}
+
+
+// Route: login using Keycloak SSO
+app.get("/sso/login", keycloak.protect(), async (req, res) => {
+  try {
+    const token = req.kauth.grant.access_token;
+    const profile = token.content;
+
+    const user = await findOrCreateUserFromKeycloakProfile(profile);
+    const userType = user.user_type || "customer";
+
+    const fullName = [user.fname, user.lname].filter(Boolean).join(" ");
+    console.log(`SSO User Logged In: ${fullName} [user_type=${userType} from ${user._collection || "Keycloak"}]`);
+
+    req.session.user = {
+      username: user.username,
+      fname: user.fname,
+      lname: user.lname,
+      user_type: userType,
+      source: "RentalUsers"
+    };
+    req.session.user_name = user.username;
+    req.session.userData = { 
+      fname: user.fname, 
+      lname: user.lname, 
+      username: user.username,
+      user_type: userType 
+    };
+
+    if (userType === "admin") {
+      return res.redirect("/adminPage.html");
+    } else if (userType === "maintenance") {
+      return res.redirect("/maintainancePage.html");
+    } else {
+      return res.redirect("/equipment-reservation.html");
+    }
+  } catch (err) {
+    console.error("SSO login error:", err);
+    res.status(500).send("SSO login failed");
+  }
+});
 app.get("/health",(req,res)=> res.status(200).send("OK"));
 
 app.post("/contact_us", async(req,res)=>{
@@ -575,15 +598,17 @@ app.post('/payments', requireLogin, async (req, res) => {
 
     const d = new Date(expiration);
     const exp = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear()).slice(-2)}`;
+
     const entry = {
-      payment_cardholder_name,
+      // this is what your schema & /mypayments expect:
+      payment_customer_name: payment_cardholder_name,     // or `${user.fname} ${user.lname}`
       last4: String(card_number).slice(-4),
-      card_type,
+      card_type:card_type,
       expiration: exp,
-      payment_zip_code,
-      payment_nickname,
-      status: 'Active',
-      added_at: new Date().toISOString().replace('T',' ').substring(0,19)
+      payment_nickname:payment_nickname,
+      status: 'active',
+      added_at: new Date().toISOString().replace('T',' ').substring(0,19),
+      payment_zip_code:payment_zip_code
     };
 
     await db.collection('RentalUsers').updateOne(
@@ -595,11 +620,16 @@ app.post('/payments', requireLogin, async (req, res) => {
     );
 
     return res.json({ success: true, ...entry });
-  } catch (e) {
-    console.error('Payment error:', e);
-    return res.status(500).json({ error: 'Server error' });
+ } catch (e) {
+  console.error('Payment error:', e);
+  if (e.errInfo && e.errInfo.details) {
+    console.error('Validation details:', JSON.stringify(e.errInfo.details, null, 2));
   }
+  return res.status(500).json({ error: 'Server error' });
+}
+
 });
+
 app.post("/addresses",requireLogin, async(req,res)=>{
   const{street,city,state,zip_code,phone_number,address_nickname}=req.body;
   if (!street|| !city|| !state||!zip_code|| !phone_number|| !address_nickname) {

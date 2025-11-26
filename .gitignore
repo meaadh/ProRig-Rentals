@@ -1,2 +1,3 @@
 atlas_uri.js,
-server.js
+server.js,
+.env
