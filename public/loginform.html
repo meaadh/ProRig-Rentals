@@ -73,33 +73,22 @@
     </div>
   </header><!-- End Header -->
   <main id="main">
-    <div class="form-container">
-
+    <div class="loginform">
+      <div class="login-card">
       <h3>Welcome to ProRig Rentals</h3>
-
-      <!-- SSO BUTTON -->
       <button type="button" class="btn-sso" onclick="window.location.href='/sso/login'">
         Login with SSO
       </button>
-
-      <!-- Collapsible Trigger -->
-      <div class="collapsible-header" id="localLoginHeader">
-        <span>Local Login</span>
-        <span class="chevron"></span>
-      </div>
-
-      <!-- COLLAPSIBLE LOCAL LOGIN FORM -->
-      <form action="/login" method="post" id="localLoginContent" class="collapsible-content">
-
+      <button class="collapsible">Local Account</button>
+      <div class="content">
+        <form action="/login" method="post" id="localLoginContent" class="collapsible-content">
           <input type="username" name="username" required placeholder="enter your username">
           <input type="password" name="password" required placeholder="enter your password">
-
           <input type="submit" name="submit" value="Login" class="form-btn">
-
-      </form>
-
+        </form>
+      </div>
+      </div>
     </div>
-
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
@@ -172,6 +161,22 @@
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
 
+  <script>
+    var coll = document.getElementsByClassName("collapsible");
+
+      for (let i = 0; i < coll.length; i++) {
+      coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        let content = this.nextElementSibling;
+
+        if (content.style.maxHeight) {
+          content.style.maxHeight = null;
+        } else {
+          content.style.maxHeight = content.scrollHeight + "px";
+        }
+      });
+    } 
+  </script>
 </body>
 
 </html>

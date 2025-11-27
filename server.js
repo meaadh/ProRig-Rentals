@@ -193,44 +193,46 @@ async function getNextSequence(counterName)
 async function findOrCreateUserFromKeycloakProfile(profile) {
   let username = profile.preferred_username || profile.email;
   const email = profile.email || "";
-  const fname = profile.given_name || "";
-  const lname = profile.family_name || "";
+  let fname = profile.given_name || "";
+  let lname = profile.family_name || "";
 
   if (!username) {
     throw new Error("Keycloak profile does not contain a preferred_username or email.");
   }
-  username = String(username).trim();
-
-  // 1) Block admins from using SSO
-  const existingAdmin = await db.collection("AdminUsers").findOne({ username });
-  if (existingAdmin) {
-    throw new Error("Admin users must log in locally, not via SSO.");
-  }
-
-  // 2) Existing RentalUser? force user_type = customer
-  const existingRental = await db.collection("RentalUsers").findOne({ username });
-  if (existingRental) {
-    if (existingRental.user_type !== "customer") {
-      await db.collection("RentalUsers").updateOne(
-        { _id: existingRental._id },
-        {
-          $set: {
-            user_type: "customer",
-            updated_at: new Date().toISOString().replace("T", " ").substring(0, 19)
-          }
-        }
-      );
-      existingRental.user_type = "customer";
+  if (!fname && !lname && profile.name) {
+    const parts = String(profile.name).trim().split(/\s+/);
+    if (parts.length === 1) {
+      fname = parts[0];
+    } else if (parts.length >= 2) {
+      fname = parts[0];
+      lname = parts.slice(1).join(" ");
     }
-    return { ...existingRental, _collection: "RentalUsers" };
+  }
+  username = String(username).trim();
+  const groups = Array.isArray(profile.groups) ? profile.groups : [];
+  const roles  = Array.isArray(profile.realm_access?.roles) ? profile.realm_access.roles : [];
+
+  const tags = [...groups, ...roles]
+    .map(String)
+    .map(s => s.toLowerCase());
+
+  let user_type = "customer";
+  if (tags.some(t => t.includes("admin"))) {
+    user_type = "admin";
+  } else if (tags.some(t => t.includes("maint"))) {
+    user_type = "maintenance";
   }
 
-  // 3) New SSO customer
+  const existingAdmin = await db.collection("AdminUsers").findOne({ username });
+  if (existingAdmin) return { ...existingAdmin, _collection: "AdminUsers" };
+
+  const existingRental = await db.collection("RentalUsers").findOne({ username });
+  if (existingRental) return { ...existingRental, _collection: "RentalUsers" };
+
   const userId = await getNextSequence("userId");
   const now = new Date().toISOString().replace("T", " ").substring(0, 19);
 
-  // create a random, hashed dummy password so it passes your JSON schema
-  const randomPassword = crypto.randomBytes(32).toString("hex"); // 64 chars
+  const randomPassword = crypto.randomBytes(32).toString("hex");
   const hashedDummy = crypto.createHash("sha256").update(randomPassword).digest("hex");
 
   const newUser = {
@@ -256,15 +258,13 @@ async function findOrCreateUserFromKeycloakProfile(profile) {
   };
 }
 
-
-// Route: login using Keycloak SSO
 app.get("/sso/login", keycloak.protect(), async (req, res) => {
   try {
     const token = req.kauth.grant.access_token;
     const profile = token.content;
 
     const user = await findOrCreateUserFromKeycloakProfile(profile);
-    const userType = user.user_type || "customer";
+    const userType = user.user_type;
 
     const fullName = [user.fname, user.lname].filter(Boolean).join(" ");
     console.log(`SSO User Logged In: ${fullName} [user_type=${userType} from ${user._collection || "Keycloak"}]`);
@@ -320,7 +320,6 @@ app.post("/sign_up", async(req,res)=>{
   const{fname,lname,email,username,password}=req.body;
   const hash=crypto.createHash("sha256").update(password).digest("hex");
   try {
-    // Check if username already exists
     const existingUser = await db.collection("RentalUsers").findOne({ username: username });
     if (existingUser) {
       console.log(`Registration failed: Username '${username}' already exists`);
@@ -475,6 +474,15 @@ app.get('/logout',requireLogin, (req, res) => {
     }
     res.clearCookie("connect.sid");
     res.redirect('/Home.html');
+  });
+});
+app.get("/sso/logout", (req, res) => {
+  const redirect = encodeURIComponent("http://localhost:3000/Home.html");
+  const keycloakLogout = `${process.env.KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/logout?redirect_uri=${redirect}`;
+
+  req.session.destroy(err => {
+    res.clearCookie("connect.sid");
+    return res.redirect(keycloakLogout);
   });
 });
 app.get('/userdetail', requireLogin, (req, res) => {
@@ -1072,14 +1080,4 @@ app.put('/api/equipment/:id', requireLogin, upload.single('image'), async (req, 
     console.error('Update equipment error:', err);
     res.status(500).json({ error: 'Failed to update equipment' });
   }
-  app.get("/sso/logout", (req, res) => {
-  const redirect = encodeURIComponent("http://localhost:3000/Home.html");
-  const keycloakLogout = `${process.env.KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/logout?redirect_uri=${redirect}`;
-
-  req.session.destroy(err => {
-    res.clearCookie("connect.sid");
-    return res.redirect(keycloakLogout);
-  });
-});
-
 });

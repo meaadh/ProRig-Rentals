@@ -1275,6 +1275,125 @@ font-weight:500;
 }
 
 /*--------------------------------------------------------------
+# Login Section
+--------------------------------------------------------------*/
+.loginform {
+  background: #eee;
+  padding: 80px 20px 120px;
+  display: block;
+}
+
+/* White centered card */
+.login-card {
+  background: white;
+  width: 100%;
+  max-width: 620px;
+  padding: 30px;
+  border-radius: 14px;
+  margin: 0 auto; 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+/* Title */
+.login-card h3 {
+  font-weight: bold;
+  font-size: 2.5em;
+  margin-bottom: 1.2rem;
+}
+
+/* SSO button */
+.login-card .btn-sso {
+  width: 100%;
+  background: var(--prorig-end);
+  color: var(--background-color);
+  border: none;
+  padding: 0.9rem;
+  border-radius: 8px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+.login-card .btn-sso:hover {
+   background: var(--btn-blue-start);
+   color: var(--background-color);
+}
+/* Collapsible header */
+.login-card .collapsible {
+  background-color: #000a54;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 1.2em;
+  font-weight: bold;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.login-card .collapsible:hover {
+  background-color: var(--btn-blue-start);
+}
+
+.login-card .active {
+  background-color: var(--btn-blue-start);
+}
+
+.login-card .collapsible:after {
+  content: '▼';
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  float: right;
+}
+
+.login-card .active:after {
+  content: "▲";
+  font-size: 0.9rem;
+}
+
+.login-card .content {
+  padding: 0 5;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.login-card input[type="username"],
+.login-card input[type="password"] {
+  width: 100%;
+  padding: 0.9rem;
+  margin-top: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.login-card .form-btn {
+  width: 100%;
+  padding: 0.9rem;
+  margin-top: 1rem;
+  background: var(--btn-blue-start);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+.login-card .form-btn:hover{
+  background: var(--prorig-end);
+  color:#fff;
+  padding: 0.7rem;
+  width: 95%;
+  font-size: 1.2rem;
+}
+/*--------------------------------------------------------------
 # Reservation Section
 --------------------------------------------------------------*/
 .reservation-section{
