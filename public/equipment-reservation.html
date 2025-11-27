@@ -139,7 +139,7 @@
           <input type="hidden" name="equipment_ids" id="selected-equipment">
           <input type="hidden" name="total_cost" id="total-cost">
           <input type="submit" name="submit" value="Reserve Selected Equipment" class="form-btn">
-          <div id="reservation-error" style="color:red;font-weight:bold;margin-top:10px;"></div>
+          <div id="reservation-error" style="color:red;font-weight:bSold;margin-top:10px;"></div>
           <div id="reservation-success" style="color:green;font-weight:bold;margin-top:10px;"></div>
         </form>
         </div>
@@ -149,8 +149,8 @@
             <form id="Payment-form" class="hidden-form" action="/payments" method="post">
               <h3>Add Payment Info</h3>
               <input type="text" name="payment_cardholder_name" id="payment_cardholder_name" required placeholder="Cardholder Name">
-              <input type="text" name="card_number" id="card_number" required placeholder="Card Number (16 digits)" pattern="\d{16}" maxlength="16" minlength="16" inputmode="numeric" title="Card number must be 16 digits">
-              <input type="date" name="expiration" id="expiration" required placeholder="Expiration Date:">
+              <input type="text" name="card_number" id="card_number" required placeholder="Card Number (16 digits)" maxlength="19"inputmode="numeric">
+              <input type="date" name="expiration" id="expiration" required placeholder="Expiration Date">
               <input type="text" name="cvv" id="cvv" required placeholder="CVV (3 or 4 digits)" pattern="\d{3,4}" maxlength="4" minlength="3" inputmode="numeric" title="CVV must be 3 or 4 digits">
               <select id="card_type" name="card_type" required>
                 <option value=""disabled selected>-- Choose Card Type --</option>
@@ -342,6 +342,16 @@
         fallbackText.style.display = "none";
       });
     });
+    document.getElementById("phone_number").addEventListener("input", function (e) {
+    let digits = e.target.value.replace(/\D/g, "").substring(0, 10); 
+    let formatted = "";
+
+    if (digits.length > 0) formatted = digits.substring(0, 3);
+    if (digits.length > 3) formatted += "-" + digits.substring(3, 6);
+    if (digits.length > 6) formatted += "-" + digits.substring(6, 10);
+
+    e.target.value = formatted;
+    });
     document.addEventListener('DOMContentLoaded', function() {
       const addressForm = document.getElementById('Address-form');
       if (addressForm) {
@@ -424,69 +434,42 @@
         });
       }
     });
-    document.addEventListener('DOMContentLoaded', () => {
-      const form = document.getElementById('Payment-form');
-      if (!form) return;
+    document.addEventListener('DOMContentLoaded', function() {
+      const paymentForm      = document.getElementById('Payment-form');
+      const paymentModal     = document.getElementById('payment-modal');
+      const paymentModalTitle = document.getElementById('payment-modal-title');
+      const paymentModalBody  = document.getElementById('payment-modal-body');
 
-      const btn    = form.querySelector('input[type="submit"]');
-      const ok     = document.getElementById('payments-success');
-      const errBox = document.getElementById('payments-error');
+      if (paymentForm) {
+        paymentForm.addEventListener('submit', function(e) {
+          setTimeout(function() {
+            const successDiv = document.getElementById('payments-success');
+            if (successDiv && successDiv.textContent.trim() !== '') {
+              if (paymentModal && paymentModalTitle && paymentModalBody) {
+                paymentModalTitle.textContent = 'Payment method added successfully!';
+                paymentModalBody.innerHTML = `
+                  <button id="close-payment-modal-btn"
+                    style="margin-top:20px;padding:8px 24px;background:#28a745;color:#fff;border:none;border-radius:5px;font-size:1.1em;cursor:pointer;">
+                    Okay
+                  </button>
+                `;
+                paymentModal.style.display = 'flex';
 
-      const modal      = document.getElementById('payment-modal');
-      const modalTitle = document.getElementById('payment-modal-title');
-      const modalBody  = document.getElementById('payment-modal-body');
-
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();                       
-        if (!form.reportValidity()) return;       
-
-        const payload = Object.fromEntries(new FormData(form).entries());
-
-        ok.textContent = ''; ok.style.display = 'none';
-        errBox.textContent = ''; errBox.style.display = 'none';
-        if (btn) { btn.disabled = true; btn.value = 'Saving…'; }
-
-        try {
-          const res = await fetch('/payments', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(payload)
-          });
-
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok || data.error) {
-            throw new Error(data.error || `Request failed (${res.status})`);
+                document.getElementById('close-payment-modal-btn').onclick = function() {
+                  paymentModal.style.display = 'none';
+                };
+              }
+            }
+          }, 500);
+        });
+      }
+      if (paymentModal) {
+        paymentModal.addEventListener('click', function(e) {
+          if (e.target === paymentModal) {
+            paymentModal.style.display = 'none';
           }
-
-          ok.textContent = 'Payment method added successfully!';
-          ok.style.display = 'block';
-          form.reset();
-
-          form.style.display='none';
-
-          if (modal && modalTitle && modalBody) {
-            modalTitle.textContent = 'Payment method added successfully!';
-            modalBody.innerHTML = `
-              <button id="close-payment-modal-btn"
-                style="margin-top:20px;padding:8px 24px;background:#28a745;color:#fff;border:none;border-radius:5px;font-size:1.1em;cursor:pointer;">
-                Okay
-              </button>`;
-            modal.style.display = 'flex';
-            document.getElementById('close-payment-modal-btn')?.addEventListener('click', () => {
-              modal.style.display = 'none';
-            });
-            modal.addEventListener('click', (evt) => {
-              if (evt.target === modal) modal.style.display = 'none';
-            });
-          }
-        } catch (err) {
-          errBox.textContent = err.message || 'Failed to add payment method.';
-          errBox.style.display = 'block';
-        } finally {
-          if (btn) { btn.disabled = false; btn.value = 'Add Payment Card to Account'; }
-        }
-      });
+        });
+      }
     });
   </script>
 

@@ -596,8 +596,8 @@ app.post('/api/reservations',requireLogin, async (req, res) => {
 
 app.post('/payments', requireLogin, async (req, res) => {
   try {
-    const { payment_cardholder_name, card_number, expiration, card_type, payment_zip_code, payment_nickname } = req.body;
-    if (!payment_cardholder_name || !card_number || !expiration || !card_type || !payment_zip_code || !payment_nickname) {
+    const {card_number, expiration, card_type, payment_zip_code, payment_nickname } = req.body;
+    if (!card_number || !expiration || !card_type || !payment_zip_code || !payment_nickname) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -606,17 +606,15 @@ app.post('/payments', requireLogin, async (req, res) => {
 
     const d = new Date(expiration);
     const exp = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear()).slice(-2)}`;
-
     const entry = {
-      // this is what your schema & /mypayments expect:
-      payment_customer_name: payment_cardholder_name,     // or `${user.fname} ${user.lname}`
+      payment_customer_name:user.fname+" "+user.lname,
       last4: String(card_number).slice(-4),
-      card_type:card_type,
+      card_type,
       expiration: exp,
-      payment_nickname:payment_nickname,
-      status: 'active',
-      added_at: new Date().toISOString().replace('T',' ').substring(0,19),
-      payment_zip_code:payment_zip_code
+      payment_zip_code,
+      payment_nickname,
+      status: 'Active',
+      added_at: new Date().toISOString().replace('T',' ').substring(0,19)
     };
 
     await db.collection('RentalUsers').updateOne(
@@ -628,14 +626,13 @@ app.post('/payments', requireLogin, async (req, res) => {
     );
 
     return res.json({ success: true, ...entry });
- } catch (e) {
+   } catch (e) {
   console.error('Payment error:', e);
   if (e.errInfo && e.errInfo.details) {
     console.error('Validation details:', JSON.stringify(e.errInfo.details, null, 2));
   }
   return res.status(500).json({ error: 'Server error' });
 }
-
 });
 
 app.post("/addresses",requireLogin, async(req,res)=>{

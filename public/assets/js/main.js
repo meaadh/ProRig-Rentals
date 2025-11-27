@@ -740,26 +740,50 @@ function showPaymentModal(totalPrice, onConfirm) {
         });
       }
       
+      const cardField = document.getElementById('card_number');
+      if (cardField) {
+        cardField.addEventListener('input', function () {
+          let digits = this.value.replace(/\D/g, '').substring(0, 16);
+          let formatted = digits.match(/.{1,4}/g)?.join('-') || '';      
+          this.value = formatted;
+        });
+      }
+      ['payment_zip_code', 'cvv'].forEach(function (fieldId) {
+        const field = document.getElementById(fieldId);
+        if (field) {
+          field.addEventListener('input', function () {
+            this.value = this.value.replace(/[^\d]/g, '');
+          });
+        }
+      });
       if (paymentForm) {
-        paymentForm.addEventListener('submit', function(e) {
+        paymentForm.addEventListener('submit', function (e) {
           e.preventDefault();
-          const cardNumber = paymentForm.card_number.value.trim();
-          const zipCode = paymentForm.zip_code.value.trim();
-          const cvv = paymentForm.cvv.value.trim();
+          
+          const cardNumberFormatted = paymentForm.card_number.value.trim();
+          const rawCardNumber       = cardNumberFormatted.replace(/\D/g, ''); // remove hyphens
+          const zipCode             = paymentForm.payment_zip_code.value.trim();
+          const cvv                 = paymentForm.cvv.value.trim();
+
           let errorMsg = '';
-          if (!/^\d{16}$/.test(cardNumber)) {
+          if (!/^\d{16}$/.test(rawCardNumber)) {
             errorMsg = 'Card number must be exactly 16 digits.';
           } else if (!/^\d{5}$/.test(zipCode)) {
             errorMsg = 'Zip code must be exactly 5 digits.';
           } else if (!/^\d{3,4}$/.test(cvv)) {
             errorMsg = 'CVV must be 3 or 4 digits.';
           }
+
           if (errorMsg) {
             document.getElementById('payments-error').textContent = errorMsg;
             document.getElementById('payments-success').textContent = '';
             return;
           }
+
           const formData = new FormData(paymentForm);
+          // send clean card number (digits only) to the server
+          formData.set('card_number', rawCardNumber);
+
           fetch('/payments', {
             method: 'POST',
             body: new URLSearchParams([...formData])
@@ -767,35 +791,32 @@ function showPaymentModal(totalPrice, onConfirm) {
           .then(res => res.json())
           .then(data => {
             if (data.message || data.success || !data.error) {
-              document.getElementById('payments-success').textContent = 'Payment method added successfully!';
+              document.getElementById('payments-success').textContent =
+                'Payment method added successfully!';
               document.getElementById('payments-error').textContent = '';
               paymentForm.reset();
+
               setTimeout(() => {
                 populatePaymentDropdown();
                 paymentForm.classList.add('hidden-form');
-                addPaymentBtn.textContent = '+ Add New Payment Method';
+                if (addPaymentBtn) {
+                  addPaymentBtn.textContent = '+ Add New Payment Method';
+                }
               }, 1000);
             } else {
-              document.getElementById('payments-error').textContent = data.error || 'Failed to add payment method';
+              document.getElementById('payments-error').textContent =
+                data.error || 'Failed to add payment method';
               document.getElementById('payments-success').textContent = '';
             }
           })
           .catch(err => {
-            document.getElementById('payments-error').textContent = 'Failed to add payment method';
+            console.error('Payment submit error:', err);
+            document.getElementById('payments-error').textContent =
+              'Failed to add payment method';
             document.getElementById('payments-success').textContent = '';
           });
         });
-
-        ['card_number', 'zip_code', 'cvv'].forEach(function(fieldId) {
-          const field = document.getElementById(fieldId);
-          if (field) {
-            field.addEventListener('input', function(e) {
-              this.value = this.value.replace(/[^\d]/g, '');
-            });
-          }
-        });
       }
-      
       if (addressForm) {
         addressForm.addEventListener('submit', function(e) {
           e.preventDefault();
