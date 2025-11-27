@@ -2310,6 +2310,55 @@ font-weight:500;
     padding: 20px;
   }
 }
+/*--------------------------------------------------------------
+# SSO Conflict
+--------------------------------------------------------------*/
+.merge-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+.merge-overlay.show {
+  display: flex;
+}
+
+.merge-box {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.merge-btn {
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  margin: 10px;
+}
+
+.merge-yes {
+  background: #28a745;
+  color: white;
+}
+
+.merge-no {
+  background: #dc3545;
+  color: white;
+}
+
+#sso-login-btn.disabled {
+  background: #777 !important;
+  cursor: not-allowed !important;
+  opacity: 0.5;
+  pointer-events: none;
+}
 
 /*--------------------------------------------------------------
 # Gloabl Form

@@ -76,7 +76,7 @@
     <div class="loginform">
       <div class="login-card">
       <h3>Welcome to ProRig Rentals</h3>
-      <button type="button" class="btn-sso" onclick="window.location.href='/sso/login'">
+      <button type="button" class="btn-sso" id="sso-login-btn" onclick="window.location.href='/sso/login'">
         Login with SSO
       </button>
       <button class="collapsible">Local Account</button>
@@ -87,6 +87,21 @@
           <input type="submit" name="submit" value="Login" class="form-btn">
         </form>
       </div>
+      </div>
+    </div>
+    <div id="merge-modal" class="merge-overlay">
+      <div class="merge-box">
+        <h2>Existing Local Account Found</h2>
+        <p id="merge-text"></p>
+
+        <div class="merge-buttons">
+          <button id="merge-confirm" type="button" class="merge-btn merge-yes">
+            Merge Accounts
+          </button>
+          <button id="merge-cancel" type="button" class="merge-btn merge-no">
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   </main><!-- End #main -->
@@ -176,6 +191,56 @@
         }
       });
     } 
+    document.addEventListener("DOMContentLoaded", () => {
+      const params       = new URLSearchParams(window.location.search);
+      const mergeRequest = params.get("merge");
+      const username     = params.get("username") || "";
+
+      const ssoBtn    = document.getElementById("sso-login-btn");
+      const modal     = document.getElementById("merge-modal");
+      const mergeText = document.getElementById("merge-text");
+      const btnYes    = document.getElementById("merge-confirm");
+      const btnNo     = document.getElementById("merge-cancel");
+
+      // Only show if backend explicitly sent merge=1 AND we have a username
+      if (
+        mergeRequest === "1" &&
+        username &&
+        ssoBtn && modal && mergeText && btnYes && btnNo
+      ) {
+        console.log("[merge] showing modal for user:", username);
+
+        // gray out SSO button
+        ssoBtn.classList.add("disabled");
+        ssoBtn.disabled = true;
+        ssoBtn.onclick = null;
+
+        mergeText.innerHTML = `
+          The username <strong>${username}</strong> already exists.<br><br>
+          Would you like to merge your SSO login with this account?
+        `;
+
+        // show modal
+        modal.classList.add("show");
+
+        // MERGE
+        btnYes.addEventListener("click", (e) => {
+          e.preventDefault();
+          window.location.href = "/sso/merge?username=" +
+            encodeURIComponent(username);
+        });
+
+        // CANCEL
+        btnNo.addEventListener("click", (e) => {
+          e.preventDefault();
+          modal.classList.remove("show");
+          // Hard-reset to clean /login so the modal is gone on refresh
+          window.location.href = "/login";
+        });
+      } else {
+        console.log("[merge] no merge requested; modal stays hidden");
+      }
+    });
   </script>
 </body>
 

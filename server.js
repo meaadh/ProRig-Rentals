@@ -13,11 +13,9 @@ const KEYCLOAK_CLIENT_ID = process.env.KEYCLOAK_CLIENT_ID;
 const KEYCLOAK_CLIENT_SECRET = process.env.KEYCLOAK_CLIENT_SECRET;
 
 
-// ----- Config & Envs -----
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
-// Prefer Heroku/Atlas env var; fall back to your local file for dev
 let uri = process.env.MONGODB_URI;
 if (!uri) {
   try {
@@ -34,10 +32,7 @@ const client = new MongoClient(uri, {
 
 const app = express();
 
-// Trust Heroku proxy so secure cookies work behind SSL
 app.set("trust proxy", 1);
-
-// Parsers & static
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname,"public")));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -61,7 +56,6 @@ const upload = multer({
   }
 });
 
-// ----- CORS (kept permissive; tighten if you know your origin) -----
 app.use((req, res, next) => {
   const origin = process.env.CORS_ORIGIN || "*";
   res.header("Access-Control-Allow-Origin",origin);
@@ -75,21 +69,20 @@ app.use((req, res, next) => {
 
 const memoryStore=new session.MemoryStore();
 
-// ----- Session (use env secret; secure in production) -----
 app.use(session({
   secret: process.env.SESSION_SECRET || "dev_only_change_me",
   resave: false,
   saveUninitialized: false,
   store: memoryStore,
   cookie: {
-    secure: NODE_ENV === "production", // true on Heroku (HTTPS)
+    secure: NODE_ENV === "production", 
     sameSite: NODE_ENV === "production" ? "none" : "lax"
   }
 }));
-// ----- Keycloak config -----
+
 const keycloakConfig = {
   "realm": process.env.KEYCLOAK_REALM,
-  "auth-server-url": process.env.KEYCLOAK_URL,          // e.g. "http://localhost:8080"
+  "auth-server-url": process.env.KEYCLOAK_URL,
   "ssl-required": "external",
   "resource": process.env.KEYCLOAK_CLIENT_ID,
   "credentials": {
@@ -100,11 +93,10 @@ const keycloakConfig = {
 
 const keycloak = new Keycloak({ store: memoryStore }, keycloakConfig);
 
-// Keycloak middleware (handles callbacks, logout, etc.)
 app.use(
   keycloak.middleware({
     logout: "/sso/logout",
-    admin: "/sso/admin" // optional
+    admin: "/sso/admin"
   })
 );
 
@@ -126,33 +118,66 @@ async function connectToDB() {
     await db.collection("RentalUsers").createIndex({ userId: 1 }, { unique: true });
     await db.collection("Reservations").createIndex({ orderId: 1 }, { unique: true });
 
-    const counterExists = await db.collection("counters").findOne({ _id: "userId" });
-    if (!counterExists) await db.collection("counters").insertOne({ _id: "userId", sequence_value: 0 });
+    await db.collection("counters").updateOne(
+      { _id: "userId" },
+      { $setOnInsert: { sequence_value: 0 } },
+      { upsert: true }
+    );
+    await db.collection("counters").updateOne(
+      { _id: "adminId" },
+      { $setOnInsert: { sequence_value: 0 } },
+      { upsert: true }
+    );
+    await db.collection("counters").updateOne(
+      { _id: "orderId" },
+      { $setOnInsert: { sequence_value: 0 } },
+      { upsert: true }
+    );
 
-    const admincounterExists = await db.collection("counters").findOne({ _id: "adminId" });
-    if (!admincounterExists) await db.collection("counters").insertOne({ _id: "adminId", sequence_value: 0 });
+    // compute max IDs from existing data
+    const [adminAgg] = await db.collection("AdminUsers")
+      .aggregate([{ $group: { _id: null, maxAdminId: { $max: "$adminId" } } }])
+      .toArray();
 
-    const OrdercounterExists = await db.collection("counters").findOne({ _id: "orderId" });
-    if (!OrdercounterExists) await db.collection("counters").insertOne({ _id: "orderId", sequence_value: 0 });
+    const [rentalAgg] = await db.collection("RentalUsers")
+      .aggregate([{ $group: { _id: null, maxUserId: { $max: "$userId" } } }])
+      .toArray();
 
-    const [a] = await db.collection("AdminUsers")
-      .aggregate([{ $group: { _id: null, maxUserIdFromAdmin: { $max: "$adminId" } } }]).toArray();
-    const [b] = await db.collection("RentalUsers")
-      .aggregate([{ $group: { _id: null, maxUserIdFromRental: { $max: "$userId" } } }]).toArray();
-    const [c] = await db.collection("Reservations")
-      .aggregate([{ $group: { _id: null, maxOrderIdFromRental: { $max: "$orderId" } } }]).toArray();
+    const [orderAgg] = await db.collection("Reservations")
+      .aggregate([{ $group: { _id: null, maxOrderId: { $max: "$orderId" } } }])
+      .toArray();
 
-    const adminIdMax = a?.maxUserIdFromAdmin || 0;
-    const userIdMax = Math.max(a?.maxUserIdFromAdmin || 0, b?.maxUserIdFromRental || 0);
-    const orderIdMax = Math.max(c?.maxOrderIdFromRental || 0);
+    const adminIdMax = adminAgg?.maxAdminId || 0;
+    const userIdMax  = Math.max(adminAgg?.maxAdminId || 0, rentalAgg?.maxUserId || 0);
+    const orderIdMax = orderAgg?.maxOrderId || 0;
 
-    await db.collection("counters").updateOne({ _id: "userId" }, { $max: { sequence_value: userIdMax } }, { upsert: true });
-    await db.collection("counters").updateOne({ _id: "adminId" }, { $max: { sequence_value: adminIdMax } }, { upsert: true });
-    await db.collection("counters").updateOne({ _id: "orderId" }, { $max: { sequence_value: orderIdMax } }, { upsert: true });
+    await db.collection("counters").updateOne(
+      { _id: "userId" },
+      { $max: { sequence_value: userIdMax } },
+      { upsert: true }
+    );
+    await db.collection("counters").updateOne(
+      { _id: "adminId" },
+      { $max: { sequence_value: adminIdMax } },
+      { upsert: true }
+    );
+    await db.collection("counters").updateOne(
+      { _id: "orderId" },
+      { $max: { sequence_value: orderIdMax } },
+      { upsert: true }
+    );
 
-    console.log(`Synced userId >= ${userIdMax}, adminId >= ${adminIdMax}, orderId >= ${orderIdMax}`);
+    const userCounter  = await db.collection("counters").findOne({ _id: "userId" });
+    const adminCounter = await db.collection("counters").findOne({ _id: "adminId" });
+    const orderCounter = await db.collection("counters").findOne({ _id: "orderId" });
 
-    // --- IMPORTANT: use Heroku port ---
+    console.log(
+      `Synced IDs. DB max -> userId: ${userIdMax}, adminId: ${adminIdMax}, orderId: ${orderIdMax}`
+    );
+    console.log(
+      `Counters now -> userId: ${userCounter.sequence_value}, adminId: ${adminCounter.sequence_value}, orderId: ${orderCounter.sequence_value}`
+    );
+
     app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
   } catch (err) {
     console.error(`MongoDB connection failed to the ${dbname} database`, err);
@@ -161,32 +186,33 @@ async function connectToDB() {
 }
 
 connectToDB();
-async function getNextSequence(counterName) 
-{
+async function getNextSequence(counterName) {
   try {
-    const counter = await db.collection("counters").findOneAndUpdate(
+    const result = await db.collection("counters").findOneAndUpdate(
       { _id: counterName },
       { $inc: { sequence_value: 1 } },
-      { returnDocument: "after", upsert: true }
+      {
+        returnDocument: "after",
+        upsert: true
+      }
     );
-    
-    console.log(`${counterName} Counter result:`, counter);
-    
-    if (counter && counter.sequence_value && typeof counter.sequence_value === 'number') {
-      console.log(`Returning ${counterName}:`, counter.sequence_value);
-      return counter.sequence_value;
-    } else {
-      console.log("Counter not found or invalid, initializing...");
-      await db.collection("counters").updateOne(
-        { _id: counterName },
-        { $set: { sequence_value: 1 } },
-        { upsert: true }
-      );
-      return 1;
+
+    console.log(`${counterName} Counter raw result:`, result);
+
+    const doc = result?.value ?? result;
+    const seq = doc?.sequence_value;
+
+    if (typeof seq === "number") {
+      console.log(`Returning ${counterName}:`, seq);
+      return seq;
     }
+
+    throw new Error(
+      `Counter document for ${counterName} is missing sequence_value`
+    );
   } catch (err) {
     console.error(`Error in getNextSequence for ${counterName}:`, err);
-    return 1;
+    throw err; 
   }
 }
 
@@ -199,6 +225,7 @@ async function findOrCreateUserFromKeycloakProfile(profile) {
   if (!username) {
     throw new Error("Keycloak profile does not contain a preferred_username or email.");
   }
+
   if (!fname && !lname && profile.name) {
     const parts = String(profile.name).trim().split(/\s+/);
     if (parts.length === 1) {
@@ -208,14 +235,34 @@ async function findOrCreateUserFromKeycloakProfile(profile) {
       lname = parts.slice(1).join(" ");
     }
   }
-  username = String(username).trim();
-  const groups = Array.isArray(profile.groups) ? profile.groups : [];
-  const roles  = Array.isArray(profile.realm_access?.roles) ? profile.realm_access.roles : [];
 
-  const tags = [...groups, ...roles]
+  username = String(username).trim();
+
+  const groupsFromProfile = Array.isArray(profile.groups) ? profile.groups : [];
+  const groupsFromJson    = Array.isArray(profile._json?.groups) ? profile._json.groups : [];
+
+  const realmRolesFromProfile = Array.isArray(profile.realm_access?.roles)
+    ? profile.realm_access.roles
+    : [];
+  const realmRolesFromJson = Array.isArray(profile._json?.realm_access?.roles)
+    ? profile._json.realm_access.roles
+    : [];
+
+  const clientRoles =
+    profile._json?.resource_access
+      ? Object.values(profile._json.resource_access).flatMap(r => r.roles || [])
+      : [];
+
+  const tags = [
+    ...groupsFromProfile,
+    ...groupsFromJson,
+    ...realmRolesFromProfile,
+    ...realmRolesFromJson,
+    ...clientRoles
+  ]
     .map(String)
     .map(s => s.toLowerCase());
-
+    
   let user_type = "customer";
   if (tags.some(t => t.includes("admin"))) {
     user_type = "admin";
@@ -223,65 +270,137 @@ async function findOrCreateUserFromKeycloakProfile(profile) {
     user_type = "maintenance";
   }
 
+  const now = new Date().toISOString().replace("T", " ").substring(0, 19);
+  const conflictAdmin  = await db.collection("AdminUsers").findOne({ username });
+  const conflictRental = await db.collection("RentalUsers").findOne({ username });
+
+  if (conflictAdmin || conflictRental) {
+    const conflictUser = conflictAdmin || conflictRental;
+    return {
+      conflict: true,
+      username: conflictUser.username,
+      email: conflictUser.email || ""
+    };
+  }
   const existingAdmin = await db.collection("AdminUsers").findOne({ username });
-  if (existingAdmin) return { ...existingAdmin, _collection: "AdminUsers" };
+  if (existingAdmin) {
+    if (existingAdmin.user_type !== user_type) {
+      await db.collection("AdminUsers").updateOne(
+        { _id: existingAdmin._id },
+        { $set: { user_type, updated_at: now } }
+      );
+      existingAdmin.user_type = user_type;
+    }
+    return { ...existingAdmin, _collection: "AdminUsers" };
+  }
 
   const existingRental = await db.collection("RentalUsers").findOne({ username });
-  if (existingRental) return { ...existingRental, _collection: "RentalUsers" };
+  if (existingRental) {
+    if (existingRental.user_type !== user_type) {
+      await db.collection("RentalUsers").updateOne(
+        { _id: existingRental._id },
+        { $set: { user_type, updated_at: now } }
+      );
+      existingRental.user_type = user_type;
+    }
+    return { ...existingRental, _collection: "RentalUsers" };
+  }
 
-  const userId = await getNextSequence("userId");
-  const now = new Date().toISOString().replace("T", " ").substring(0, 19);
+  const isAdminLike = user_type === "admin" || user_type === "maintenance";
 
   const randomPassword = crypto.randomBytes(32).toString("hex");
   const hashedDummy = crypto.createHash("sha256").update(randomPassword).digest("hex");
 
-  const newUser = {
-    userId,
-    fname,
-    lname,
-    email,
-    username,
-    password: hashedDummy,        // ✅ now a valid string
-    user_type: "customer",
-    address: [],
-    payment: [],
-    created_at: now,
-    updated_at: now
-  };
+  if (isAdminLike) {
+    const adminId = await getNextSequence("adminId");
 
-  const result = await db.collection("RentalUsers").insertOne(newUser);
+    const newAdmin = {
+      adminId,
+      fname,
+      lname,
+      email,
+      username,
+      password: hashedDummy,
+      user_type,
+      address: [],
+      payment: [],
+      created_at: now,
+      updated_at: now
+    };
 
-  return {
-    _id: result.insertedId,
-    ...newUser,
-    _collection: "RentalUsers"
-  };
+    const result = await db.collection("AdminUsers").insertOne(newAdmin);
+
+    return {
+      _id: result.insertedId,
+      ...newAdmin,
+      _collection: "AdminUsers"
+    };
+  } else {
+    const userId = await getNextSequence("userId");
+
+    const newUser = {
+      userId,
+      fname,
+      lname,
+      email,
+      username,
+      password: hashedDummy,
+      user_type,
+      address: [],
+      payment: [],
+      created_at: now,
+      updated_at: now
+    };
+
+    const result = await db.collection("RentalUsers").insertOne(newUser);
+
+    return {
+      _id: result.insertedId,
+      ...newUser,
+      _collection: "RentalUsers"
+    };
+  }
 }
 
 app.get("/sso/login", keycloak.protect(), async (req, res) => {
   try {
-    const token = req.kauth.grant.access_token;
+    const token   = req.kauth.grant.access_token;
     const profile = token.content;
 
-    const user = await findOrCreateUserFromKeycloakProfile(profile);
-    const userType = user.user_type;
+    const result = await findOrCreateUserFromKeycloakProfile(profile);
 
+    if (result.conflict) {
+      const q = new URLSearchParams({
+        merge: "1",
+        username: result.username || "",
+        email: result.email || ""
+      }).toString();
+      return res.redirect(`/login?${q}`);
+    }
+
+    const user     = result;
+    const userType = user.user_type;
     const fullName = [user.fname, user.lname].filter(Boolean).join(" ");
-    console.log(`SSO User Logged In: ${fullName} [user_type=${userType} from ${user._collection || "Keycloak"}]`);
+
+    console.log(
+      `SSO User Logged In: ${fullName} [user_type=${userType} from ${user._collection || "Keycloak"}]`
+    );
 
     req.session.user = {
+      _id: user._id,
       username: user.username,
       fname: user.fname,
       lname: user.lname,
       user_type: userType,
+      collection: user._collection,
       source: "RentalUsers"
     };
     req.session.user_name = user.username;
-    req.session.userData = { 
-      fname: user.fname, 
-      lname: user.lname, 
+    req.session.userData = {
+      fname: user.fname,
+      lname: user.lname,
       username: user.username,
-      user_type: userType 
+      user_type: userType
     };
 
     if (userType === "admin") {
@@ -296,6 +415,7 @@ app.get("/sso/login", keycloak.protect(), async (req, res) => {
     res.status(500).send("SSO login failed");
   }
 });
+
 app.get("/health",(req,res)=> res.status(200).send("OK"));
 
 app.post("/contact_us", async(req,res)=>{
