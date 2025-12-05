@@ -37,6 +37,9 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname,"public")));
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "loginform.html"));
+});
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -369,6 +372,7 @@ app.get("/sso/login", keycloak.protect(), async (req, res) => {
 
     const result = await findOrCreateUserFromKeycloakProfile(profile);
 
+<<<<<<< Updated upstream
           if (result.conflict) 
           {
             const q = new URLSearchParams({
@@ -378,6 +382,15 @@ app.get("/sso/login", keycloak.protect(), async (req, res) => {
             }).toString();
             return res.redirect(`/loginform.html?${q}`);    
           }
+=======
+    if (result.conflict) {
+      const q = new URLSearchParams({
+        merge: "1",
+        username: result.username || "",
+        email: result.email || ""
+      }).toString();
+return res.redirect(`/loginform.html?${q}`);    }
+>>>>>>> Stashed changes
 
     const user     = result;
     const userType = user.user_type;
