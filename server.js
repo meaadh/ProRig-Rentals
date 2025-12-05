@@ -279,12 +279,23 @@ async function findOrCreateUserFromKeycloakProfile(profile) {
 
   if (conflictAdmin || conflictRental) {
     const conflictUser = conflictAdmin || conflictRental;
+
+    // If already linked, just treat as normal existing user
+    if (conflictUser.ssoLinked) {
+      return {
+        ...conflictUser,
+        _collection: conflictAdmin ? "AdminUsers" : "RentalUsers"
+      };
+    }
+
+    // Not linked yet → show merge modal
     return {
       conflict: true,
       username: conflictUser.username,
       email: conflictUser.email || ""
     };
   }
+
   const existingAdmin = await db.collection("AdminUsers").findOne({ username });
   if (existingAdmin) {
     if (existingAdmin.user_type !== user_type) {
@@ -372,7 +383,6 @@ app.get("/sso/login", keycloak.protect(), async (req, res) => {
 
     const result = await findOrCreateUserFromKeycloakProfile(profile);
 
-<<<<<<< Updated upstream
           if (result.conflict) 
           {
             const q = new URLSearchParams({
@@ -380,17 +390,8 @@ app.get("/sso/login", keycloak.protect(), async (req, res) => {
               username: result.username || "",
               email: result.email || ""
             }).toString();
-            return res.redirect(`/loginform.html?${q}`);    
+            return res.redirect(`/login?${q}`);    
           }
-=======
-    if (result.conflict) {
-      const q = new URLSearchParams({
-        merge: "1",
-        username: result.username || "",
-        email: result.email || ""
-      }).toString();
-return res.redirect(`/loginform.html?${q}`);    }
->>>>>>> Stashed changes
 
     const user     = result;
     const userType = user.user_type;
@@ -429,11 +430,81 @@ return res.redirect(`/loginform.html?${q}`);    }
     res.status(500).send("SSO login failed");
   }
 });
-app.get("/sso/merge", (req, res) => {
-  // keep any query params (merge, username, email, etc.)
-  const q = new URLSearchParams(req.query).toString();
-            return res.redirect(`/loginform.html?${q}`);    
+app.get("/sso/merge", async (req, res) => {
+  try {
+    const { username } = req.query;
+
+    if (!username) {
+      return res.redirect(
+        "/loginform.html?error=" +
+        encodeURIComponent("Missing username for merge.")
+      );
+    }
+
+    // Find the existing local account for this username
+    let user = await db.collection("AdminUsers").findOne({ username });
+    let collection = "AdminUsers";
+
+    if (!user) {
+      user = await db.collection("RentalUsers").findOne({ username });
+      collection = "RentalUsers";
+    }
+
+    if (!user) {
+      return res.redirect(
+        "/loginform.html?error=" +
+        encodeURIComponent("Local account not found to merge.")
+      );
+    }
+
+    // Optional: mark this account as linked to SSO so we don't keep asking
+    await db.collection(collection).updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          ssoLinked: true,
+          updated_at: new Date().toISOString().replace("T", " ").substring(0, 19)
+        }
+      }
+    );
+
+    const userType = user.user_type || (collection === "AdminUsers" ? "admin" : "customer");
+
+    // Log the user in (same as your /login route)
+    req.session.user = {
+      _id: user._id,
+      username: user.username,
+      fname: user.fname,
+      lname: user.lname,
+      user_type: userType,
+      collection,
+      source: "sso-merge"
+    };
+    req.session.user_name = user.username;
+    req.session.userData = {
+      fname: user.fname,
+      lname: user.lname,
+      username: user.username,
+      user_type: userType
+    };
+
+    // Redirect based on user type
+    if (userType === "admin") {
+      return res.redirect("/adminPage.html");
+    } else if (userType === "maintenance") {
+      return res.redirect("/maintainancePage.html");
+    } else {
+      return res.redirect("/equipment-reservation.html");
+    }
+  } catch (err) {
+    console.error("SSO merge error:", err);
+    return res.redirect(
+      "/loginform.html?error=" +
+      encodeURIComponent("Merge failed: " + err.message)
+    );
+  }
 });
+
 
 app.get("/health",(req,res)=> res.status(200).send("OK"));
 
