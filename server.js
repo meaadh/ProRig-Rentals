@@ -369,14 +369,15 @@ app.get("/sso/login", keycloak.protect(), async (req, res) => {
 
     const result = await findOrCreateUserFromKeycloakProfile(profile);
 
-    if (result.conflict) {
-      const q = new URLSearchParams({
-        merge: "1",
-        username: result.username || "",
-        email: result.email || ""
-      }).toString();
-      return res.redirect(`/login?${q}`);
-    }
+          if (result.conflict) 
+          {
+            const q = new URLSearchParams({
+              merge: "1",
+              username: result.username || "",
+              email: result.email || ""
+            }).toString();
+            return res.redirect(`/loginform.html?${q}`);    
+          }
 
     const user     = result;
     const userType = user.user_type;
@@ -414,6 +415,11 @@ app.get("/sso/login", keycloak.protect(), async (req, res) => {
     console.error("SSO login error:", err);
     res.status(500).send("SSO login failed");
   }
+});
+app.get("/sso/merge", (req, res) => {
+  // keep any query params (merge, username, email, etc.)
+  const q = new URLSearchParams(req.query).toString();
+            return res.redirect(`/loginform.html?${q}`);    
 });
 
 app.get("/health",(req,res)=> res.status(200).send("OK"));
